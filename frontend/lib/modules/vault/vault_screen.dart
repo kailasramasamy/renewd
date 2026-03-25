@@ -22,6 +22,7 @@ class VaultScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'vault_fab',
         onPressed: () {},
         backgroundColor: MinderColors.oceanBlue,
         foregroundColor: Colors.white,

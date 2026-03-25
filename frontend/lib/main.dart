@@ -21,7 +21,7 @@ class MinderApp extends StatelessWidget {
       title: 'Minder',
       theme: MinderTheme.light,
       darkTheme: MinderTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
       initialBinding: InitialBinding(),

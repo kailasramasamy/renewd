@@ -42,9 +42,9 @@ class ChatScreen extends StatelessWidget {
           horizontal: MinderSpacing.lg,
           vertical: MinderSpacing.md,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(
+        decoration: BoxDecoration(
+          color: Theme.of(Get.context!).scaffoldBackgroundColor,
+          border: const Border(
             top: BorderSide(color: MinderColors.mist),
           ),
         ),

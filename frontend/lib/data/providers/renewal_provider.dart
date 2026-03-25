@@ -8,7 +8,8 @@ class RenewalProvider {
 
   Future<List<RenewalModel>> getAll() async {
     final response = await _client.safeGet(ApiEndpoints.renewals);
-    final list = response.body as List<dynamic>;
+    final body = response.body as Map<String, dynamic>;
+    final list = body['renewals'] as List<dynamic>? ?? [];
     return list
         .map((e) => RenewalModel.fromJson(e as Map<String, dynamic>))
         .toList();

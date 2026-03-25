@@ -1,3 +1,56 @@
 import 'package:get/get.dart';
+import '../../data/models/renewal_model.dart';
+import '../../data/providers/renewal_provider.dart';
 
-class DashboardController extends GetxController {}
+class DashboardController extends GetxController {
+  final _provider = RenewalProvider();
+
+  final RxList<RenewalModel> renewals = <RenewalModel>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxString error = ''.obs;
+
+  int get dueThisMonth {
+    final now = DateTime.now();
+    return renewals.where((r) {
+      return r.renewalDate.month == now.month &&
+          r.renewalDate.year == now.year;
+    }).length;
+  }
+
+  int get totalActive => renewals.length;
+
+  double get monthlySpend {
+    return renewals
+        .where((r) => r.frequency == 'monthly')
+        .fold(0.0, (sum, r) => sum + (r.amount ?? 0));
+  }
+
+  int get overdueCount =>
+      renewals.where((r) => r.daysRemaining < 0).length;
+
+  int get urgentCount => renewals
+      .where((r) => r.daysRemaining >= 0 && r.daysRemaining <= 3)
+      .length;
+
+  bool get hasAlerts => overdueCount > 0 || urgentCount > 0;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchRenewals();
+  }
+
+  Future<void> fetchRenewals() async {
+    isLoading.value = true;
+    error.value = '';
+    try {
+      final result = await _provider.getAll();
+      renewals.assignAll(result);
+      renewals.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+    } catch (e) {
+      error.value = e.toString();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}

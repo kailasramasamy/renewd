@@ -1,7 +1,7 @@
 class AppConstants {
   AppConstants._();
 
-  static const String apiBaseUrl = 'https://api.minder.quartex.in/v1';
+  static const String apiBaseUrl = 'http://localhost:6000/api/v1';
   static const int maxFileSizeBytes = 10 * 1024 * 1024; // 10MB
 
   // Storage keys

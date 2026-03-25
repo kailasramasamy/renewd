@@ -25,8 +25,18 @@ export async function buildApp() {
 
   await app.register(postgresPlugin);
   await app.register(redisPlugin);
-  await app.register(firebasePlugin);
-  await app.register(s3Plugin);
+
+  if (env.FIREBASE_PROJECT_ID) {
+    await app.register(firebasePlugin);
+  } else {
+    app.log.warn("Firebase not configured — auth will be skipped in dev");
+  }
+
+  if (env.DO_SPACES_KEY) {
+    await app.register(s3Plugin);
+  } else {
+    app.log.warn("DO Spaces not configured — file uploads disabled");
+  }
 
   app.decorate("authenticate", authMiddleware);
 

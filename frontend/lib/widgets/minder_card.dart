@@ -16,8 +16,12 @@ class MinderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? MinderColors.darkSlate : Colors.white;
+    final shadowColor = isDark ? Colors.transparent : MinderColors.mist;
+
     return Material(
-      color: Colors.white,
+      color: bgColor,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -25,16 +29,18 @@ class MinderCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
+            border: isDark
+                ? Border.all(color: MinderColors.steel, width: 1)
+                : null,
+            boxShadow: [
               BoxShadow(
-                color: MinderColors.mist,
+                color: shadowColor,
                 blurRadius: 8,
-                offset: Offset(0, 2),
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-          padding: padding ??
-              const EdgeInsets.all(MinderSpacing.lg),
+          padding: padding ?? const EdgeInsets.all(MinderSpacing.lg),
           child: child,
         ),
       ),

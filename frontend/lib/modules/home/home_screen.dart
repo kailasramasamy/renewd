@@ -46,15 +46,13 @@ class HomeScreen extends StatelessWidget {
           index: controller.currentTab.value,
           children: _tabs,
         ),
-        bottomNavigationBar: SizedBox(
-          height: 64,
-          child: BottomNavigationBar(
-            currentIndex: controller.currentTab.value,
-            onTap: controller.changeTab,
-            selectedItemColor: MinderColors.oceanBlue,
-            unselectedItemColor: MinderColors.slate,
-            items: _navItems,
-          ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: controller.currentTab.value,
+          onTap: controller.changeTab,
+          selectedItemColor: MinderColors.oceanBlue,
+          unselectedItemColor: MinderColors.slate,
+          type: BottomNavigationBarType.fixed,
+          items: _navItems,
         ),
       ),
     );
