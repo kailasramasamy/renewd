@@ -19,7 +19,7 @@ class ApiEndpoints {
   static const String documents = '/documents';
   static String documentById(String id) => '/documents/$id';
   static String documentsByRenewal(String renewalId) =>
-      '/renewals/$renewalId/documents';
+      '/documents/by-renewal/$renewalId';
 
   // Payments
   static const String payments = '/payments';

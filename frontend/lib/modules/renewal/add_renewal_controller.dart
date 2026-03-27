@@ -35,10 +35,10 @@ class AddRenewalController extends GetxController {
   bool get isCustomFrequency => frequency.value == 'custom';
 
   String? validateAndGetError() {
-    if (name.value.trim().isEmpty) return 'Name is required';
-    if (renewalDate.value == null) return 'Renewal date is required';
+    if (name.value.trim().isEmpty) return 'Please enter a name for this renewal';
+    if (renewalDate.value == null) return 'Please select the next renewal date';
     if (isCustomFrequency && frequencyDays.value <= 0) {
-      return 'Enter a valid number of days';
+      return 'Please enter how many days between renewals';
     }
     return null;
   }
@@ -46,7 +46,7 @@ class AddRenewalController extends GetxController {
   Future<void> save() async {
     final error = validateAndGetError();
     if (error != null) {
-      Get.snackbar('Validation Error', error,
+      Get.snackbar('Missing info', error,
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
@@ -66,6 +66,8 @@ class AddRenewalController extends GetxController {
       };
       await _provider.create(data);
       Get.back(result: true);
+      Get.snackbar('Done', '${name.value.trim()} added',
+          snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {

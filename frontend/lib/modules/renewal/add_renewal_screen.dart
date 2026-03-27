@@ -224,11 +224,12 @@ class _DateField extends StatelessWidget {
   }
 
   Future<void> _pickDate(BuildContext context) async {
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
     final picked = await showDatePicker(
       context: context,
-      initialDate: c.renewalDate.value ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+      initialDate: c.renewalDate.value ?? tomorrow,
+      firstDate: tomorrow,
+      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
     );
     if (picked != null) c.renewalDate.value = picked;
   }

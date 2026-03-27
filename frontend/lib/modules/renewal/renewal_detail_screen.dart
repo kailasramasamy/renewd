@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -11,6 +12,7 @@ import '../../data/models/renewal_model.dart';
 import '../../widgets/minder_button.dart';
 import '../../widgets/minder_card.dart';
 import '../../widgets/status_badge.dart';
+import '../vault/vault_screen.dart';
 import 'renewal_detail_controller.dart';
 
 class RenewalDetailScreen extends StatelessWidget {
@@ -61,7 +63,9 @@ class RenewalDetailScreen extends StatelessWidget {
           _CountdownRing(renewal: renewal),
           const SizedBox(height: MinderSpacing.xl),
           _InfoSection(renewal: renewal),
-          const SizedBox(height: MinderSpacing.xxl),
+          const SizedBox(height: MinderSpacing.xl),
+          _DocumentsSection(c: c),
+          const SizedBox(height: MinderSpacing.xl),
           Obx(() => MinderButton(
                 label: 'Mark Renewed',
                 icon: Iconsax.tick_circle,
@@ -268,5 +272,78 @@ class _Divider extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: MinderSpacing.sm),
       child: Divider(color: MinderColors.steel, height: 1),
     );
+  }
+}
+
+class _DocumentsSection extends StatelessWidget {
+  final RenewalDetailController c;
+  const _DocumentsSection({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Documents', style: MinderTextStyles.h3),
+            const Spacer(),
+            Obx(() => c.isUploading.value
+                ? const SizedBox(
+                    width: 18, height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2,
+                        color: MinderColors.oceanBlue))
+                : IconButton(
+                    icon: const Icon(Iconsax.document_upload,
+                        color: MinderColors.oceanBlue),
+                    onPressed: () => _pickAndUpload(c),
+                    tooltip: 'Upload document',
+                  )),
+          ],
+        ),
+        Obx(() => c.isParsing.value
+            ? Padding(
+                padding: const EdgeInsets.only(bottom: MinderSpacing.sm),
+                child: Row(
+                  children: [
+                    const SizedBox(
+                        width: 14, height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2,
+                            color: MinderColors.lavender)),
+                    const SizedBox(width: MinderSpacing.sm),
+                    Text('Analyzing with AI...',
+                        style: MinderTextStyles.caption
+                            .copyWith(color: MinderColors.lavender)),
+                  ],
+                ),
+              )
+            : const SizedBox.shrink()),
+        Obx(() {
+          final docs = c.documents;
+          if (docs.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: MinderSpacing.md),
+              child: Text('No documents attached',
+                  style: MinderTextStyles.bodySmall
+                      .copyWith(color: MinderColors.slate)),
+            );
+          }
+          return Column(
+            children: docs.map((doc) => Padding(
+                  padding: const EdgeInsets.only(bottom: MinderSpacing.md),
+                  child: DocumentCard(doc: doc),
+                )).toList(),
+          );
+        }),
+      ],
+    );
+  }
+
+  Future<void> _pickAndUpload(RenewalDetailController c) async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.first;
+    if (file.path == null) return;
+    await c.uploadDocument(file.path!, file.name);
   }
 }

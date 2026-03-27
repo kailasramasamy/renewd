@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../modules/splash/splash_screen.dart';
 import '../../modules/auth/login_screen.dart';
+import '../../modules/document/document_detail_screen.dart';
 import '../../modules/home/home_screen.dart';
 import '../../modules/renewal/add_renewal_screen.dart';
 import '../../modules/renewal/renewal_detail_screen.dart';
@@ -34,6 +35,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.editRenewal,
       page: () => const EditRenewalScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.documentDetail,
+      page: () => const DocumentDetailScreen(),
     ),
   ];
 }

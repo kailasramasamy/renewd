@@ -15,6 +15,7 @@ const envSchema = z.object({
   DO_SPACES_SECRET: z.string().default(""),
   DO_SPACES_CDN_URL: z.string().default(""),
   CLAUDE_API_KEY: z.string().default(""),
+  CLAUDE_MODEL: z.string().default("claude-haiku-4-5-20251001"),
   GOOGLE_VISION_KEY: z.string().default(""),
 });
 

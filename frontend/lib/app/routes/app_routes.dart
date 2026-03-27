@@ -10,4 +10,5 @@ abstract class AppRoutes {
   static const addRenewal = '/add-renewal';
   static const renewalDetail = '/renewal-detail';
   static const editRenewal = '/edit-renewal';
+  static const documentDetail = '/document-detail';
 }

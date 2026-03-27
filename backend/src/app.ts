@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
 import { env } from "./config/env.js";
 import { postgresPlugin } from "./plugins/postgres.js";
 import { redisPlugin } from "./plugins/redis.js";
@@ -16,12 +17,24 @@ import userRoutes from "./routes/users/index.js";
 export async function buildApp() {
   const app = Fastify({
     logger: env.NODE_ENV !== "test",
+    bodyLimit: 10 * 1024 * 1024,
+  });
+
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
+    try {
+      const str = (body as string).trim();
+      done(null, str ? JSON.parse(str) : undefined);
+    } catch (err) {
+      done(err as Error, undefined);
+    }
   });
 
   await app.register(cors, {
     origin: env.NODE_ENV === "production" ? false : true,
     credentials: true,
   });
+
+  await app.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
 
   await app.register(postgresPlugin);
   await app.register(redisPlugin);

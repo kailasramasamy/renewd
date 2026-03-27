@@ -17,19 +17,22 @@ class RenewalProvider {
 
   Future<RenewalModel> getById(String id) async {
     final response = await _client.safeGet(ApiEndpoints.renewalById(id));
-    return RenewalModel.fromJson(response.body as Map<String, dynamic>);
+    final body = response.body as Map<String, dynamic>;
+    return RenewalModel.fromJson(body['renewal'] as Map<String, dynamic>);
   }
 
   Future<RenewalModel> create(Map<String, dynamic> data) async {
     final response =
         await _client.safePost(ApiEndpoints.renewals, data);
-    return RenewalModel.fromJson(response.body as Map<String, dynamic>);
+    final body = response.body as Map<String, dynamic>;
+    return RenewalModel.fromJson(body['renewal'] as Map<String, dynamic>);
   }
 
   Future<RenewalModel> update(String id, Map<String, dynamic> data) async {
     final response =
         await _client.safePut(ApiEndpoints.renewalById(id), data);
-    return RenewalModel.fromJson(response.body as Map<String, dynamic>);
+    final body = response.body as Map<String, dynamic>;
+    return RenewalModel.fromJson(body['renewal'] as Map<String, dynamic>);
   }
 
   Future<void> delete(String id) async {
