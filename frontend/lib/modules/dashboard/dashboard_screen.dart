@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -53,12 +54,143 @@ class DashboardScreen extends StatelessWidget {
       }),
       floatingActionButton: FloatingActionButton(
         heroTag: 'dashboard_fab',
-        onPressed: () async {
-          final result = await Get.toNamed(AppRoutes.addRenewal);
-          if (result == true) c.fetchRenewals();
-        },
+        onPressed: () => _showAddOptions(context, c),
         backgroundColor: RenewdColors.oceanBlue,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+Future<void> _showAddOptions(
+    BuildContext context, DashboardController c) async {
+  await showModalBottomSheet(
+    context: context,
+    backgroundColor: RenewdColors.darkSlate,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => _AddOptionsSheet(c: c),
+  );
+}
+
+class _AddOptionsSheet extends StatelessWidget {
+  final DashboardController c;
+  const _AddOptionsSheet({required this.c});
+
+  Future<void> _onScanTap(BuildContext context) async {
+    Navigator.of(context).pop();
+    final picker = ImagePicker();
+    final file = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (file == null) return;
+    final result = await Get.toNamed(
+      AppRoutes.scanAdd,
+      arguments: {'filePath': file.path, 'fileName': file.name},
+    );
+    if (result == true) c.fetchRenewals();
+  }
+
+  Future<void> _onManualTap(BuildContext context) async {
+    Navigator.of(context).pop();
+    final result = await Get.toNamed(AppRoutes.addRenewal);
+    if (result == true) c.fetchRenewals();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(RenewdSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: RenewdColors.steel,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: RenewdSpacing.xl),
+            _SheetOption(
+              icon: Iconsax.scan,
+              label: 'Scan Document',
+              subtitle: 'AI extracts details automatically',
+              color: RenewdColors.lavender,
+              onTap: () => _onScanTap(context),
+            ),
+            const SizedBox(height: RenewdSpacing.md),
+            _SheetOption(
+              icon: Iconsax.edit,
+              label: 'Add Manually',
+              subtitle: 'Fill in renewal details yourself',
+              color: RenewdColors.oceanBlue,
+              onTap: () => _onManualTap(context),
+            ),
+            const SizedBox(height: RenewdSpacing.md),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _SheetOption({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        decoration: BoxDecoration(
+          color: RenewdColors.charcoal,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: RenewdColors.steel),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(RenewdSpacing.sm),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: RenewdSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: RenewdTextStyles.body),
+                  Text(subtitle,
+                      style: RenewdTextStyles.caption
+                          .copyWith(color: RenewdColors.slate)),
+                ],
+              ),
+            ),
+            const Icon(Iconsax.arrow_right_3,
+                color: RenewdColors.slate, size: 16),
+          ],
+        ),
       ),
     );
   }

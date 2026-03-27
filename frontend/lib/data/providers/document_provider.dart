@@ -56,6 +56,12 @@ class DocumentProvider {
     return DocumentModel.fromJson(body['document'] as Map<String, dynamic>);
   }
 
+  Future<void> linkToRenewal(String docId, String renewalId) async {
+    await _client.safePost('${ApiEndpoints.documents}/$docId/link', {
+      'renewal_id': renewalId,
+    });
+  }
+
   Future<void> delete(String id) async {
     await _client.safeDelete(ApiEndpoints.documentById(id));
   }

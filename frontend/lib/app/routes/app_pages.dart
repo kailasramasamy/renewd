@@ -6,6 +6,7 @@ import '../../modules/home/home_screen.dart';
 import '../../modules/renewal/add_renewal_screen.dart';
 import '../../modules/renewal/renewal_detail_screen.dart';
 import '../../modules/renewal/edit_renewal_screen.dart';
+import '../../modules/renewal/scan_add_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -39,6 +40,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.documentDetail,
       page: () => const DocumentDetailScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.scanAdd,
+      page: () => const ScanAddScreen(),
     ),
   ];
 }

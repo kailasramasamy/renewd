@@ -129,6 +129,20 @@ async function registerFileServe(app: FastifyInstance) {
   });
 }
 
+async function registerLink(app: FastifyInstance) {
+  app.post("/:id/link", auth, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const { renewal_id } = request.body as { renewal_id: string };
+    const result = await app.db.query(
+      `UPDATE documents SET renewal_id = $1, is_current = true
+       WHERE id = $2 AND user_id = (SELECT id FROM users WHERE firebase_uid = $3) RETURNING *`,
+      [renewal_id, id, request.user.uid]
+    );
+    if (result.rows.length === 0) throw new NotFoundError("Document");
+    return reply.send({ document: result.rows[0] });
+  });
+}
+
 async function registerDelete(app: FastifyInstance) {
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
@@ -152,5 +166,6 @@ export default async function documentRoutes(app: FastifyInstance) {
   await registerParse(app);
   await registerQueries(app);
   await registerFileServe(app);
+  await registerLink(app);
   await registerDelete(app);
 }

@@ -1,0 +1,319 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../widgets/minder_button.dart';
+import 'scan_add_controller.dart';
+import 'scan_add_form.dart';
+
+class ScanAddScreen extends StatelessWidget {
+  const ScanAddScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.put(ScanAddController());
+    final args = Get.arguments as Map<String, dynamic>?;
+    final filePath = args?['filePath'] as String?;
+    final fileName = args?['fileName'] as String?;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (filePath != null && fileName != null) {
+        c.uploadAndParse(filePath, fileName);
+      }
+    });
+
+    return Obx(() {
+      if (c.isAnalyzing) {
+        return _AnalyzingScreen(c: c);
+      }
+      if (c.extraction.value != null) {
+        return _ReviewFormScreen(c: c);
+      }
+      return _PickerScreen(c: c);
+    });
+  }
+}
+
+class _PickerScreen extends StatelessWidget {
+  final ScanAddController c;
+  const _PickerScreen({required this.c});
+
+  Future<void> _pickImage(BuildContext context, ImageSource source) async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: source, imageQuality: 85);
+    if (file != null) {
+      await c.uploadAndParse(file.path, file.name);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: RenewdColors.charcoal,
+      appBar: AppBar(
+        backgroundColor: RenewdColors.charcoal,
+        leading: IconButton(
+          icon: const Icon(Iconsax.arrow_left),
+          onPressed: () => Get.back(),
+        ),
+        title: Text('Scan Document',
+            style: RenewdTextStyles.h3.copyWith(color: Colors.white)),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(RenewdSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Icon(Iconsax.document_upload,
+                size: 64, color: RenewdColors.lavender),
+            const SizedBox(height: RenewdSpacing.xl),
+            Text(
+              'Upload a document',
+              style: RenewdTextStyles.h2.copyWith(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: RenewdSpacing.sm),
+            Text(
+              'Insurance policy, bill, license — AI will extract details automatically',
+              style: RenewdTextStyles.bodySmall
+                  .copyWith(color: RenewdColors.slate),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: RenewdSpacing.xxl),
+            _PickerOption(
+              icon: Iconsax.camera,
+              label: 'Take a Photo',
+              onTap: () => _pickImage(context, ImageSource.camera),
+            ),
+            const SizedBox(height: RenewdSpacing.md),
+            _PickerOption(
+              icon: Iconsax.gallery,
+              label: 'Choose from Gallery',
+              onTap: () => _pickImage(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PickerOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _PickerOption({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        decoration: BoxDecoration(
+          color: RenewdColors.darkSlate,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: RenewdColors.steel),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: RenewdColors.lavender, size: 24),
+            const SizedBox(width: RenewdSpacing.md),
+            Text(label,
+                style: RenewdTextStyles.body.copyWith(color: Colors.white)),
+            const Spacer(),
+            const Icon(Iconsax.arrow_right_3,
+                color: RenewdColors.slate, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnalyzingScreen extends StatelessWidget {
+  final ScanAddController c;
+  const _AnalyzingScreen({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: RenewdColors.charcoal,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(RenewdSpacing.xl),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: RenewdColors.darkSlate,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: RenewdColors.steel),
+                  ),
+                  child: const Icon(Iconsax.document_text,
+                      size: 36, color: RenewdColors.lavender),
+                ),
+                const SizedBox(height: RenewdSpacing.xl),
+                Text(
+                  'Analyzing your document...',
+                  style: RenewdTextStyles.h3.copyWith(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: RenewdSpacing.xl),
+                const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    color: RenewdColors.lavender,
+                    strokeWidth: 3,
+                  ),
+                ),
+                const SizedBox(height: RenewdSpacing.xl),
+                Obx(() => Text(
+                      c.isUploading.value
+                          ? 'Uploading...'
+                          : 'Reading document with AI...',
+                      style: RenewdTextStyles.caption
+                          .copyWith(color: RenewdColors.slate),
+                    )),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReviewFormScreen extends StatelessWidget {
+  final ScanAddController c;
+  const _ReviewFormScreen({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Iconsax.arrow_left),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text('Review Details'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _AiBanner(),
+            const SizedBox(height: RenewdSpacing.lg),
+            if (c.keyDetails.isNotEmpty) ...[
+              _KeyDetailsChips(c: c),
+              const SizedBox(height: RenewdSpacing.xl),
+            ],
+            ScanAddForm(c: c),
+            const SizedBox(height: RenewdSpacing.xxl),
+            Obx(() => RenewdButton(
+                  label: 'Create Renewal',
+                  icon: Iconsax.tick_circle,
+                  isLoading: c.isSaving.value,
+                  onPressed: c.save,
+                )),
+            const SizedBox(height: RenewdSpacing.xl),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AiBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(RenewdSpacing.md),
+      decoration: BoxDecoration(
+        color: RenewdColors.lavender.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: RenewdColors.lavender.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.auto_awesome,
+              color: RenewdColors.lavender, size: 20),
+          const SizedBox(width: RenewdSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('AI extracted these details',
+                    style: RenewdTextStyles.bodySmall.copyWith(
+                        color: RenewdColors.lavender,
+                        fontWeight: FontWeight.w600)),
+                Text('Please review before saving',
+                    style: RenewdTextStyles.caption
+                        .copyWith(color: RenewdColors.lavender)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _KeyDetailsChips extends StatelessWidget {
+  final ScanAddController c;
+  const _KeyDetailsChips({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Key Details',
+            style:
+                RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate)),
+        const SizedBox(height: RenewdSpacing.sm),
+        Obx(() => Wrap(
+              spacing: RenewdSpacing.sm,
+              runSpacing: RenewdSpacing.sm,
+              children: c.keyDetails
+                  .map((d) => _DetailChip(label: d))
+                  .toList(),
+            )),
+      ],
+    );
+  }
+}
+
+class _DetailChip extends StatelessWidget {
+  final String label;
+  const _DetailChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: RenewdSpacing.md, vertical: RenewdSpacing.xs),
+      decoration: BoxDecoration(
+        color: RenewdColors.darkSlate,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: RenewdColors.steel),
+      ),
+      child: Text(label,
+          style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),
+    );
+  }
+}
