@@ -33,11 +33,11 @@ async function registerCreate(app: FastifyInstance) {
     );
     if (userResult.rows.length === 0) throw new AppError("User not found", 404, "NOT_FOUND");
 
-    const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes } = body;
+    const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name } = body;
     const result = await app.db.query(
-      `INSERT INTO renewals (user_id, name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [userResult.rows[0].id, name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null]
+      `INSERT INTO renewals (user_id, name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+      [userResult.rows[0].id, name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, group_name ?? null]
     );
     return reply.status(201).send({ renewal: result.rows[0] });
   });
@@ -47,13 +47,13 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
   app.put("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
     const body = request.body as Record<string, unknown>;
-    const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, status } = body;
+    const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, status, group_name } = body;
 
     const result = await app.db.query(
       `UPDATE renewals SET name=$1, category=$2, provider=$3, amount=$4, renewal_date=$5,
-       frequency=$6, frequency_days=$7, auto_renew=$8, notes=$9, status=$10, updated_at=NOW()
-       WHERE id=$11 AND user_id=(SELECT id FROM users WHERE firebase_uid=$12) RETURNING *`,
-      [name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, status ?? "active", id, request.user.uid]
+       frequency=$6, frequency_days=$7, auto_renew=$8, notes=$9, status=$10, group_name=$11, updated_at=NOW()
+       WHERE id=$12 AND user_id=(SELECT id FROM users WHERE firebase_uid=$13) RETURNING *`,
+      [name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, status ?? "active", group_name ?? null, id, request.user.uid]
     );
     if (result.rows.length === 0) throw new NotFoundError("Renewal");
     return reply.send({ renewal: result.rows[0] });

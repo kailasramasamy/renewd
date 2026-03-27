@@ -14,6 +14,7 @@ class RenewalModel {
   final bool autoRenew;
   final String? notes;
   final String status;
+  final String? groupName;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -30,11 +31,15 @@ class RenewalModel {
     required this.autoRenew,
     this.notes,
     required this.status,
+    this.groupName,
     required this.createdAt,
     required this.updatedAt,
   });
 
   int get daysRemaining => RenewdDateUtils.daysRemaining(renewalDate);
+
+  String get displayGroup =>
+      groupName ?? CategoryConfig.label(category);
 
   factory RenewalModel.fromJson(Map<String, dynamic> json) => RenewalModel(
         id: json['id'] as String,
@@ -54,6 +59,7 @@ class RenewalModel {
         autoRenew: json['auto_renew'] as bool? ?? false,
         notes: json['notes'] as String?,
         status: json['status'] as String? ?? 'active',
+        groupName: json['group_name'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String),
         updatedAt: DateTime.parse(json['updated_at'] as String),
       );
@@ -71,6 +77,7 @@ class RenewalModel {
         'auto_renew': autoRenew,
         'notes': notes,
         'status': status,
+        'group_name': groupName,
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
       };

@@ -41,6 +41,10 @@ class EditRenewalScreen extends StatelessWidget {
                 const SizedBox(height: RenewdSpacing.sm),
                 _buildCategoryChips(c),
                 const SizedBox(height: RenewdSpacing.xl),
+                _buildLabel('Group'),
+                const SizedBox(height: RenewdSpacing.sm),
+                _GroupSection(c: c),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Provider'),
                 const SizedBox(height: RenewdSpacing.sm),
                 TextFormField(
@@ -183,7 +187,7 @@ class EditRenewalScreen extends StatelessWidget {
 
   Widget _buildFrequencyDropdown(EditRenewalController c) {
     return DropdownButtonFormField<String>(
-      value: c.frequency.value,
+      initialValue: c.frequency.value,
       decoration: const InputDecoration(),
       items: EditRenewalController.frequencyLabels.entries.map((e) {
         return DropdownMenuItem(value: e.key, child: Text(e.value));
@@ -224,5 +228,88 @@ class EditRenewalScreen extends StatelessWidget {
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
     );
     if (picked != null) c.renewalDate.value = picked;
+  }
+}
+
+class _GroupSection extends StatefulWidget {
+  final EditRenewalController c;
+  const _GroupSection({required this.c});
+
+  @override
+  State<_GroupSection> createState() => _GroupSectionState();
+}
+
+class _GroupSectionState extends State<_GroupSection> {
+  late final TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.c.groupName.value);
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _selectChip(String g) {
+    final isSelected = widget.c.groupName.value == g;
+    final newVal = isSelected ? '' : g;
+    widget.c.groupName.value = newVal;
+    _textController.text = newVal;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Obx(() {
+          final suggestions = widget.c.suggestedGroups;
+          final catColor = CategoryConfig.color(widget.c.category.value);
+          if (suggestions.isEmpty) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(bottom: RenewdSpacing.sm),
+            child: Wrap(
+              spacing: RenewdSpacing.sm,
+              runSpacing: RenewdSpacing.sm,
+              children: suggestions.map((g) {
+                final isSelected = widget.c.groupName.value == g;
+                return GestureDetector(
+                  onTap: () => _selectChip(g),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: RenewdSpacing.md,
+                        vertical: RenewdSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? catColor.withValues(alpha: 0.2)
+                          : RenewdColors.darkSlate,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected ? catColor : RenewdColors.steel,
+                        width: isSelected ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Text(g,
+                        style: RenewdTextStyles.caption.copyWith(
+                            color: isSelected ? catColor : RenewdColors.slate)),
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        }),
+        TextField(
+          controller: _textController,
+          onChanged: (v) => widget.c.groupName.value = v,
+          decoration: const InputDecoration(
+              hintText: 'Or type a custom group...'),
+        ),
+      ],
+    );
   }
 }

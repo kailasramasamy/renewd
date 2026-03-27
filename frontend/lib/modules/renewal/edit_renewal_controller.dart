@@ -11,6 +11,7 @@ class EditRenewalController extends GetxController {
   final RxString providerName = ''.obs;
   final RxString notes = ''.obs;
   final Rx<RenewalCategory> category = RenewalCategory.subscription.obs;
+  final RxString groupName = ''.obs;
   final Rx<double?> amount = Rx<double?>(null);
   final Rx<DateTime?> renewalDate = Rx<DateTime?>(null);
   final RxString frequency = 'monthly'.obs;
@@ -27,6 +28,9 @@ class EditRenewalController extends GetxController {
   };
 
   bool get isCustomFrequency => frequency.value == 'custom';
+
+  List<String> get suggestedGroups =>
+      CategoryConfig.suggestedGroups(category.value);
 
   @override
   void onInit() {
@@ -48,6 +52,7 @@ class EditRenewalController extends GetxController {
     frequency.value = r.frequency ?? 'monthly';
     frequencyDays.value = r.frequencyDays ?? 30;
     autoRenew.value = r.autoRenew;
+    groupName.value = r.groupName ?? '';
   }
 
   String? validateAndGetError() {
@@ -74,6 +79,9 @@ class EditRenewalController extends GetxController {
         'renewal_date': renewalDate.value!.toIso8601String(),
         'frequency': frequency.value,
         'auto_renew': autoRenew.value,
+        'group_name': groupName.value.trim().isNotEmpty
+            ? groupName.value.trim()
+            : null,
         'provider': providerName.value.trim().isNotEmpty
             ? providerName.value.trim()
             : null,

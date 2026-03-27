@@ -9,6 +9,7 @@ class AddRenewalController extends GetxController {
   final RxString providerName = ''.obs;
   final RxString notes = ''.obs;
   final Rx<RenewalCategory> category = RenewalCategory.subscription.obs;
+  final RxString groupName = ''.obs;
   final Rx<double?> amount = Rx<double?>(null);
   final Rx<DateTime?> renewalDate = Rx<DateTime?>(null);
   final RxString frequency = 'monthly'.obs;
@@ -17,26 +18,26 @@ class AddRenewalController extends GetxController {
   final RxBool isLoading = false.obs;
 
   static const List<String> frequencies = [
-    'monthly',
-    'quarterly',
-    'yearly',
-    'weekly',
-    'custom',
+    'monthly', 'quarterly', 'yearly', 'weekly', 'custom',
   ];
 
   static const Map<String, String> frequencyLabels = {
-    'monthly': 'Monthly',
-    'quarterly': 'Quarterly',
-    'yearly': 'Yearly',
-    'weekly': 'Weekly',
-    'custom': 'Custom',
+    'monthly': 'Monthly', 'quarterly': 'Quarterly',
+    'yearly': 'Yearly', 'weekly': 'Weekly', 'custom': 'Custom',
   };
 
   bool get isCustomFrequency => frequency.value == 'custom';
 
+  List<String> get suggestedGroups =>
+      CategoryConfig.suggestedGroups(category.value);
+
   String? validateAndGetError() {
-    if (name.value.trim().isEmpty) return 'Please enter a name for this renewal';
-    if (renewalDate.value == null) return 'Please select the next renewal date';
+    if (name.value.trim().isEmpty) {
+      return 'Please enter a name for this renewal';
+    }
+    if (renewalDate.value == null) {
+      return 'Please select the next renewal date';
+    }
     if (isCustomFrequency && frequencyDays.value <= 0) {
       return 'Please enter how many days between renewals';
     }
@@ -58,6 +59,8 @@ class AddRenewalController extends GetxController {
         'renewal_date': renewalDate.value!.toIso8601String(),
         'frequency': frequency.value,
         'auto_renew': autoRenew.value,
+        if (groupName.value.trim().isNotEmpty)
+          'group_name': groupName.value.trim(),
         if (providerName.value.trim().isNotEmpty)
           'provider': providerName.value.trim(),
         if (amount.value != null) 'amount': amount.value,
@@ -69,7 +72,8 @@ class AddRenewalController extends GetxController {
       Get.snackbar('Done', '${name.value.trim()} added',
           snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Error', e.toString(),
+          snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }

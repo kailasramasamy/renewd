@@ -8,6 +8,7 @@ class DashboardController extends GetxController {
   final RxList<RenewalModel> renewals = <RenewalModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
+  final RxMap<String, bool> expandedGroups = <String, bool>{}.obs;
 
   int get dueThisMonth {
     final now = DateTime.now();
@@ -33,6 +34,39 @@ class DashboardController extends GetxController {
       .length;
 
   bool get hasAlerts => overdueCount > 0 || urgentCount > 0;
+
+  Map<String, List<RenewalModel>> get groupedRenewals {
+    final map = <String, List<RenewalModel>>{};
+    for (final r in renewals) {
+      final group = r.displayGroup;
+      map.putIfAbsent(group, () => []).add(r);
+    }
+    for (final list in map.values) {
+      list.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+    }
+    return map;
+  }
+
+  List<String> get sortedGroupNames {
+    final groups = groupedRenewals;
+    final names = groups.keys.toList();
+    names.sort((a, b) {
+      final aMin = groups[a]!.first.daysRemaining;
+      final bMin = groups[b]!.first.daysRemaining;
+      return aMin.compareTo(bMin);
+    });
+    return names;
+  }
+
+  List<RenewalModel> get dueSoon =>
+      renewals.where((r) => r.daysRemaining >= 0 && r.daysRemaining <= 7).toList();
+
+  void toggleGroup(String groupName) {
+    expandedGroups[groupName] = !(expandedGroups[groupName] ?? true);
+  }
+
+  bool isGroupExpanded(String groupName) =>
+      expandedGroups[groupName] ?? true;
 
   @override
   void onInit() {
