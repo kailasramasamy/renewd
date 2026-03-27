@@ -56,8 +56,7 @@ class DueSoonCard extends StatelessWidget {
           Text(renewal.name,
               style: RenewdTextStyles.bodySmall
                   .copyWith(fontWeight: FontWeight.w600),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
+              maxLines: 1, overflow: TextOverflow.ellipsis),
           const SizedBox(height: RenewdSpacing.xs),
           Text(days == 0 ? 'Today' : '$days days',
               style: RenewdTextStyles.caption.copyWith(color: statusColor)),
@@ -71,24 +70,27 @@ class DueSoonCard extends StatelessWidget {
   }
 }
 
-class GroupCard extends StatelessWidget {
+/// Top-level category card (Insurance, Subscription, etc.)
+class CategoryCard extends StatelessWidget {
   final DashboardController c;
-  final String groupName;
-  const GroupCard({super.key, required this.c, required this.groupName});
+  final RenewalCategory cat;
+  final Map<String, List<RenewalModel>> groups;
+
+  const CategoryCard({
+    super.key,
+    required this.c,
+    required this.cat,
+    required this.groups,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final groups = c.groupedRenewals;
-      final items = groups[groupName] ?? [];
-      if (items.isEmpty) return const SizedBox.shrink();
-      final first = items.first;
-      final catColor = CategoryConfig.color(first.category);
-      final catIcon = CategoryConfig.icon(first.category);
-      final nextDays = first.daysRemaining;
-      final totalAmount =
-          items.fold<double>(0, (sum, r) => sum + (r.amount ?? 0));
-      final isExpanded = c.isGroupExpanded(groupName);
+      final isExpanded = c.isCategoryExpanded(cat);
+      final totalItems = groups.values.fold<int>(0, (s, l) => s + l.length);
+      final firstItem = _firstByUrgency();
+      final catColor = CategoryConfig.color(cat);
+      final catIcon = CategoryConfig.icon(cat);
 
       return Container(
         decoration: BoxDecoration(
@@ -98,21 +100,20 @@ class GroupCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            GroupHeader(
-              groupName: groupName,
-              catColor: catColor,
-              catIcon: catIcon,
-              itemCount: items.length,
-              nextDays: nextDays,
-              totalAmount: totalAmount,
+            _CategoryHeader(
+              label: CategoryConfig.label(cat),
+              color: catColor,
+              icon: catIcon,
+              itemCount: totalItems,
+              nextDays: firstItem.daysRemaining,
               isExpanded: isExpanded,
-              onTap: () => c.toggleGroup(groupName),
+              onTap: () => c.toggleCategory(cat),
             ),
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
               child: isExpanded
-                  ? ExpandedItems(items: items, c: c)
+                  ? _SubGroupList(c: c, cat: cat, groups: groups)
                   : const SizedBox.shrink(),
             ),
           ],
@@ -120,44 +121,45 @@ class GroupCard extends StatelessWidget {
       );
     });
   }
+
+  RenewalModel _firstByUrgency() {
+    RenewalModel? first;
+    for (final list in groups.values) {
+      if (first == null || list.first.daysRemaining < first.daysRemaining) {
+        first = list.first;
+      }
+    }
+    return first!;
+  }
 }
 
-class GroupHeader extends StatelessWidget {
-  final String groupName;
-  final Color catColor;
-  final IconData catIcon;
+class _CategoryHeader extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData icon;
   final int itemCount;
   final int nextDays;
-  final double totalAmount;
   final bool isExpanded;
   final VoidCallback onTap;
 
-  const GroupHeader({
-    super.key,
-    required this.groupName,
-    required this.catColor,
-    required this.catIcon,
+  const _CategoryHeader({
+    required this.label,
+    required this.color,
+    required this.icon,
     required this.itemCount,
     required this.nextDays,
-    required this.totalAmount,
     required this.isExpanded,
     required this.onTap,
   });
 
-  String get _subtitle {
+  @override
+  Widget build(BuildContext context) {
     final daysText = nextDays < 0
         ? '${nextDays.abs()}d overdue'
         : nextDays == 0
-            ? 'Today'
+            ? 'Due today'
             : 'Next: $nextDays days';
-    if (totalAmount > 0) {
-      return '$daysText · ₹${totalAmount.toStringAsFixed(0)}/yr';
-    }
-    return daysText;
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -166,32 +168,30 @@ class GroupHeader extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: 36, height: 36,
               decoration: BoxDecoration(
-                color: catColor.withValues(alpha: 0.15),
+                color: color.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(catIcon, size: 16, color: catColor),
+              child: Icon(icon, size: 16, color: color),
             ),
             const SizedBox(width: RenewdSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(groupName, style: RenewdTextStyles.h3),
-                  Text(_subtitle,
+                  Text(label, style: RenewdTextStyles.h3),
+                  Text(daysText,
                       style: RenewdTextStyles.caption
                           .copyWith(color: RenewdColors.slate)),
                 ],
               ),
             ),
-            CountBadge(count: itemCount, color: catColor),
+            CountBadge(count: itemCount, color: color),
             const SizedBox(width: RenewdSpacing.sm),
             Icon(
               isExpanded ? Iconsax.arrow_up_2 : Iconsax.arrow_down_1,
-              size: 16,
-              color: RenewdColors.slate,
+              size: 16, color: RenewdColors.slate,
             ),
           ],
         ),
@@ -200,16 +200,126 @@ class GroupHeader extends StatelessWidget {
   }
 }
 
-class ExpandedItems extends StatelessWidget {
+/// Sub-groups within a category (Car Insurance, Health Insurance, etc.)
+class _SubGroupList extends StatelessWidget {
+  final DashboardController c;
+  final RenewalCategory cat;
+  final Map<String, List<RenewalModel>> groups;
+
+  const _SubGroupList({
+    required this.c,
+    required this.cat,
+    required this.groups,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final sortedKeys = groups.keys.toList()
+      ..sort((a, b) => groups[a]!.first.daysRemaining
+          .compareTo(groups[b]!.first.daysRemaining));
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          RenewdSpacing.md, 0, RenewdSpacing.md, RenewdSpacing.md),
+      child: Column(
+        children: sortedKeys
+            .map((g) => _SubGroupRow(c: c, cat: cat, groupName: g,
+                items: groups[g]!))
+            .toList(),
+      ),
+    );
+  }
+}
+
+class _SubGroupRow extends StatelessWidget {
+  final DashboardController c;
+  final RenewalCategory cat;
+  final String groupName;
+  final List<RenewalModel> items;
+
+  const _SubGroupRow({
+    required this.c,
+    required this.cat,
+    required this.groupName,
+    required this.items,
+  });
+
+  String get _uniqueKey => '${cat.name}:$groupName';
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final isExpanded = c.isSubGroupExpanded(_uniqueKey);
+      final nextDays = items.first.daysRemaining;
+      final statusColor = RenewdDateUtils.statusColorFromDays(nextDays);
+
+      return Column(
+        children: [
+          InkWell(
+            onTap: () => c.toggleSubGroup(_uniqueKey),
+            borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  vertical: RenewdSpacing.sm, horizontal: RenewdSpacing.xs),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4, height: 24,
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: RenewdSpacing.md),
+                  Expanded(
+                    child: Text(groupName,
+                        style: RenewdTextStyles.body
+                            .copyWith(fontWeight: FontWeight.w500)),
+                  ),
+                  CountBadge(
+                      count: items.length,
+                      color: CategoryConfig.color(cat)),
+                  const SizedBox(width: RenewdSpacing.sm),
+                  Text(
+                    nextDays < 0
+                        ? '${nextDays.abs()}d late'
+                        : '${nextDays}d',
+                    style: RenewdTextStyles.caption.copyWith(
+                        color: statusColor, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(width: RenewdSpacing.sm),
+                  Icon(
+                    isExpanded
+                        ? Iconsax.arrow_up_2
+                        : Iconsax.arrow_right_3,
+                    size: 14, color: RenewdColors.slate,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: isExpanded
+                ? _ExpandedRenewals(items: items, c: c)
+                : const SizedBox.shrink(),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _ExpandedRenewals extends StatelessWidget {
   final List<RenewalModel> items;
   final DashboardController c;
-  const ExpandedItems({super.key, required this.items, required this.c});
+  const _ExpandedRenewals({required this.items, required this.c});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          RenewdSpacing.md, 0, RenewdSpacing.md, RenewdSpacing.md),
+      padding: const EdgeInsets.only(left: RenewdSpacing.xl),
       child: Column(
         children: items
             .map((r) => Padding(
@@ -218,8 +328,7 @@ class ExpandedItems extends StatelessWidget {
                     renewal: r,
                     onTap: () async {
                       final result = await Get.toNamed(
-                          AppRoutes.renewalDetail,
-                          arguments: r);
+                          AppRoutes.renewalDetail, arguments: r);
                       if (result == true) c.fetchRenewals();
                     },
                   ),
@@ -233,51 +342,42 @@ class ExpandedItems extends StatelessWidget {
 class RenewalListItem extends StatelessWidget {
   final RenewalModel renewal;
   final VoidCallback onTap;
-  const RenewalListItem({super.key, required this.renewal, required this.onTap});
+  const RenewalListItem(
+      {super.key, required this.renewal, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final days = renewal.daysRemaining;
     final statusColor = RenewdDateUtils.statusColorFromDays(days);
     final statusType = _statusTypeFromDays(days);
-    final catColor = CategoryConfig.color(renewal.category);
-    final catIcon = CategoryConfig.icon(renewal.category);
 
     return RenewdCard(
       onTap: onTap,
       padding: const EdgeInsets.all(RenewdSpacing.md),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: catColor.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(catIcon, size: 18, color: catColor),
-          ),
-          const SizedBox(width: RenewdSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(renewal.name,
-                    style: RenewdTextStyles.h3.copyWith(fontSize: 15)),
+                    style: RenewdTextStyles.bodySmall
+                        .copyWith(fontWeight: FontWeight.w600)),
                 if (renewal.provider != null) ...[
                   const SizedBox(height: RenewdSpacing.xs),
                   Text(renewal.provider!,
-                      style: RenewdTextStyles.bodySmall
+                      style: RenewdTextStyles.caption
                           .copyWith(color: RenewdColors.slate)),
                 ],
-                const SizedBox(height: RenewdSpacing.xs),
-                Text(RenewdDateUtils.formatDate(renewal.renewalDate),
-                    style: RenewdTextStyles.caption
-                        .copyWith(color: RenewdColors.slate)),
+                if (renewal.amount != null) ...[
+                  const SizedBox(height: RenewdSpacing.xs),
+                  Text('₹${renewal.amount!.toStringAsFixed(0)}',
+                      style: RenewdTextStyles.caption
+                          .copyWith(color: RenewdColors.slate)),
+                ],
               ],
             ),
           ),
-          const SizedBox(width: RenewdSpacing.sm),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

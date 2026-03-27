@@ -354,7 +354,8 @@ class _GroupedRenewalList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupNames = c.sortedGroupNames;
+    final grouped = c.categoryGrouped;
+    final sortedCats = c.sortedCategories;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -366,9 +367,13 @@ class _GroupedRenewalList extends StatelessWidget {
           ],
         ),
         const SizedBox(height: RenewdSpacing.md),
-        ...groupNames.map((name) => Padding(
+        ...sortedCats.map((cat) => Padding(
               padding: const EdgeInsets.only(bottom: RenewdSpacing.md),
-              child: GroupCard(c: c, groupName: name),
+              child: CategoryCard(
+                c: c,
+                cat: cat,
+                groups: grouped[cat]!,
+              ),
             )),
       ],
     );

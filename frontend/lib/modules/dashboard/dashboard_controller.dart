@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../core/constants/category_config.dart';
 import '../../data/models/renewal_model.dart';
 import '../../data/providers/renewal_provider.dart';
 
@@ -8,7 +9,8 @@ class DashboardController extends GetxController {
   final RxList<RenewalModel> renewals = <RenewalModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
-  final RxMap<String, bool> expandedGroups = <String, bool>{}.obs;
+  final RxMap<String, bool> expandedCategories = <String, bool>{}.obs;
+  final RxMap<String, bool> expandedSubGroups = <String, bool>{}.obs;
 
   int get dueThisMonth {
     final now = DateTime.now();
@@ -35,38 +37,60 @@ class DashboardController extends GetxController {
 
   bool get hasAlerts => overdueCount > 0 || urgentCount > 0;
 
-  Map<String, List<RenewalModel>> get groupedRenewals {
-    final map = <String, List<RenewalModel>>{};
+  List<RenewalModel> get dueSoon =>
+      renewals.where((r) => r.daysRemaining >= 0 && r.daysRemaining <= 7).toList();
+
+  /// Two-level grouping: Category → Group → Items
+  Map<RenewalCategory, Map<String, List<RenewalModel>>> get categoryGrouped {
+    final map = <RenewalCategory, Map<String, List<RenewalModel>>>{};
     for (final r in renewals) {
+      final cat = r.category;
       final group = r.displayGroup;
-      map.putIfAbsent(group, () => []).add(r);
+      map.putIfAbsent(cat, () => {});
+      map[cat]!.putIfAbsent(group, () => []).add(r);
     }
-    for (final list in map.values) {
-      list.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+    for (final catMap in map.values) {
+      for (final list in catMap.values) {
+        list.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+      }
     }
     return map;
   }
 
-  List<String> get sortedGroupNames {
-    final groups = groupedRenewals;
-    final names = groups.keys.toList();
-    names.sort((a, b) {
-      final aMin = groups[a]!.first.daysRemaining;
-      final bMin = groups[b]!.first.daysRemaining;
+  /// Categories sorted by most urgent first
+  List<RenewalCategory> get sortedCategories {
+    final grouped = categoryGrouped;
+    final cats = grouped.keys.toList();
+    cats.sort((a, b) {
+      final aMin = _minDaysForCategory(grouped[a]!);
+      final bMin = _minDaysForCategory(grouped[b]!);
       return aMin.compareTo(bMin);
     });
-    return names;
+    return cats;
   }
 
-  List<RenewalModel> get dueSoon =>
-      renewals.where((r) => r.daysRemaining >= 0 && r.daysRemaining <= 7).toList();
-
-  void toggleGroup(String groupName) {
-    expandedGroups[groupName] = !(expandedGroups[groupName] ?? true);
+  int _minDaysForCategory(Map<String, List<RenewalModel>> groups) {
+    int min = 999999;
+    for (final list in groups.values) {
+      if (list.first.daysRemaining < min) min = list.first.daysRemaining;
+    }
+    return min;
   }
 
-  bool isGroupExpanded(String groupName) =>
-      expandedGroups[groupName] ?? true;
+  void toggleCategory(RenewalCategory cat) {
+    final key = cat.name;
+    expandedCategories[key] = !(expandedCategories[key] ?? true);
+  }
+
+  bool isCategoryExpanded(RenewalCategory cat) =>
+      expandedCategories[cat.name] ?? true;
+
+  void toggleSubGroup(String key) {
+    expandedSubGroups[key] = !(expandedSubGroups[key] ?? false);
+  }
+
+  bool isSubGroupExpanded(String key) =>
+      expandedSubGroups[key] ?? false;
 
   @override
   void onInit() {
