@@ -34,6 +34,10 @@ class RenewalDetailScreen extends StatelessWidget {
           actions: [
             if (renewal != null) ...[
               IconButton(
+                icon: const Icon(Iconsax.notification),
+                onPressed: () => _showRemindersSheet(context, c),
+              ),
+              IconButton(
                 icon: const Icon(Iconsax.edit),
                 onPressed: () async {
                   final result = await Get.toNamed(
@@ -84,6 +88,64 @@ class RenewalDetailScreen extends StatelessWidget {
               )),
           const SizedBox(height: RenewdSpacing.xl),
         ],
+      ),
+    );
+  }
+
+  void _showRemindersSheet(BuildContext context, RenewalDetailController c) {
+    const availableDays = [30, 14, 7, 3, 1];
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Iconsax.notification, size: 20, color: RenewdColors.oceanBlue),
+                const SizedBox(width: RenewdSpacing.sm),
+                Text('Reminders', style: RenewdTextStyles.h3),
+              ],
+            ),
+            const SizedBox(height: RenewdSpacing.xs),
+            Text('Get notified before this renewal is due',
+                style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),
+            const SizedBox(height: RenewdSpacing.md),
+            Obx(() => Wrap(
+                  spacing: RenewdSpacing.sm,
+                  runSpacing: RenewdSpacing.sm,
+                  children: availableDays.map((day) {
+                    final selected = c.reminderDays.contains(day);
+                    final label = day == 1 ? '1 day before' : '$day days before';
+                    return FilterChip(
+                      label: Text(label),
+                      selected: selected,
+                      onSelected: (_) {
+                        final updated = List<int>.from(c.reminderDays);
+                        if (selected) {
+                          updated.remove(day);
+                        } else {
+                          updated.add(day);
+                        }
+                        updated.sort((a, b) => b.compareTo(a));
+                        c.updateReminders(updated);
+                      },
+                      selectedColor: RenewdColors.oceanBlue.withValues(alpha: 0.2),
+                      checkmarkColor: RenewdColors.oceanBlue,
+                      labelStyle: RenewdTextStyles.caption.copyWith(
+                        color: selected ? RenewdColors.oceanBlue : RenewdColors.slate,
+                      ),
+                    );
+                  }).toList(),
+                )),
+            const SizedBox(height: RenewdSpacing.lg),
+          ],
+        ),
       ),
     );
   }

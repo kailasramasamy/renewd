@@ -45,4 +45,23 @@ class RenewalProvider {
     final body = response.body as Map<String, dynamic>;
     return RenewalModel.fromJson(body['renewal'] as Map<String, dynamic>);
   }
+
+  Future<List<Map<String, dynamic>>> getReminders(String renewalId) async {
+    final response =
+        await _client.safeGet(ApiEndpoints.renewalReminders(renewalId));
+    final body = response.body as Map<String, dynamic>;
+    final list = body['reminders'] as List<dynamic>? ?? [];
+    return list.cast<Map<String, dynamic>>();
+  }
+
+  Future<List<Map<String, dynamic>>> updateReminders(
+      String renewalId, List<int> daysBefore) async {
+    final response = await _client.safePut(
+      ApiEndpoints.renewalReminders(renewalId),
+      {'days_before': daysBefore},
+    );
+    final body = response.body as Map<String, dynamic>;
+    final list = body['reminders'] as List<dynamic>? ?? [];
+    return list.cast<Map<String, dynamic>>();
+  }
 }

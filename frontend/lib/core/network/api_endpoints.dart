@@ -21,6 +21,15 @@ class ApiEndpoints {
   static String documentsByRenewal(String renewalId) =>
       '/documents/by-renewal/$renewalId';
 
+  // Notifications
+  static const String fcmToken = '/users/me/fcm-token';
+  static const String notificationPreferences =
+      '/users/me/notification-preferences';
+  static String renewalReminders(String renewalId) =>
+      '/renewals/$renewalId/reminders';
+  static String snoozeReminder(String renewalId, String reminderId) =>
+      '/renewals/$renewalId/reminders/$reminderId/snooze';
+
   // Payments
   static const String payments = '/payments';
   static String paymentsByRenewal(String renewalId) =>

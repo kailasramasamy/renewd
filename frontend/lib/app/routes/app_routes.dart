@@ -12,4 +12,5 @@ abstract class AppRoutes {
   static const editRenewal = '/edit-renewal';
   static const documentDetail = '/document-detail';
   static const scanAdd = '/scan-add';
+  static const notificationSettings = '/notification-settings';
 }

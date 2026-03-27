@@ -11,6 +11,7 @@ class RenewalDetailController extends GetxController {
   final Rx<RenewalModel?> renewal = Rx<RenewalModel?>(null);
   final RxBool isLoading = false.obs;
   final RxList<DocumentModel> documents = <DocumentModel>[].obs;
+  final RxList<int> reminderDays = <int>[].obs;
   final RxBool isUploading = false.obs;
   final RxBool isParsing = false.obs;
   bool dataChanged = false;
@@ -22,6 +23,7 @@ class RenewalDetailController extends GetxController {
     if (arg is RenewalModel) {
       renewal.value = arg;
       fetchDocuments();
+      fetchReminders();
     } else if (arg is String) {
       fetchRenewal(arg);
     }
@@ -32,6 +34,7 @@ class RenewalDetailController extends GetxController {
     try {
       renewal.value = await _provider.getById(id);
       await fetchDocuments();
+      await fetchReminders();
     } catch (e) {
       Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {
@@ -46,6 +49,42 @@ class RenewalDetailController extends GetxController {
       documents.assignAll(await _docProvider.getByRenewal(id));
     } catch (_) {
       // documents are supplementary — silent fail
+    }
+  }
+
+  Future<void> fetchReminders() async {
+    final id = renewal.value?.id;
+    if (id == null) return;
+    try {
+      final reminders = await _provider.getReminders(id);
+      final unsent = reminders
+          .where((r) => r['is_sent'] != true)
+          .map((r) => r['days_before'] as int)
+          .toList();
+
+      if (unsent.isEmpty) {
+        // Pre-existing renewal with no reminders — create defaults
+        const defaults = [7, 1];
+        await _provider.updateReminders(id, defaults);
+        reminderDays.assignAll(defaults);
+      } else {
+        reminderDays.assignAll(unsent);
+      }
+    } catch (_) {
+      // reminders are supplementary — silent fail
+    }
+  }
+
+  Future<void> updateReminders(List<int> days) async {
+    final id = renewal.value?.id;
+    if (id == null) return;
+    try {
+      await _provider.updateReminders(id, days);
+      reminderDays.assignAll(days);
+      Get.snackbar('Updated', 'Reminders updated',
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
   }
 

@@ -3,6 +3,7 @@ import '../../modules/splash/splash_screen.dart';
 import '../../modules/auth/login_screen.dart';
 import '../../modules/document/document_detail_screen.dart';
 import '../../modules/home/home_screen.dart';
+import '../../modules/notifications/notification_settings_screen.dart';
 import '../../modules/renewal/add_renewal_screen.dart';
 import '../../modules/renewal/renewal_detail_screen.dart';
 import '../../modules/renewal/edit_renewal_screen.dart';
@@ -44,6 +45,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.scanAdd,
       page: () => const ScanAddScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.notificationSettings,
+      page: () => const NotificationSettingsScreen(),
     ),
   ];
 }

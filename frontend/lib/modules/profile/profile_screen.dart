@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import '../../app/routes/app_routes.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -71,8 +72,17 @@ class ProfileScreen extends StatelessWidget {
                         .copyWith(color: RenewdColors.amber)),
               )
             : const Icon(Iconsax.arrow_right_3, color: RenewdColors.slate),
-        onTap: () {},
+        onTap: () => _onItemTap(item.label),
       );
+
+  void _onItemTap(String label) {
+    switch (label) {
+      case 'Notifications':
+        Get.toNamed(AppRoutes.notificationSettings);
+      default:
+        break;
+    }
+  }
 
   Widget _buildSignOut() => ListTile(
         leading: const Icon(Iconsax.logout, color: RenewdColors.coralRed),

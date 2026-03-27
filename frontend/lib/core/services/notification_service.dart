@@ -1,24 +1,140 @@
+import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import '../../data/providers/notification_provider.dart';
 
 class NotificationService extends GetxService {
+  final _messaging = FirebaseMessaging.instance;
+  final _localNotifications = FlutterLocalNotificationsPlugin();
+  final _provider = NotificationProvider();
+
+  static const _channel = AndroidNotificationChannel(
+    'renewd_reminders',
+    'Renewal Reminders',
+    description: 'Notifications for upcoming renewals',
+    importance: Importance.high,
+  );
+
   Future<NotificationService> init() async {
+    await _initLocalNotifications();
+    await _requestPermission();
+    await _registerToken();
+    _listenForTokenRefresh();
+    _listenForForegroundMessages();
+    _listenForMessageTaps();
     return this;
   }
 
-  Future<bool> requestPermission() async {
-    // TODO: integrate flutter_local_notifications or firebase_messaging
-    return true;
+  Future<void> _initLocalNotifications() async {
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const ios = DarwinInitializationSettings();
+    await _localNotifications.initialize(
+      const InitializationSettings(android: android, iOS: ios),
+      onDidReceiveNotificationResponse: _onNotificationTap,
+    );
+
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_channel);
   }
 
-  void onMessage(Map<String, dynamic> message) {
-    // TODO: handle incoming push notification payload
+  Future<void> _requestPermission() async {
+    await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
-  void scheduleRenewalReminder({
-    required String renewalId,
-    required String title,
-    required DateTime renewalDate,
-  }) {
-    // TODO: schedule local notification before renewalDate
+  Future<void> _registerToken() async {
+    try {
+      final token = await _messaging.getToken();
+      if (token != null) {
+        await _provider.registerFcmToken(token);
+      }
+    } catch (_) {
+      // APNS token not available (e.g. simulator) — skip silently
+    }
+  }
+
+  void _listenForTokenRefresh() {
+    _messaging.onTokenRefresh.listen((token) async {
+      await _provider.registerFcmToken(token);
+    });
+  }
+
+  void _listenForForegroundMessages() {
+    FirebaseMessaging.onMessage.listen(_showLocalNotification);
+  }
+
+  void _listenForMessageTaps() {
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageTap);
+  }
+
+  Future<void> _showLocalNotification(RemoteMessage message) async {
+    final notification = message.notification;
+    if (notification == null) return;
+
+    final hasReminder = message.data['reminder_id'] != null;
+    await _localNotifications.show(
+      notification.hashCode,
+      notification.title,
+      notification.body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channel.id,
+          _channel.name,
+          channelDescription: _channel.description,
+          importance: Importance.high,
+          priority: Priority.high,
+          actions: hasReminder
+              ? const [
+                  AndroidNotificationAction('snooze', 'Snooze',
+                      showsUserInterface: false),
+                ]
+              : null,
+        ),
+        iOS: const DarwinNotificationDetails(),
+      ),
+      payload: jsonEncode(message.data),
+    );
+  }
+
+  void _handleMessageTap(RemoteMessage message) {
+    final renewalId = message.data['renewal_id'];
+    if (renewalId != null) {
+      Get.toNamed('/renewal-detail', arguments: renewalId);
+    }
+  }
+
+  void _onNotificationTap(NotificationResponse response) {
+    if (response.payload == null) return;
+    final data = jsonDecode(response.payload!) as Map<String, dynamic>;
+
+    if (response.actionId == 'snooze') {
+      _handleSnooze(data);
+      return;
+    }
+
+    final renewalId = data['renewal_id'];
+    if (renewalId != null) {
+      Get.toNamed('/renewal-detail', arguments: renewalId);
+    }
+  }
+
+  Future<void> _handleSnooze(Map<String, dynamic> data) async {
+    final renewalId = data['renewal_id'] as String?;
+    final reminderId = data['reminder_id'] as String?;
+    if (renewalId == null || reminderId == null) return;
+    try {
+      await _provider.snoozeReminder(renewalId, reminderId);
+      Get.snackbar('Snoozed', 'Reminder snoozed until tomorrow',
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to snooze reminder',
+          snackPosition: SnackPosition.BOTTOM);
+    }
   }
 }

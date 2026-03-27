@@ -19,7 +19,7 @@
 
 ---
 
-## Sprint 2 (Week 2): Renewal CRUD ← CURRENT
+## Sprint 2 (Week 2): Renewal CRUD ✅ COMPLETED
 **Goal:** User can add, view, edit, delete renewals. Dashboard shows live data.
 
 | # | Task | F/B | Effort | Status |
@@ -39,7 +39,7 @@
 
 ---
 
-## Sprint 3 (Week 3): Document Vault
+## Sprint 3 (Week 3): Document Vault ✅ COMPLETED
 **Goal:** User can upload, scan, view, and manage documents linked to renewals
 
 | # | Task | F/B | Effort |
@@ -58,22 +58,22 @@
 
 ---
 
-## Sprint 4 (Week 4): Reminders + Notifications
+## Sprint 4 (Week 4): Reminders + Notifications ✅ COMPLETED 2026-03-27
 **Goal:** User gets push notifications before renewals expire
 
-| # | Task | F/B | Effort |
-|---|------|-----|--------|
-| 1 | FCM setup in Flutter (foreground + background handlers) | Frontend | 3hr |
-| 2 | FCM token registration API | Backend | 1hr |
-| 3 | Reminder creation: default rules (30/7/1 day) on renewal create | Backend | 2hr |
-| 4 | BullMQ cron job: check renewals, send FCM push | Backend | 4hr |
-| 5 | Notification settings screen (global defaults) | Frontend | 2hr |
-| 6 | Per-item custom reminder schedule | Both | 2hr |
-| 7 | Snooze from notification (deep link handling) | Both | 2hr |
-| 8 | Daily digest notification | Backend | 2hr |
-| 9 | Auto-cancel reminders on Mark Renewed | Backend | 1hr |
+| # | Task | F/B | Effort | Status |
+|---|------|-----|--------|--------|
+| 1 | FCM setup in Flutter (foreground + background handlers) | Frontend | 3hr | ✅ |
+| 2 | FCM token registration API | Backend | 1hr | ✅ |
+| 3 | Reminder creation: default rules (30/7/1 day) on renewal create | Backend | 2hr | ✅ |
+| 4 | BullMQ cron job: check renewals, send FCM push | Backend | 4hr | ✅ |
+| 5 | Notification settings screen (global defaults) | Frontend | 2hr | ✅ |
+| 6 | Per-item custom reminder schedule | Both | 2hr | ✅ |
+| 7 | Snooze from notification (deep link handling) | Both | 2hr | ✅ |
+| 8 | Daily digest notification | Backend | 2hr | ✅ |
+| 9 | Auto-cancel reminders on Mark Renewed | Backend | 1hr | ✅ |
 
-**Deliverable:** P0 complete. App is fully usable for basic renewal tracking.
+**Delivered:** FCM push notifications, BullMQ cron scheduler, notification settings, per-item reminders, snooze, daily digest, auto-cancel on renew
 
 ---
 
@@ -128,6 +128,7 @@
 | 8 | Dark mode testing and fixes | Frontend | 2hr |
 | 9 | App icon + splash screen branding | Frontend | 1hr |
 | 10 | Web build testing + responsive layout fixes | Frontend | 2hr |
+| 11 | Admin panel: user stats, device breakdown, notification delivery, renewal analytics | Backend + Web | 4hr |
 
 **Deliverable:** MVP complete. Ready for personal use + first demos.
 
@@ -138,9 +139,9 @@
 | Sprint | What | Outcome |
 |--------|------|---------|
 | 1 | Auth + Dashboard shell | ✅ App launches, login works |
-| 2 | Renewal CRUD | Core tracking works end-to-end |
-| 3 | Document Vault | Upload, scan, search documents |
-| 4 | Reminders | Push notifications before expiry |
+| 2 | Renewal CRUD | ✅ Core tracking works end-to-end |
+| 3 | Document Vault | ✅ Upload, scan, search documents |
+| 4 | Reminders | ✅ Push notifications before expiry |
 | 5 | OCR + AI Extraction | Scan → auto-create renewal |
 | 6 | Payments + AI Chat | Track spending, chat with Renewd |
 | 7-8 | Offers + Polish | Find better deals, launch-ready |

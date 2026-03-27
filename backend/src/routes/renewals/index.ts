@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../middleware/auth.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
+import { createDefaultReminders, deleteUnsentReminders } from "./helpers.js";
+import { registerReminderRoutes } from "./reminders.js";
 
 const auth = { preHandler: authMiddleware };
 
@@ -33,13 +35,18 @@ async function registerCreate(app: FastifyInstance) {
     );
     if (userResult.rows.length === 0) throw new AppError("User not found", 404, "NOT_FOUND");
 
+    const userId = userResult.rows[0].id;
     const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name } = body;
     const result = await app.db.query(
       `INSERT INTO renewals (user_id, name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
-      [userResult.rows[0].id, name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, group_name ?? null]
+      [userId, name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, group_name ?? null]
     );
-    return reply.status(201).send({ renewal: result.rows[0] });
+
+    const renewal = result.rows[0];
+    await createDefaultReminders(app.db, userId, renewal.id, renewal.renewal_date);
+
+    return reply.status(201).send({ renewal });
   });
 }
 
@@ -56,11 +63,17 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
       [name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, status ?? "active", group_name ?? null, id, request.user.uid]
     );
     if (result.rows.length === 0) throw new NotFoundError("Renewal");
-    return reply.send({ renewal: result.rows[0] });
+
+    const renewal = result.rows[0];
+    await deleteUnsentReminders(app.db, id);
+    await createDefaultReminders(app.db, renewal.user_id, id, renewal.renewal_date);
+
+    return reply.send({ renewal });
   });
 
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    await app.db.query("DELETE FROM reminders WHERE renewal_id = $1", [id]);
     const result = await app.db.query(
       "DELETE FROM renewals WHERE id=$1 AND user_id=(SELECT id FROM users WHERE firebase_uid=$2) RETURNING id",
       [id, request.user.uid]
@@ -82,11 +95,16 @@ async function registerMarkRenewed(app: FastifyInstance) {
 
     const r = renewal.rows[0];
     const nextDate = calculateNextDate(r.renewal_date, r.frequency, r.frequency_days);
+    const nextDateStr = nextDate.toISOString().split("T")[0];
 
     const result = await app.db.query(
       "UPDATE renewals SET renewal_date=$1, updated_at=NOW() WHERE id=$2 RETURNING *",
-      [nextDate.toISOString().split("T")[0], id]
+      [nextDateStr, id]
     );
+
+    await deleteUnsentReminders(app.db, id);
+    await createDefaultReminders(app.db, r.user_id, id, nextDateStr);
+
     return reply.send({ renewal: result.rows[0] });
   });
 }
@@ -109,4 +127,5 @@ export default async function renewalRoutes(app: FastifyInstance) {
   await registerCreate(app);
   await registerUpdateAndDelete(app);
   await registerMarkRenewed(app);
+  await registerReminderRoutes(app);
 }
