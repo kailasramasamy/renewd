@@ -32,7 +32,7 @@ async function registerUpload(app: FastifyInstance) {
     const renewalId = (data.fields.renewal_id as { value: string } | undefined)?.value ?? null;
     const docType = (data.fields.doc_type as { value: string } | undefined)?.value ?? "other";
 
-    const fileUrl = await saveFileToS3(app, buffer, data.filename, data.mimetype);
+    const fileUrl = await saveFileToS3(app, buffer, data.filename, data.mimetype, request.user.uid);
 
     const doc = await insertDocument(app, {
       userId: request.user.uid,

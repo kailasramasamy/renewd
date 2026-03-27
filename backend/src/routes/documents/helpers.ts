@@ -7,18 +7,19 @@ export function computeHash(buffer: Buffer): string {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
-export function generateS3Key(originalName: string): string {
+export function generateS3Key(userId: string, originalName: string): string {
   const ext = originalName.split(".").pop() ?? "bin";
-  return `documents/${crypto.randomUUID()}.${ext}`;
+  return `minder/${userId}/documents/${crypto.randomUUID()}.${ext}`;
 }
 
 export async function saveFileToS3(
   app: FastifyInstance,
   buffer: Buffer,
   originalName: string,
-  mimeType: string
+  mimeType: string,
+  userId: string
 ): Promise<string> {
-  const key = generateS3Key(originalName);
+  const key = generateS3Key(userId, originalName);
   return uploadToS3(app.s3, key, buffer, mimeType);
 }
 

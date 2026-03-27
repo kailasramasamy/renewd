@@ -21,6 +21,7 @@ export async function uploadToS3(
     Key: key,
     Body: body,
     ContentType: mimeType,
+    ServerSideEncryption: "AES256",
   }));
   return `s3://${BUCKET}/${key}`;
 }
