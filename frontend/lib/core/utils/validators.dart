@@ -1,5 +1,5 @@
-class MinderValidators {
-  MinderValidators._();
+class RenewdValidators {
+  RenewdValidators._();
 
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {

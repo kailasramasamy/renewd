@@ -18,22 +18,22 @@ class LoginScreen extends StatelessWidget {
     final phoneController = TextEditingController();
 
     return Scaffold(
-      backgroundColor: MinderColors.softWhite,
+      backgroundColor: RenewdColors.softWhite,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(MinderSpacing.xl),
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
           child: Form(
             key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: MinderSpacing.xxxl),
+                const SizedBox(height: RenewdSpacing.xxxl),
                 _buildHeader(),
-                const SizedBox(height: MinderSpacing.xxl),
+                const SizedBox(height: RenewdSpacing.xxl),
                 _buildPhoneField(phoneController, controller),
-                const SizedBox(height: MinderSpacing.sm),
+                const SizedBox(height: RenewdSpacing.sm),
                 _buildError(controller),
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildContinueButton(formKey, phoneController, controller),
               ],
             ),
@@ -47,17 +47,17 @@ class LoginScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Minder',
+            'Renewd',
             style: GoogleFonts.dmSans(
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: MinderColors.oceanBlue,
+              color: RenewdColors.oceanBlue,
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: MinderSpacing.sm),
+          const SizedBox(height: RenewdSpacing.sm),
           Text('Track all your renewals in one place.',
-              style: MinderTextStyles.body.copyWith(color: MinderColors.slate)),
+              style: RenewdTextStyles.body.copyWith(color: RenewdColors.slate)),
         ],
       );
 
@@ -74,14 +74,14 @@ class LoginScreen extends StatelessWidget {
           prefixIcon: Icon(Icons.phone_outlined),
         ),
         onChanged: (v) => controller.phone.value = v,
-        validator: MinderValidators.validatePhone,
+        validator: RenewdValidators.validatePhone,
       );
 
   Widget _buildError(AuthController controller) => Obx(() {
         if (controller.errorMessage.value.isEmpty) return const SizedBox.shrink();
         return Text(
           controller.errorMessage.value,
-          style: MinderTextStyles.bodySmall.copyWith(color: MinderColors.coralRed),
+          style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.coralRed),
         );
       });
 
@@ -90,7 +90,7 @@ class LoginScreen extends StatelessWidget {
     TextEditingController phoneController,
     AuthController controller,
   ) =>
-      Obx(() => MinderButton(
+      Obx(() => RenewdButton(
             label: 'Continue',
             isLoading: controller.isLoading.value,
             onPressed: () {

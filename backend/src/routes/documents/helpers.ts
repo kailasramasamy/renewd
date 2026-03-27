@@ -9,7 +9,7 @@ export function computeHash(buffer: Buffer): string {
 
 export function generateS3Key(userId: string, originalName: string): string {
   const ext = originalName.split(".").pop() ?? "bin";
-  return `minder/${userId}/documents/${crypto.randomUUID()}.${ext}`;
+  return `renewd/${userId}/documents/${crypto.randomUUID()}.${ext}`;
 }
 
 export async function saveFileToS3(

@@ -1,4 +1,4 @@
-# Minder — Feature Specification v1.0
+# Renewd — Feature Specification v1.0
 
 ## Product Summary
 

@@ -25,7 +25,7 @@ class StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: MinderTextStyles.caption.copyWith(color: color),
+        style: RenewdTextStyles.caption.copyWith(color: color),
       ),
     );
   }
@@ -33,13 +33,13 @@ class StatusBadge extends StatelessWidget {
   Color _colorForStatus(StatusType status) {
     switch (status) {
       case StatusType.safe:
-        return MinderColors.emerald;
+        return RenewdColors.emerald;
       case StatusType.warning:
-        return MinderColors.amber;
+        return RenewdColors.amber;
       case StatusType.urgent:
-        return MinderColors.tangerine;
+        return RenewdColors.tangerine;
       case StatusType.critical:
-        return MinderColors.coralRed;
+        return RenewdColors.coralRed;
     }
   }
 }

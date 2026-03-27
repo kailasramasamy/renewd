@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class MinderColors {
-  MinderColors._();
+class RenewdColors {
+  RenewdColors._();
 
   // Core
   static const deepNavy = Color(0xFF1B2838);

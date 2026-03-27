@@ -1,8 +1,8 @@
-# Minder — Design System
+# Renewd — Design System
 
 ## Brand Identity
 
-Minder is a premium consumer app. The design should feel trustworthy, calm, and effortless — like having a personal secretary who has everything under control.
+Renewd is a premium consumer app. The design should feel trustworthy, calm, and effortless — like having a personal secretary who has everything under control.
 
 **Design principles:**
 - Clean over clever
@@ -204,7 +204,7 @@ Base unit: 4px
 - **Button press:** Scale down to 0.96, 80ms
 - **Status color changes:** Animate over 300ms (smooth countdown color transitions)
 - **FAB expand:** Staggered reveal, 150ms per option
-- **Pull to refresh:** Custom animation with Minder logo
+- **Pull to refresh:** Custom animation with Renewd logo
 - **Skeleton loading:** Shimmer effect on Cloud Gray
 - **Toast/Snackbar:** Slide up from bottom, auto-dismiss 3s
 
@@ -236,7 +236,7 @@ fonts:
 ### Color Constants (Dart)
 
 ```dart
-class MinderColors {
+class RenewdColors {
   // Core
   static const deepNavy = Color(0xFF1B2838);
   static const oceanBlue = Color(0xFF2563EB);

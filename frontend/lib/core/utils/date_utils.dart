@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 
-class MinderDateUtils {
-  MinderDateUtils._();
+class RenewdDateUtils {
+  RenewdDateUtils._();
 
   static int daysRemaining(DateTime date) {
     final now = DateTime.now();
@@ -21,10 +21,10 @@ class MinderDateUtils {
   }
 
   static Color statusColorFromDays(int days) {
-    if (days < 0) return MinderColors.coralRed;
-    if (days <= 7) return MinderColors.coralRed;
-    if (days <= 30) return MinderColors.tangerine;
-    if (days <= 60) return MinderColors.amber;
-    return MinderColors.emerald;
+    if (days < 0) return RenewdColors.coralRed;
+    if (days <= 7) return RenewdColors.coralRed;
+    if (days <= 30) return RenewdColors.tangerine;
+    if (days <= 60) return RenewdColors.amber;
+    return RenewdColors.emerald;
   }
 }

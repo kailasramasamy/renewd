@@ -1,5 +1,5 @@
-class MinderSpacing {
-  MinderSpacing._();
+class RenewdSpacing {
+  RenewdSpacing._();
 
   static const double xs = 4;
   static const double sm = 8;

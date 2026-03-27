@@ -24,33 +24,33 @@ class AddRenewalScreen extends StatelessWidget {
         title: const Text('Add Renewal'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(MinderSpacing.lg),
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _NameField(c: c),
-            const SizedBox(height: MinderSpacing.xl),
+            const SizedBox(height: RenewdSpacing.xl),
             _CategorySection(c: c),
-            const SizedBox(height: MinderSpacing.xl),
+            const SizedBox(height: RenewdSpacing.xl),
             _ProviderField(c: c),
-            const SizedBox(height: MinderSpacing.xl),
+            const SizedBox(height: RenewdSpacing.xl),
             _AmountField(c: c),
-            const SizedBox(height: MinderSpacing.xl),
+            const SizedBox(height: RenewdSpacing.xl),
             _DateField(c: c),
-            const SizedBox(height: MinderSpacing.xl),
+            const SizedBox(height: RenewdSpacing.xl),
             _FrequencySection(c: c),
-            const SizedBox(height: MinderSpacing.xl),
+            const SizedBox(height: RenewdSpacing.xl),
             _AutoRenewToggle(c: c),
-            const SizedBox(height: MinderSpacing.xl),
+            const SizedBox(height: RenewdSpacing.xl),
             _NotesField(c: c),
-            const SizedBox(height: MinderSpacing.xxl),
-            Obx(() => MinderButton(
+            const SizedBox(height: RenewdSpacing.xxl),
+            Obx(() => RenewdButton(
                   label: 'Save Renewal',
                   icon: Iconsax.tick_circle,
                   isLoading: c.isLoading.value,
                   onPressed: c.save,
                 )),
-            const SizedBox(height: MinderSpacing.xl),
+            const SizedBox(height: RenewdSpacing.xl),
           ],
         ),
       ),
@@ -67,9 +67,9 @@ class _NameField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Name *', style: MinderTextStyles.bodySmall.copyWith(
-            color: MinderColors.slate)),
-        const SizedBox(height: MinderSpacing.sm),
+        Text('Name *', style: RenewdTextStyles.bodySmall.copyWith(
+            color: RenewdColors.slate)),
+        const SizedBox(height: RenewdSpacing.sm),
         TextField(
           onChanged: (v) => c.name.value = v,
           decoration: const InputDecoration(hintText: 'e.g. Netflix, LIC Policy'),
@@ -88,12 +88,12 @@ class _CategorySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Category', style: MinderTextStyles.bodySmall.copyWith(
-            color: MinderColors.slate)),
-        const SizedBox(height: MinderSpacing.sm),
+        Text('Category', style: RenewdTextStyles.bodySmall.copyWith(
+            color: RenewdColors.slate)),
+        const SizedBox(height: RenewdSpacing.sm),
         Obx(() => Wrap(
-              spacing: MinderSpacing.sm,
-              runSpacing: MinderSpacing.sm,
+              spacing: RenewdSpacing.sm,
+              runSpacing: RenewdSpacing.sm,
               children: RenewalCategory.values.map((cat) {
                 final isSelected = c.category.value == cat;
                 final color = CategoryConfig.color(cat);
@@ -102,14 +102,14 @@ class _CategorySection extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: MinderSpacing.md, vertical: MinderSpacing.sm),
+                        horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? color.withValues(alpha: 0.2)
-                          : MinderColors.darkSlate,
+                          : RenewdColors.darkSlate,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isSelected ? color : MinderColors.steel,
+                        color: isSelected ? color : RenewdColors.steel,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -118,11 +118,11 @@ class _CategorySection extends StatelessWidget {
                       children: [
                         Icon(CategoryConfig.icon(cat),
                             size: 14,
-                            color: isSelected ? color : MinderColors.slate),
-                        const SizedBox(width: MinderSpacing.xs),
+                            color: isSelected ? color : RenewdColors.slate),
+                        const SizedBox(width: RenewdSpacing.xs),
                         Text(CategoryConfig.label(cat),
-                            style: MinderTextStyles.caption.copyWith(
-                                color: isSelected ? color : MinderColors.slate)),
+                            style: RenewdTextStyles.caption.copyWith(
+                                color: isSelected ? color : RenewdColors.slate)),
                       ],
                     ),
                   ),
@@ -143,9 +143,9 @@ class _ProviderField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Provider', style: MinderTextStyles.bodySmall.copyWith(
-            color: MinderColors.slate)),
-        const SizedBox(height: MinderSpacing.sm),
+        Text('Provider', style: RenewdTextStyles.bodySmall.copyWith(
+            color: RenewdColors.slate)),
+        const SizedBox(height: RenewdSpacing.sm),
         TextField(
           onChanged: (v) => c.providerName.value = v,
           decoration: const InputDecoration(hintText: 'e.g. Netflix Inc.'),
@@ -164,9 +164,9 @@ class _AmountField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Amount', style: MinderTextStyles.bodySmall.copyWith(
-            color: MinderColors.slate)),
-        const SizedBox(height: MinderSpacing.sm),
+        Text('Amount', style: RenewdTextStyles.bodySmall.copyWith(
+            color: RenewdColors.slate)),
+        const SizedBox(height: RenewdSpacing.sm),
         TextField(
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (v) => c.amount.value = double.tryParse(v),
@@ -187,33 +187,33 @@ class _DateField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Renewal Date *', style: MinderTextStyles.bodySmall.copyWith(
-            color: MinderColors.slate)),
-        const SizedBox(height: MinderSpacing.sm),
+        Text('Renewal Date *', style: RenewdTextStyles.bodySmall.copyWith(
+            color: RenewdColors.slate)),
+        const SizedBox(height: RenewdSpacing.sm),
         Obx(() => GestureDetector(
               onTap: () => _pickDate(context),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
-                    horizontal: MinderSpacing.lg, vertical: MinderSpacing.md),
+                    horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
                 decoration: BoxDecoration(
-                  color: MinderColors.darkSlate,
+                  color: RenewdColors.darkSlate,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: MinderColors.steel),
+                  border: Border.all(color: RenewdColors.steel),
                 ),
                 child: Row(
                   children: [
                     Icon(Iconsax.calendar,
-                        size: 18, color: MinderColors.slate),
-                    const SizedBox(width: MinderSpacing.sm),
+                        size: 18, color: RenewdColors.slate),
+                    const SizedBox(width: RenewdSpacing.sm),
                     Text(
                       c.renewalDate.value != null
-                          ? MinderDateUtils.formatDate(c.renewalDate.value!)
+                          ? RenewdDateUtils.formatDate(c.renewalDate.value!)
                           : 'Select date',
-                      style: MinderTextStyles.body.copyWith(
+                      style: RenewdTextStyles.body.copyWith(
                           color: c.renewalDate.value != null
                               ? null
-                              : MinderColors.slate),
+                              : RenewdColors.slate),
                     ),
                   ],
                 ),
@@ -244,9 +244,9 @@ class _FrequencySection extends StatelessWidget {
     return Obx(() => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Frequency', style: MinderTextStyles.bodySmall.copyWith(
-                color: MinderColors.slate)),
-            const SizedBox(height: MinderSpacing.sm),
+            Text('Frequency', style: RenewdTextStyles.bodySmall.copyWith(
+                color: RenewdColors.slate)),
+            const SizedBox(height: RenewdSpacing.sm),
             DropdownButtonFormField<String>(
               value: c.frequency.value,
               decoration: const InputDecoration(),
@@ -261,7 +261,7 @@ class _FrequencySection extends StatelessWidget {
               },
             ),
             if (c.isCustomFrequency) ...[
-              const SizedBox(height: MinderSpacing.md),
+              const SizedBox(height: RenewdSpacing.md),
               TextFormField(
                 keyboardType: TextInputType.number,
                 initialValue: c.frequencyDays.value.toString(),
@@ -289,16 +289,16 @@ class _AutoRenewToggle extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Auto-renew',
-                    style: MinderTextStyles.body),
+                    style: RenewdTextStyles.body),
                 Text('Automatically tracks the next cycle',
-                    style: MinderTextStyles.caption.copyWith(
-                        color: MinderColors.slate)),
+                    style: RenewdTextStyles.caption.copyWith(
+                        color: RenewdColors.slate)),
               ],
             ),
             Switch(
               value: c.autoRenew.value,
               onChanged: (v) => c.autoRenew.value = v,
-              activeThumbColor: MinderColors.oceanBlue,
+              activeThumbColor: RenewdColors.oceanBlue,
             ),
           ],
         ));
@@ -314,9 +314,9 @@ class _NotesField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Notes', style: MinderTextStyles.bodySmall.copyWith(
-            color: MinderColors.slate)),
-        const SizedBox(height: MinderSpacing.sm),
+        Text('Notes', style: RenewdTextStyles.bodySmall.copyWith(
+            color: RenewdColors.slate)),
+        const SizedBox(height: RenewdSpacing.sm),
         TextField(
           onChanged: (v) => c.notes.value = v,
           maxLines: 3,

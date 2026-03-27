@@ -24,33 +24,33 @@ class EditRenewalScreen extends StatelessWidget {
         title: const Text('Edit Renewal'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(MinderSpacing.lg),
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
         child: Obx(() => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildLabel('Name *'),
-                const SizedBox(height: MinderSpacing.sm),
+                const SizedBox(height: RenewdSpacing.sm),
                 TextFormField(
                   initialValue: c.name.value,
                   onChanged: (v) => c.name.value = v,
                   decoration:
                       const InputDecoration(hintText: 'e.g. Netflix, LIC Policy'),
                 ),
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Category'),
-                const SizedBox(height: MinderSpacing.sm),
+                const SizedBox(height: RenewdSpacing.sm),
                 _buildCategoryChips(c),
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Provider'),
-                const SizedBox(height: MinderSpacing.sm),
+                const SizedBox(height: RenewdSpacing.sm),
                 TextFormField(
                   initialValue: c.providerName.value,
                   onChanged: (v) => c.providerName.value = v,
                   decoration: const InputDecoration(hintText: 'e.g. Netflix Inc.'),
                 ),
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Amount'),
-                const SizedBox(height: MinderSpacing.sm),
+                const SizedBox(height: RenewdSpacing.sm),
                 TextFormField(
                   initialValue: c.amount.value?.toStringAsFixed(2) ?? '',
                   keyboardType:
@@ -59,16 +59,16 @@ class EditRenewalScreen extends StatelessWidget {
                   decoration:
                       const InputDecoration(prefixText: '₹ ', hintText: '0.00'),
                 ),
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Renewal Date *'),
-                const SizedBox(height: MinderSpacing.sm),
+                const SizedBox(height: RenewdSpacing.sm),
                 _buildDateField(context, c),
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Frequency'),
-                const SizedBox(height: MinderSpacing.sm),
+                const SizedBox(height: RenewdSpacing.sm),
                 _buildFrequencyDropdown(c),
                 if (c.isCustomFrequency) ...[
-                  const SizedBox(height: MinderSpacing.md),
+                  const SizedBox(height: RenewdSpacing.md),
                   TextFormField(
                     initialValue: c.frequencyDays.value.toString(),
                     keyboardType: TextInputType.number,
@@ -78,11 +78,11 @@ class EditRenewalScreen extends StatelessWidget {
                         labelText: 'Every N days', hintText: '30'),
                   ),
                 ],
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildAutoRenewRow(c),
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Notes'),
-                const SizedBox(height: MinderSpacing.sm),
+                const SizedBox(height: RenewdSpacing.sm),
                 TextFormField(
                   initialValue: c.notes.value,
                   onChanged: (v) => c.notes.value = v,
@@ -90,14 +90,14 @@ class EditRenewalScreen extends StatelessWidget {
                   decoration: const InputDecoration(
                       hintText: 'Any additional details...'),
                 ),
-                const SizedBox(height: MinderSpacing.xxl),
-                MinderButton(
+                const SizedBox(height: RenewdSpacing.xxl),
+                RenewdButton(
                   label: 'Save Changes',
                   icon: Iconsax.tick_circle,
                   isLoading: c.isLoading.value,
                   onPressed: c.save,
                 ),
-                const SizedBox(height: MinderSpacing.xl),
+                const SizedBox(height: RenewdSpacing.xl),
               ],
             )),
       ),
@@ -106,13 +106,13 @@ class EditRenewalScreen extends StatelessWidget {
 
   Widget _buildLabel(String text) {
     return Text(text,
-        style: MinderTextStyles.bodySmall.copyWith(color: MinderColors.slate));
+        style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate));
   }
 
   Widget _buildCategoryChips(EditRenewalController c) {
     return Wrap(
-      spacing: MinderSpacing.sm,
-      runSpacing: MinderSpacing.sm,
+      spacing: RenewdSpacing.sm,
+      runSpacing: RenewdSpacing.sm,
       children: RenewalCategory.values.map((cat) {
         final isSelected = c.category.value == cat;
         final color = CategoryConfig.color(cat);
@@ -121,14 +121,14 @@ class EditRenewalScreen extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(
-                horizontal: MinderSpacing.md, vertical: MinderSpacing.sm),
+                horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
             decoration: BoxDecoration(
               color: isSelected
                   ? color.withValues(alpha: 0.2)
-                  : MinderColors.darkSlate,
+                  : RenewdColors.darkSlate,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isSelected ? color : MinderColors.steel,
+                color: isSelected ? color : RenewdColors.steel,
                 width: isSelected ? 1.5 : 1,
               ),
             ),
@@ -137,11 +137,11 @@ class EditRenewalScreen extends StatelessWidget {
               children: [
                 Icon(CategoryConfig.icon(cat),
                     size: 14,
-                    color: isSelected ? color : MinderColors.slate),
-                const SizedBox(width: MinderSpacing.xs),
+                    color: isSelected ? color : RenewdColors.slate),
+                const SizedBox(width: RenewdSpacing.xs),
                 Text(CategoryConfig.label(cat),
-                    style: MinderTextStyles.caption.copyWith(
-                        color: isSelected ? color : MinderColors.slate)),
+                    style: RenewdTextStyles.caption.copyWith(
+                        color: isSelected ? color : RenewdColors.slate)),
               ],
             ),
           ),
@@ -156,24 +156,24 @@ class EditRenewalScreen extends StatelessWidget {
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(
-            horizontal: MinderSpacing.lg, vertical: MinderSpacing.md),
+            horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
         decoration: BoxDecoration(
-          color: MinderColors.darkSlate,
+          color: RenewdColors.darkSlate,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: MinderColors.steel),
+          border: Border.all(color: RenewdColors.steel),
         ),
         child: Row(
           children: [
-            const Icon(Iconsax.calendar, size: 18, color: MinderColors.slate),
-            const SizedBox(width: MinderSpacing.sm),
+            const Icon(Iconsax.calendar, size: 18, color: RenewdColors.slate),
+            const SizedBox(width: RenewdSpacing.sm),
             Text(
               c.renewalDate.value != null
-                  ? MinderDateUtils.formatDate(c.renewalDate.value!)
+                  ? RenewdDateUtils.formatDate(c.renewalDate.value!)
                   : 'Select date',
-              style: MinderTextStyles.body.copyWith(
+              style: RenewdTextStyles.body.copyWith(
                   color: c.renewalDate.value != null
                       ? null
-                      : MinderColors.slate),
+                      : RenewdColors.slate),
             ),
           ],
         ),
@@ -201,16 +201,16 @@ class EditRenewalScreen extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Auto-renew', style: MinderTextStyles.body),
+            Text('Auto-renew', style: RenewdTextStyles.body),
             Text('Automatically tracks the next cycle',
-                style: MinderTextStyles.caption
-                    .copyWith(color: MinderColors.slate)),
+                style: RenewdTextStyles.caption
+                    .copyWith(color: RenewdColors.slate)),
           ],
         ),
         Switch(
           value: c.autoRenew.value,
           onChanged: (v) => c.autoRenew.value = v,
-          activeThumbColor: MinderColors.oceanBlue,
+          activeThumbColor: RenewdColors.oceanBlue,
         ),
       ],
     );

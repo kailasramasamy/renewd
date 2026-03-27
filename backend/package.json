@@ -1,7 +1,7 @@
 {
   "name": "minder-backend",
   "version": "1.0.0",
-  "description": "Minder API - AI-powered personal renewal tracking",
+  "description": "Renewd API - AI-powered personal renewal tracking",
   "type": "module",
   "scripts": {
     "dev": "nodemon",

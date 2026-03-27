@@ -17,32 +17,32 @@ class CategoryConfig {
   static const Map<RenewalCategory, _CategoryMeta> _configs = {
     RenewalCategory.insurance: _CategoryMeta(
       label: 'Insurance',
-      color: MinderColors.oceanBlue,
+      color: RenewdColors.oceanBlue,
       icon: Iconsax.shield_tick,
     ),
     RenewalCategory.subscription: _CategoryMeta(
       label: 'Subscription',
-      color: MinderColors.lavender,
+      color: RenewdColors.lavender,
       icon: Iconsax.refresh_circle,
     ),
     RenewalCategory.government: _CategoryMeta(
       label: 'Government',
-      color: MinderColors.teal,
+      color: RenewdColors.teal,
       icon: Iconsax.building,
     ),
     RenewalCategory.utility: _CategoryMeta(
       label: 'Utility',
-      color: MinderColors.amber,
+      color: RenewdColors.amber,
       icon: Iconsax.flash,
     ),
     RenewalCategory.membership: _CategoryMeta(
       label: 'Membership',
-      color: MinderColors.rose,
+      color: RenewdColors.rose,
       icon: Iconsax.crown,
     ),
     RenewalCategory.other: _CategoryMeta(
       label: 'Other',
-      color: MinderColors.slate,
+      color: RenewdColors.slate,
       icon: Iconsax.category,
     ),
   };

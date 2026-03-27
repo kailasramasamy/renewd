@@ -35,14 +35,14 @@ class DocumentDetailScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, DocumentDetailController c) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(MinderSpacing.lg),
+      padding: const EdgeInsets.all(RenewdSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _DocumentPreview(c: c),
-          const SizedBox(height: MinderSpacing.lg),
+          const SizedBox(height: RenewdSpacing.lg),
           _AiSummarySection(c: c),
-          const SizedBox(height: MinderSpacing.xl),
+          const SizedBox(height: RenewdSpacing.xl),
         ],
       ),
     );
@@ -78,21 +78,21 @@ class _PdfPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MinderCard(
+    return RenewdCard(
       child: Row(
         children: [
-          const Icon(Iconsax.document_text, size: 48, color: MinderColors.coralRed),
-          const SizedBox(width: MinderSpacing.lg),
+          const Icon(Iconsax.document_text, size: 48, color: RenewdColors.coralRed),
+          const SizedBox(width: RenewdSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(doc.fileName, style: MinderTextStyles.body,
+                Text(doc.fileName, style: RenewdTextStyles.body,
                     overflow: TextOverflow.ellipsis),
                 if (doc.fileSizeLabel.isNotEmpty)
                   Text(doc.fileSizeLabel,
-                      style: MinderTextStyles.caption
-                          .copyWith(color: MinderColors.slate)),
+                      style: RenewdTextStyles.caption
+                          .copyWith(color: RenewdColors.slate)),
               ],
             ),
           ),
@@ -112,21 +112,21 @@ class _AiSummarySection extends StatelessWidget {
     if (!doc.hasAiSummary) return _AnalyzeButton(c: c);
 
     final parsed = c.parsedOcr();
-    return MinderCard(
+    return RenewdCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Iconsax.magic_star, size: 16, color: MinderColors.lavender),
-              const SizedBox(width: MinderSpacing.sm),
+              const Icon(Iconsax.magic_star, size: 16, color: RenewdColors.lavender),
+              const SizedBox(width: RenewdSpacing.sm),
               Text('AI Analysis',
-                  style: MinderTextStyles.bodySmall.copyWith(
-                      color: MinderColors.lavender,
+                  style: RenewdTextStyles.bodySmall.copyWith(
+                      color: RenewdColors.lavender,
                       fontWeight: FontWeight.w600)),
             ],
           ),
-          const SizedBox(height: MinderSpacing.md),
+          const SizedBox(height: RenewdSpacing.md),
           if (parsed != null) ...[
             _AiRow('Summary', parsed['summary'] as String?),
             _AiRow('Provider', parsed['provider'] as String?),
@@ -136,8 +136,8 @@ class _AiSummarySection extends StatelessWidget {
             _AiRow('Amount', parsed['amount'] as String?),
             _KeyDetails(details: parsed['key_details']),
           ] else
-            Text(doc.ocrText!, style: MinderTextStyles.bodySmall),
-          const SizedBox(height: MinderSpacing.md),
+            Text(doc.ocrText!, style: RenewdTextStyles.bodySmall),
+          const SizedBox(height: RenewdSpacing.md),
           _ReAnalyzeButton(c: c),
         ],
       ),
@@ -154,17 +154,17 @@ class _AiRow extends StatelessWidget {
   Widget build(BuildContext context) {
     if (value == null || value!.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(bottom: MinderSpacing.sm),
+      padding: const EdgeInsets.only(bottom: RenewdSpacing.sm),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 90,
             child: Text(label,
-                style: MinderTextStyles.caption
-                    .copyWith(color: MinderColors.slate)),
+                style: RenewdTextStyles.caption
+                    .copyWith(color: RenewdColors.slate)),
           ),
-          Expanded(child: Text(value!, style: MinderTextStyles.bodySmall)),
+          Expanded(child: Text(value!, style: RenewdTextStyles.bodySmall)),
         ],
       ),
     );
@@ -184,18 +184,18 @@ class _KeyDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Key Details',
-            style: MinderTextStyles.caption.copyWith(color: MinderColors.slate)),
-        const SizedBox(height: MinderSpacing.xs),
+            style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),
+        const SizedBox(height: RenewdSpacing.xs),
         ...list.map((d) => Padding(
-              padding: const EdgeInsets.only(bottom: MinderSpacing.xs),
+              padding: const EdgeInsets.only(bottom: RenewdSpacing.xs),
               child: Row(
                 children: [
                   const Icon(Iconsax.arrow_right_3, size: 12,
-                      color: MinderColors.lavender),
-                  const SizedBox(width: MinderSpacing.xs),
+                      color: RenewdColors.lavender),
+                  const SizedBox(width: RenewdSpacing.xs),
                   Expanded(
                       child: Text(d.toString(),
-                          style: MinderTextStyles.bodySmall)),
+                          style: RenewdTextStyles.bodySmall)),
                 ],
               ),
             )),
@@ -216,7 +216,7 @@ class _AnalyzeButton extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: c.isParsing.value ? null : c.triggerParse,
             style: ElevatedButton.styleFrom(
-              backgroundColor: MinderColors.lavender,
+              backgroundColor: RenewdColors.lavender,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -229,7 +229,7 @@ class _AnalyzeButton extends StatelessWidget {
                         color: Colors.white))
                 : const Icon(Iconsax.magic_star, size: 18),
             label: Text(c.isParsing.value ? 'Analyzing...' : 'Analyze with AI',
-                style: MinderTextStyles.body
+                style: RenewdTextStyles.body
                     .copyWith(fontWeight: FontWeight.w600, color: Colors.white)),
           ),
         ));
@@ -248,12 +248,12 @@ class _ReAnalyzeButton extends StatelessWidget {
               ? const SizedBox(
                   width: 14, height: 14,
                   child: CircularProgressIndicator(strokeWidth: 2,
-                      color: MinderColors.lavender))
+                      color: RenewdColors.lavender))
               : const Icon(Iconsax.refresh, size: 14,
-                  color: MinderColors.lavender),
+                  color: RenewdColors.lavender),
           label: Text(c.isParsing.value ? 'Re-analyzing...' : 'Re-analyze',
-              style: MinderTextStyles.caption
-                  .copyWith(color: MinderColors.lavender)),
+              style: RenewdTextStyles.caption
+                  .copyWith(color: RenewdColors.lavender)),
         ));
   }
 }
@@ -266,11 +266,11 @@ class _DeleteBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          MinderSpacing.lg, MinderSpacing.sm, MinderSpacing.lg, MinderSpacing.xl),
-      child: Obx(() => MinderButton(
+          RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, RenewdSpacing.xl),
+      child: Obx(() => RenewdButton(
             label: 'Delete Document',
             icon: Iconsax.trash,
-            variant: MinderButtonVariant.danger,
+            variant: RenewdButtonVariant.danger,
             isLoading: c.isDeleting.value,
             onPressed: () => _confirmDelete(context, c),
           )),
@@ -293,7 +293,7 @@ class _DeleteBar extends StatelessWidget {
               c.deleteDocument();
             },
             child: const Text('Delete',
-                style: TextStyle(color: MinderColors.coralRed)),
+                style: TextStyle(color: RenewdColors.coralRed)),
           ),
         ],
       ),

@@ -40,16 +40,16 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MinderColors.deepNavy,
+      backgroundColor: RenewdColors.deepNavy,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnim,
           child: Text(
-            'Minder',
+            'Renewd',
             style: GoogleFonts.dmSans(
               fontSize: 32,
               fontWeight: FontWeight.w700,
-              color: MinderColors.oceanBlue,
+              color: RenewdColors.oceanBlue,
               letterSpacing: -0.5,
             ),
           ),

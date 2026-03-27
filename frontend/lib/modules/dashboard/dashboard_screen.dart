@@ -20,7 +20,7 @@ class DashboardScreen extends StatelessWidget {
     final c = Get.put(DashboardController());
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Minder'),
+        title: const Text('Renewd'),
         actions: [
           IconButton(
             icon: const Icon(Iconsax.notification),
@@ -38,12 +38,12 @@ class DashboardScreen extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: c.fetchRenewals,
           child: ListView(
-            padding: const EdgeInsets.all(MinderSpacing.lg),
+            padding: const EdgeInsets.all(RenewdSpacing.lg),
             children: [
               if (c.hasAlerts) _buildUrgencyBanner(c),
-              if (c.hasAlerts) const SizedBox(height: MinderSpacing.md),
+              if (c.hasAlerts) const SizedBox(height: RenewdSpacing.md),
               _buildSummaryRow(c),
-              const SizedBox(height: MinderSpacing.xl),
+              const SizedBox(height: RenewdSpacing.xl),
               if (c.renewals.isEmpty)
                 _buildEmptyState()
               else
@@ -58,7 +58,7 @@ class DashboardScreen extends StatelessWidget {
           final result = await Get.toNamed(AppRoutes.addRenewal);
           if (result == true) c.fetchRenewals();
         },
-        backgroundColor: MinderColors.oceanBlue,
+        backgroundColor: RenewdColors.oceanBlue,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
@@ -70,11 +70,11 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Iconsax.warning_2, size: 48, color: MinderColors.coralRed),
-          const SizedBox(height: MinderSpacing.md),
+          const Icon(Iconsax.warning_2, size: 48, color: RenewdColors.coralRed),
+          const SizedBox(height: RenewdSpacing.md),
           Text('Failed to load renewals',
-              style: MinderTextStyles.body),
-          const SizedBox(height: MinderSpacing.sm),
+              style: RenewdTextStyles.body),
+          const SizedBox(height: RenewdSpacing.sm),
           TextButton(
             onPressed: c.fetchRenewals,
             child: const Text('Retry'),
@@ -93,25 +93,25 @@ class DashboardScreen extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: MinderSpacing.lg,
-        vertical: MinderSpacing.md,
+        horizontal: RenewdSpacing.lg,
+        vertical: RenewdSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: MinderColors.coralRed.withValues(alpha: 0.1),
+        color: RenewdColors.coralRed.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: MinderColors.coralRed.withValues(alpha: 0.3),
+          color: RenewdColors.coralRed.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
         children: [
           const Icon(Iconsax.warning_2,
-              color: MinderColors.coralRed, size: 20),
-          const SizedBox(width: MinderSpacing.sm),
+              color: RenewdColors.coralRed, size: 20),
+          const SizedBox(width: RenewdSpacing.sm),
           Text(
             parts.join(' · '),
-            style: MinderTextStyles.bodySmall
-                .copyWith(color: MinderColors.coralRed),
+            style: RenewdTextStyles.bodySmall
+                .copyWith(color: RenewdColors.coralRed),
           ),
         ],
       ),
@@ -126,19 +126,19 @@ class DashboardScreen extends StatelessWidget {
             label: 'Due This Month',
             value: '${c.dueThisMonth}',
             icon: Iconsax.calendar,
-            color: MinderColors.tangerine,
+            color: RenewdColors.tangerine,
           ),
         ),
-        const SizedBox(width: MinderSpacing.md),
+        const SizedBox(width: RenewdSpacing.md),
         Expanded(
           child: _SummaryCard(
             label: 'Active',
             value: '${c.totalActive}',
             icon: Iconsax.refresh_circle,
-            color: MinderColors.oceanBlue,
+            color: RenewdColors.oceanBlue,
           ),
         ),
-        const SizedBox(width: MinderSpacing.md),
+        const SizedBox(width: RenewdSpacing.md),
         Expanded(
           child: _SummaryCard(
             label: 'Monthly',
@@ -146,7 +146,7 @@ class DashboardScreen extends StatelessWidget {
                 ? '₹${c.monthlySpend.toStringAsFixed(0)}'
                 : '₹0',
             icon: Iconsax.wallet_3,
-            color: MinderColors.emerald,
+            color: RenewdColors.emerald,
           ),
         ),
       ],
@@ -158,10 +158,10 @@ class DashboardScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Renewals',
-            style: MinderTextStyles.h3),
-        const SizedBox(height: MinderSpacing.md),
+            style: RenewdTextStyles.h3),
+        const SizedBox(height: RenewdSpacing.md),
         ...c.renewals.map((r) => Padding(
-              padding: const EdgeInsets.only(bottom: MinderSpacing.md),
+              padding: const EdgeInsets.only(bottom: RenewdSpacing.md),
               child: _RenewalListItem(
                 renewal: r,
                 onTap: () async {
@@ -180,19 +180,19 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildEmptyState() {
     return Column(
       children: [
-        const SizedBox(height: MinderSpacing.xxxl),
+        const SizedBox(height: RenewdSpacing.xxxl),
         const Icon(Iconsax.document_text,
-            size: 64, color: MinderColors.mist),
-        const SizedBox(height: MinderSpacing.lg),
+            size: 64, color: RenewdColors.mist),
+        const SizedBox(height: RenewdSpacing.lg),
         Text(
           'No renewals yet',
-          style: MinderTextStyles.h3.copyWith(color: MinderColors.slate),
+          style: RenewdTextStyles.h3.copyWith(color: RenewdColors.slate),
         ),
-        const SizedBox(height: MinderSpacing.sm),
+        const SizedBox(height: RenewdSpacing.sm),
         Text(
           'Tap + to add your first renewal\nor scan a document to get started',
-          style: MinderTextStyles.bodySmall
-              .copyWith(color: MinderColors.slate),
+          style: RenewdTextStyles.bodySmall
+              .copyWith(color: RenewdColors.slate),
           textAlign: TextAlign.center,
         ),
       ],
@@ -209,14 +209,14 @@ class _RenewalListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final days = renewal.daysRemaining;
-    final statusColor = MinderDateUtils.statusColorFromDays(days);
+    final statusColor = RenewdDateUtils.statusColorFromDays(days);
     final statusType = _statusTypeFromDays(days);
     final catColor = CategoryConfig.color(renewal.category);
     final catIcon = CategoryConfig.icon(renewal.category);
 
-    return MinderCard(
+    return RenewdCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(MinderSpacing.md),
+      padding: const EdgeInsets.all(RenewdSpacing.md),
       child: Row(
         children: [
           Container(
@@ -228,38 +228,38 @@ class _RenewalListItem extends StatelessWidget {
             ),
             child: Icon(catIcon, size: 18, color: catColor),
           ),
-          const SizedBox(width: MinderSpacing.md),
+          const SizedBox(width: RenewdSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(renewal.name, style: MinderTextStyles.h3.copyWith(
+                Text(renewal.name, style: RenewdTextStyles.h3.copyWith(
                     fontSize: 15)),
                 if (renewal.provider != null) ...[
-                  const SizedBox(height: MinderSpacing.xs),
+                  const SizedBox(height: RenewdSpacing.xs),
                   Text(renewal.provider!,
-                      style: MinderTextStyles.bodySmall.copyWith(
-                          color: MinderColors.slate)),
+                      style: RenewdTextStyles.bodySmall.copyWith(
+                          color: RenewdColors.slate)),
                 ],
-                const SizedBox(height: MinderSpacing.xs),
+                const SizedBox(height: RenewdSpacing.xs),
                 Text(
-                  MinderDateUtils.formatDate(renewal.renewalDate),
-                  style: MinderTextStyles.caption
-                      .copyWith(color: MinderColors.slate),
+                  RenewdDateUtils.formatDate(renewal.renewalDate),
+                  style: RenewdTextStyles.caption
+                      .copyWith(color: RenewdColors.slate),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: MinderSpacing.sm),
+          const SizedBox(width: RenewdSpacing.sm),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 days < 0 ? '${days.abs()}d late' : '${days}d',
-                style: MinderTextStyles.caption.copyWith(
+                style: RenewdTextStyles.caption.copyWith(
                     color: statusColor, fontWeight: FontWeight.w600),
               ),
-              const SizedBox(height: MinderSpacing.xs),
+              const SizedBox(height: RenewdSpacing.xs),
               StatusBadge(
                 label: _statusLabel(days),
                 status: statusType,
@@ -276,7 +276,7 @@ class _RenewalListItem extends StatelessWidget {
     if (days == 0) return 'Today';
     if (days <= 7) return '$days days';
     if (days <= 30) return '$days days';
-    return MinderDateUtils.formatShort(renewal.renewalDate);
+    return RenewdDateUtils.formatShort(renewal.renewalDate);
   }
 
   StatusType _statusTypeFromDays(int days) {
@@ -303,22 +303,22 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MinderCard(
-      padding: const EdgeInsets.all(MinderSpacing.md),
+    return RenewdCard(
+      padding: const EdgeInsets.all(RenewdSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 20, color: color),
-          const SizedBox(height: MinderSpacing.sm),
+          const SizedBox(height: RenewdSpacing.sm),
           Text(
             value,
-            style: MinderTextStyles.h2,
+            style: RenewdTextStyles.h2,
           ),
-          const SizedBox(height: MinderSpacing.xs),
+          const SizedBox(height: RenewdSpacing.xs),
           Text(
             label,
-            style: MinderTextStyles.caption
-                .copyWith(color: MinderColors.slate),
+            style: RenewdTextStyles.caption
+                .copyWith(color: RenewdColors.slate),
           ),
         ],
       ),

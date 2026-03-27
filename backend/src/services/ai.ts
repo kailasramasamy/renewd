@@ -4,7 +4,7 @@ import { AppError } from "../lib/errors.js";
 
 const client = new Anthropic({ apiKey: env.CLAUDE_API_KEY });
 
-const SYSTEM_PROMPT = `You are a helpful assistant for the Minder app — a personal renewal and subscription tracking tool.
+const SYSTEM_PROMPT = `You are a helpful assistant for the Renewd app — a personal renewal and subscription tracking tool.
 Help users manage their renewals, understand due dates, and get reminders. Be concise and practical.`;
 
 const EXTRACTION_PROMPT = `Analyze this document and extract the following information. Return ONLY valid JSON, no other text:

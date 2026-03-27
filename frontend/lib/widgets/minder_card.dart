@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 
-class MinderCard extends StatelessWidget {
+class RenewdCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
 
-  const MinderCard({
+  const RenewdCard({
     super.key,
     required this.child,
     this.padding,
@@ -17,8 +17,8 @@ class MinderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? MinderColors.darkSlate : Colors.white;
-    final shadowColor = isDark ? Colors.transparent : MinderColors.mist;
+    final bgColor = isDark ? RenewdColors.darkSlate : Colors.white;
+    final shadowColor = isDark ? Colors.transparent : RenewdColors.mist;
 
     return Material(
       color: bgColor,
@@ -30,7 +30,7 @@ class MinderCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: isDark
-                ? Border.all(color: MinderColors.steel, width: 1)
+                ? Border.all(color: RenewdColors.steel, width: 1)
                 : null,
             boxShadow: [
               BoxShadow(
@@ -40,7 +40,7 @@ class MinderCard extends StatelessWidget {
               ),
             ],
           ),
-          padding: padding ?? const EdgeInsets.all(MinderSpacing.lg),
+          padding: padding ?? const EdgeInsets.all(RenewdSpacing.lg),
           child: child,
         ),
       ),

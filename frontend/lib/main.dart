@@ -9,18 +9,18 @@ import 'core/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => StorageService().init());
-  runApp(const MinderApp());
+  runApp(const RenewdApp());
 }
 
-class MinderApp extends StatelessWidget {
-  const MinderApp({super.key});
+class RenewdApp extends StatelessWidget {
+  const RenewdApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Minder',
-      theme: MinderTheme.light,
-      darkTheme: MinderTheme.dark,
+      title: 'Renewd',
+      theme: RenewdTheme.light,
+      darkTheme: RenewdTheme.dark,
       themeMode: ThemeMode.dark,
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,

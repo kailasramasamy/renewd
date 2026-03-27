@@ -39,7 +39,7 @@ class RenewalDetailScreen extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Iconsax.trash,
-                    color: MinderColors.coralRed),
+                    color: RenewdColors.coralRed),
                 onPressed: () => _confirmDelete(context, c),
               ),
             ],
@@ -57,22 +57,22 @@ class RenewalDetailScreen extends StatelessWidget {
   Widget _buildBody(BuildContext context, RenewalDetailController c,
       RenewalModel renewal) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(MinderSpacing.lg),
+      padding: const EdgeInsets.all(RenewdSpacing.lg),
       child: Column(
         children: [
           _CountdownRing(renewal: renewal),
-          const SizedBox(height: MinderSpacing.xl),
+          const SizedBox(height: RenewdSpacing.xl),
           _InfoSection(renewal: renewal),
-          const SizedBox(height: MinderSpacing.xl),
+          const SizedBox(height: RenewdSpacing.xl),
           _DocumentsSection(c: c),
-          const SizedBox(height: MinderSpacing.xl),
-          Obx(() => MinderButton(
+          const SizedBox(height: RenewdSpacing.xl),
+          Obx(() => RenewdButton(
                 label: 'Mark Renewed',
                 icon: Iconsax.tick_circle,
                 isLoading: c.isLoading.value,
                 onPressed: c.markRenewed,
               )),
-          const SizedBox(height: MinderSpacing.xl),
+          const SizedBox(height: RenewdSpacing.xl),
         ],
       ),
     );
@@ -96,7 +96,7 @@ class RenewalDetailScreen extends StatelessWidget {
               c.deleteRenewal();
             },
             child: const Text('Delete',
-                style: TextStyle(color: MinderColors.coralRed)),
+                style: TextStyle(color: RenewdColors.coralRed)),
           ),
         ],
       ),
@@ -111,7 +111,7 @@ class _CountdownRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final days = renewal.daysRemaining;
-    final statusColor = MinderDateUtils.statusColorFromDays(days);
+    final statusColor = RenewdDateUtils.statusColorFromDays(days);
     final progress = days <= 0 ? 1.0 : (days / 365.0).clamp(0.0, 1.0);
     return Column(
       children: [
@@ -124,7 +124,7 @@ class _CountdownRing extends StatelessWidget {
               CircularProgressIndicator(
                 value: 1 - progress,
                 strokeWidth: 8,
-                backgroundColor: MinderColors.steel,
+                backgroundColor: RenewdColors.steel,
                 valueColor: AlwaysStoppedAnimation<Color>(statusColor),
               ),
               Center(
@@ -133,13 +133,13 @@ class _CountdownRing extends StatelessWidget {
                   children: [
                     Text(
                       days < 0 ? '${days.abs()}' : '$days',
-                      style: MinderTextStyles.numberMedium
+                      style: RenewdTextStyles.numberMedium
                           .copyWith(color: statusColor),
                     ),
                     Text(
                       days < 0 ? 'overdue' : 'days',
-                      style: MinderTextStyles.caption
-                          .copyWith(color: MinderColors.slate),
+                      style: RenewdTextStyles.caption
+                          .copyWith(color: RenewdColors.slate),
                     ),
                   ],
                 ),
@@ -147,10 +147,10 @@ class _CountdownRing extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: MinderSpacing.sm),
+        const SizedBox(height: RenewdSpacing.sm),
         Text(
           days < 0 ? 'days overdue' : 'days remaining',
-          style: MinderTextStyles.bodySmall.copyWith(color: MinderColors.slate),
+          style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate),
         ),
       ],
     );
@@ -167,7 +167,7 @@ class _InfoSection extends StatelessWidget {
     final statusType = _statusTypeFromDays(days);
     return Column(
       children: [
-        MinderCard(
+        RenewdCard(
           child: Column(
             children: [
               if (renewal.provider != null) ...[
@@ -192,7 +192,7 @@ class _InfoSection extends StatelessWidget {
               _InfoRow(
                   icon: Iconsax.calendar,
                   label: 'Next Renewal',
-                  value: MinderDateUtils.formatDate(renewal.renewalDate)),
+                  value: RenewdDateUtils.formatDate(renewal.renewalDate)),
               _Divider(),
               _InfoRow(
                   icon: Iconsax.autobrightness,
@@ -202,11 +202,11 @@ class _InfoSection extends StatelessWidget {
               Row(
                 children: [
                   Icon(CategoryConfig.icon(renewal.category),
-                      size: 16, color: MinderColors.slate),
-                  const SizedBox(width: MinderSpacing.sm),
+                      size: 16, color: RenewdColors.slate),
+                  const SizedBox(width: RenewdSpacing.sm),
                   Text('Category',
-                      style: MinderTextStyles.bodySmall
-                          .copyWith(color: MinderColors.slate)),
+                      style: RenewdTextStyles.bodySmall
+                          .copyWith(color: RenewdColors.slate)),
                   const Spacer(),
                   StatusBadge(
                     label: CategoryConfig.label(renewal.category),
@@ -253,13 +253,13 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: MinderColors.slate),
-        const SizedBox(width: MinderSpacing.sm),
+        Icon(icon, size: 16, color: RenewdColors.slate),
+        const SizedBox(width: RenewdSpacing.sm),
         Text(label,
-            style: MinderTextStyles.bodySmall
-                .copyWith(color: MinderColors.slate)),
+            style: RenewdTextStyles.bodySmall
+                .copyWith(color: RenewdColors.slate)),
         const Spacer(),
-        Text(value, style: MinderTextStyles.bodySmall),
+        Text(value, style: RenewdTextStyles.bodySmall),
       ],
     );
   }
@@ -269,8 +269,8 @@ class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: MinderSpacing.sm),
-      child: Divider(color: MinderColors.steel, height: 1),
+      padding: EdgeInsets.symmetric(vertical: RenewdSpacing.sm),
+      child: Divider(color: RenewdColors.steel, height: 1),
     );
   }
 }
@@ -286,16 +286,16 @@ class _DocumentsSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('Documents', style: MinderTextStyles.h3),
+            Text('Documents', style: RenewdTextStyles.h3),
             const Spacer(),
             Obx(() => c.isUploading.value
                 ? const SizedBox(
                     width: 18, height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2,
-                        color: MinderColors.oceanBlue))
+                        color: RenewdColors.oceanBlue))
                 : IconButton(
                     icon: const Icon(Iconsax.document_upload,
-                        color: MinderColors.oceanBlue),
+                        color: RenewdColors.oceanBlue),
                     onPressed: () => _pickAndUpload(c),
                     tooltip: 'Upload document',
                   )),
@@ -303,17 +303,17 @@ class _DocumentsSection extends StatelessWidget {
         ),
         Obx(() => c.isParsing.value
             ? Padding(
-                padding: const EdgeInsets.only(bottom: MinderSpacing.sm),
+                padding: const EdgeInsets.only(bottom: RenewdSpacing.sm),
                 child: Row(
                   children: [
                     const SizedBox(
                         width: 14, height: 14,
                         child: CircularProgressIndicator(strokeWidth: 2,
-                            color: MinderColors.lavender)),
-                    const SizedBox(width: MinderSpacing.sm),
+                            color: RenewdColors.lavender)),
+                    const SizedBox(width: RenewdSpacing.sm),
                     Text('Analyzing with AI...',
-                        style: MinderTextStyles.caption
-                            .copyWith(color: MinderColors.lavender)),
+                        style: RenewdTextStyles.caption
+                            .copyWith(color: RenewdColors.lavender)),
                   ],
                 ),
               )
@@ -322,15 +322,15 @@ class _DocumentsSection extends StatelessWidget {
           final docs = c.documents;
           if (docs.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: MinderSpacing.md),
+              padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.md),
               child: Text('No documents attached',
-                  style: MinderTextStyles.bodySmall
-                      .copyWith(color: MinderColors.slate)),
+                  style: RenewdTextStyles.bodySmall
+                      .copyWith(color: RenewdColors.slate)),
             );
           }
           return Column(
             children: docs.map((doc) => Padding(
-                  padding: const EdgeInsets.only(bottom: MinderSpacing.md),
+                  padding: const EdgeInsets.only(bottom: RenewdSpacing.md),
                   child: DocumentCard(doc: doc),
                 )).toList(),
           );

@@ -36,7 +36,7 @@ class VaultScreen extends StatelessWidget {
       floatingActionButton: Obx(() => FloatingActionButton(
             heroTag: 'vault_fab',
             onPressed: c.isUploading.value ? null : () => _pickAndUpload(c),
-            backgroundColor: MinderColors.oceanBlue,
+            backgroundColor: RenewdColors.oceanBlue,
             foregroundColor: Colors.white,
             child: c.isUploading.value
                 ? const SizedBox(
@@ -64,7 +64,7 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          MinderSpacing.lg, MinderSpacing.md, MinderSpacing.lg, 0),
+          RenewdSpacing.lg, RenewdSpacing.md, RenewdSpacing.lg, 0),
       child: TextField(
         onChanged: (v) => c.searchQuery.value = v,
         decoration: InputDecoration(
@@ -72,10 +72,10 @@ class _SearchBar extends StatelessWidget {
           prefixIcon: const Icon(Iconsax.search_normal, size: 18),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: MinderColors.steel),
+            borderSide: const BorderSide(color: RenewdColors.steel),
           ),
           contentPadding: const EdgeInsets.symmetric(
-              horizontal: MinderSpacing.md, vertical: MinderSpacing.sm),
+              horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
         ),
       ),
     );
@@ -90,19 +90,19 @@ class _TabRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() => Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: MinderSpacing.lg, vertical: MinderSpacing.md),
+              horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
           child: Row(
             children: VaultTab.values.map((tab) {
               final active = c.activeTab.value == tab;
               return Padding(
-                padding: const EdgeInsets.only(right: MinderSpacing.sm),
+                padding: const EdgeInsets.only(right: RenewdSpacing.sm),
                 child: FilterChip(
                   label: Text(_tabLabel(tab)),
                   selected: active,
                   onSelected: (_) => c.activeTab.value = tab,
-                  selectedColor: MinderColors.oceanBlue,
-                  labelStyle: MinderTextStyles.caption.copyWith(
-                    color: active ? Colors.white : MinderColors.slate,
+                  selectedColor: RenewdColors.oceanBlue,
+                  labelStyle: RenewdTextStyles.caption.copyWith(
+                    color: active ? Colors.white : RenewdColors.slate,
                     fontWeight: active ? FontWeight.w600 : FontWeight.w400,
                   ),
                   showCheckmark: false,
@@ -151,22 +151,22 @@ class _GroupedList extends StatelessWidget {
     final grouped = c.groupedByRenewal;
     if (grouped.isEmpty) return _Empty();
     return ListView(
-      padding: const EdgeInsets.all(MinderSpacing.lg),
+      padding: const EdgeInsets.all(RenewdSpacing.lg),
       children: grouped.entries.map((entry) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: MinderSpacing.sm),
+              padding: const EdgeInsets.only(bottom: RenewdSpacing.sm),
               child: Text('Renewal: ${entry.key.substring(0, 8)}...',
-                  style: MinderTextStyles.caption
-                      .copyWith(color: MinderColors.slate)),
+                  style: RenewdTextStyles.caption
+                      .copyWith(color: RenewdColors.slate)),
             ),
             ...entry.value.map((doc) => Padding(
-                  padding: const EdgeInsets.only(bottom: MinderSpacing.md),
+                  padding: const EdgeInsets.only(bottom: RenewdSpacing.md),
                   child: DocumentCard(doc: doc),
                 )),
-            const SizedBox(height: MinderSpacing.md),
+            const SizedBox(height: RenewdSpacing.md),
           ],
         );
       }).toList(),
@@ -181,9 +181,9 @@ class _DocumentList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.all(MinderSpacing.lg),
+      padding: const EdgeInsets.all(RenewdSpacing.lg),
       itemCount: docs.length,
-      separatorBuilder: (context2, index) => const SizedBox(height: MinderSpacing.md),
+      separatorBuilder: (context2, index) => const SizedBox(height: RenewdSpacing.md),
       itemBuilder: (context2, i) => DocumentCard(doc: docs[i]),
     );
   }
@@ -196,10 +196,10 @@ class _Empty extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Iconsax.document, size: 48, color: MinderColors.steel),
-          const SizedBox(height: MinderSpacing.md),
+          Icon(Iconsax.document, size: 48, color: RenewdColors.steel),
+          const SizedBox(height: RenewdSpacing.md),
           Text('No documents yet',
-              style: MinderTextStyles.body.copyWith(color: MinderColors.slate)),
+              style: RenewdTextStyles.body.copyWith(color: RenewdColors.slate)),
         ],
       ),
     );
@@ -212,43 +212,43 @@ class DocumentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MinderCard(
+    return RenewdCard(
       onTap: () => Get.toNamed(AppRoutes.documentDetail, arguments: doc),
-      padding: const EdgeInsets.all(MinderSpacing.md),
+      padding: const EdgeInsets.all(RenewdSpacing.md),
       child: Row(
         children: [
           _Thumbnail(doc: doc),
-          const SizedBox(width: MinderSpacing.md),
+          const SizedBox(width: RenewdSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(doc.fileName,
-                    style: MinderTextStyles.bodySmall
+                    style: RenewdTextStyles.bodySmall
                         .copyWith(fontWeight: FontWeight.w600),
                     overflow: TextOverflow.ellipsis),
-                const SizedBox(height: MinderSpacing.xs),
+                const SizedBox(height: RenewdSpacing.xs),
                 Row(
                   children: [
                     if (doc.docType != null) _DocTypeBadge(type: doc.docType!),
                     if (doc.docType != null && doc.fileSizeLabel.isNotEmpty)
-                      const SizedBox(width: MinderSpacing.sm),
+                      const SizedBox(width: RenewdSpacing.sm),
                     if (doc.fileSizeLabel.isNotEmpty)
                       Text(doc.fileSizeLabel,
-                          style: MinderTextStyles.caption
-                              .copyWith(color: MinderColors.slate)),
+                          style: RenewdTextStyles.caption
+                              .copyWith(color: RenewdColors.slate)),
                   ],
                 ),
                 if (doc.hasAiSummary) ...[
-                  const SizedBox(height: MinderSpacing.xs),
+                  const SizedBox(height: RenewdSpacing.xs),
                   Row(
                     children: [
                       const Icon(Iconsax.magic_star, size: 10,
-                          color: MinderColors.lavender),
-                      const SizedBox(width: MinderSpacing.xs),
+                          color: RenewdColors.lavender),
+                      const SizedBox(width: RenewdSpacing.xs),
                       Text('AI analyzed',
-                          style: MinderTextStyles.caption.copyWith(
-                              color: MinderColors.lavender)),
+                          style: RenewdTextStyles.caption.copyWith(
+                              color: RenewdColors.lavender)),
                     ],
                   ),
                 ],
@@ -256,7 +256,7 @@ class DocumentCard extends StatelessWidget {
             ),
           ),
           const Icon(Iconsax.arrow_right_3, size: 16,
-              color: MinderColors.slate),
+              color: RenewdColors.slate),
         ],
       ),
     );
@@ -290,11 +290,11 @@ class _PdfIcon extends StatelessWidget {
     return Container(
       width: 48, height: 48,
       decoration: BoxDecoration(
-        color: MinderColors.coralRed.withAlpha(26),
+        color: RenewdColors.coralRed.withAlpha(26),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Icon(Iconsax.document_text, size: 24,
-          color: MinderColors.coralRed),
+          color: RenewdColors.coralRed),
     );
   }
 }
@@ -307,14 +307,14 @@ class _DocTypeBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: MinderSpacing.sm, vertical: 2),
+          horizontal: RenewdSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
-        color: MinderColors.oceanBlue.withAlpha(26),
+        color: RenewdColors.oceanBlue.withAlpha(26),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(type,
-          style: MinderTextStyles.caption
-              .copyWith(color: MinderColors.oceanBlue)),
+          style: RenewdTextStyles.caption
+              .copyWith(color: RenewdColors.oceanBlue)),
     );
   }
 }

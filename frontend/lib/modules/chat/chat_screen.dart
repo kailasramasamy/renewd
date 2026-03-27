@@ -15,8 +15,8 @@ class ChatScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Minder AI',
-          style: MinderTextStyles.h3.copyWith(color: MinderColors.lavender),
+          'Renewd AI',
+          style: RenewdTextStyles.h3.copyWith(color: RenewdColors.lavender),
         ),
       ),
       body: Column(
@@ -26,7 +26,7 @@ class ChatScreen extends StatelessWidget {
               child: Text(
                 'Ask me anything about your renewals',
                 style:
-                    MinderTextStyles.body.copyWith(color: MinderColors.slate),
+                    RenewdTextStyles.body.copyWith(color: RenewdColors.slate),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -39,13 +39,13 @@ class ChatScreen extends StatelessWidget {
 
   Widget _buildInputBar() => Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: MinderSpacing.lg,
-          vertical: MinderSpacing.md,
+          horizontal: RenewdSpacing.lg,
+          vertical: RenewdSpacing.md,
         ),
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           border: const Border(
-            top: BorderSide(color: MinderColors.mist),
+            top: BorderSide(color: RenewdColors.mist),
           ),
         ),
         child: Row(
@@ -53,15 +53,15 @@ class ChatScreen extends StatelessWidget {
             Expanded(
               child: TextField(
                 decoration: const InputDecoration(
-                  hintText: 'Ask Minder AI...',
+                  hintText: 'Ask Renewd AI...',
                 ),
               ),
             ),
-            const SizedBox(width: MinderSpacing.sm),
+            const SizedBox(width: RenewdSpacing.sm),
             IconButton(
               onPressed: () {},
               icon: const Icon(Iconsax.send_1),
-              color: MinderColors.oceanBlue,
+              color: RenewdColors.oceanBlue,
             ),
           ],
         ),

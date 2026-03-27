@@ -34,7 +34,7 @@ class RenewalModel {
     required this.updatedAt,
   });
 
-  int get daysRemaining => MinderDateUtils.daysRemaining(renewalDate);
+  int get daysRemaining => RenewdDateUtils.daysRemaining(renewalDate);
 
   factory RenewalModel.fromJson(Map<String, dynamic> json) => RenewalModel(
         id: json['id'] as String,

@@ -7,10 +7,10 @@ const connection = {
   port: Number(new URL(env.REDIS_URL).port) || 6379,
 };
 
-export const minderQueue = new Queue("minder-jobs", { connection });
+export const renewdQueue = new Queue("renewd-jobs", { connection });
 
-export const minderWorker = new Worker(
-  "minder-jobs",
+export const renewdWorker = new Worker(
+  "renewd-jobs",
   async (job) => {
     switch (job.name) {
       case "reminder":
@@ -22,10 +22,10 @@ export const minderWorker = new Worker(
   { connection }
 );
 
-minderWorker.on("completed", (job) => {
+renewdWorker.on("completed", (job) => {
   console.log(`Job ${job.id} (${job.name}) completed`);
 });
 
-minderWorker.on("failed", (job, err) => {
+renewdWorker.on("failed", (job, err) => {
   console.error(`Job ${job?.id} (${job?.name}) failed:`, err.message);
 });

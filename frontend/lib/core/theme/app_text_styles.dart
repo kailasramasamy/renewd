@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MinderTextStyles {
-  MinderTextStyles._();
+class RenewdTextStyles {
+  RenewdTextStyles._();
 
   static TextStyle get h1 => GoogleFonts.inter(
         fontSize: 28,

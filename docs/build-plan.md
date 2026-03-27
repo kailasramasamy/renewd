@@ -1,4 +1,4 @@
-# Minder — Build Plan
+# Renewd — Build Plan
 
 ## Sprint 1 (Week 1): Auth + Dashboard Shell ✅ COMPLETED 2026-03-25
 **Goal:** User can sign up, log in, and see an empty dashboard
@@ -96,7 +96,7 @@
 ---
 
 ## Sprint 6 (Week 6): Payment Tracking + AI Chat
-**Goal:** Track payment history. Chat with Minder about your renewals.
+**Goal:** Track payment history. Chat with Renewd about your renewals.
 
 | # | Task | F/B | Effort |
 |---|------|-----|--------|
@@ -142,5 +142,5 @@
 | 3 | Document Vault | Upload, scan, search documents |
 | 4 | Reminders | Push notifications before expiry |
 | 5 | OCR + AI Extraction | Scan → auto-create renewal |
-| 6 | Payments + AI Chat | Track spending, chat with Minder |
+| 6 | Payments + AI Chat | Track spending, chat with Renewd |
 | 7-8 | Offers + Polish | Find better deals, launch-ready |

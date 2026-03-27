@@ -24,9 +24,9 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Profile')),
       body: Column(
         children: [
-          const SizedBox(height: MinderSpacing.xl),
+          const SizedBox(height: RenewdSpacing.xl),
           _buildAvatar(),
-          const SizedBox(height: MinderSpacing.xl),
+          const SizedBox(height: RenewdSpacing.xl),
           Expanded(
             child: ListView(
               children: [
@@ -44,40 +44,40 @@ class ProfileScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 36,
-            backgroundColor: MinderColors.cloudGray,
-            child: const Icon(Iconsax.user, size: 36, color: MinderColors.slate),
+            backgroundColor: RenewdColors.cloudGray,
+            child: const Icon(Iconsax.user, size: 36, color: RenewdColors.slate),
           ),
-          const SizedBox(height: MinderSpacing.sm),
+          const SizedBox(height: RenewdSpacing.sm),
           Text('Your Name',
-              style: MinderTextStyles.h3.copyWith(color: MinderColors.deepNavy)),
+              style: RenewdTextStyles.h3.copyWith(color: RenewdColors.deepNavy)),
         ],
       );
 
   Widget _buildItem(_ProfileItem item) => ListTile(
-        leading: Icon(item.icon, color: MinderColors.slate),
-        title: Text(item.label, style: MinderTextStyles.body),
+        leading: Icon(item.icon, color: RenewdColors.slate),
+        title: Text(item.label, style: RenewdTextStyles.body),
         trailing: item.isPremium
             ? Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: MinderSpacing.sm,
-                  vertical: MinderSpacing.xs,
+                  horizontal: RenewdSpacing.sm,
+                  vertical: RenewdSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: MinderColors.amber.withValues(alpha: 0.15),
+                  color: RenewdColors.amber.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text('PRO',
-                    style: MinderTextStyles.caption
-                        .copyWith(color: MinderColors.amber)),
+                    style: RenewdTextStyles.caption
+                        .copyWith(color: RenewdColors.amber)),
               )
-            : const Icon(Iconsax.arrow_right_3, color: MinderColors.slate),
+            : const Icon(Iconsax.arrow_right_3, color: RenewdColors.slate),
         onTap: () {},
       );
 
   Widget _buildSignOut() => ListTile(
-        leading: const Icon(Iconsax.logout, color: MinderColors.coralRed),
+        leading: const Icon(Iconsax.logout, color: RenewdColors.coralRed),
         title: Text('Sign Out',
-            style: MinderTextStyles.body.copyWith(color: MinderColors.coralRed)),
+            style: RenewdTextStyles.body.copyWith(color: RenewdColors.coralRed)),
         onTap: () => Get.find<AuthService>().signOut(),
       );
 }

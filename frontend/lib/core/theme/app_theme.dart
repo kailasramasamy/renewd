@@ -3,29 +3,29 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
-class MinderTheme {
-  MinderTheme._();
+class RenewdTheme {
+  RenewdTheme._();
 
   static ThemeData get light => ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
-        scaffoldBackgroundColor: MinderColors.softWhite,
+        scaffoldBackgroundColor: RenewdColors.softWhite,
         colorScheme: const ColorScheme.light(
-          primary: MinderColors.oceanBlue,
-          secondary: MinderColors.lavender,
-          surface: MinderColors.softWhite,
-          error: MinderColors.coralRed,
+          primary: RenewdColors.oceanBlue,
+          secondary: RenewdColors.lavender,
+          surface: RenewdColors.softWhite,
+          error: RenewdColors.coralRed,
           onPrimary: Colors.white,
           onSecondary: Colors.white,
-          onSurface: MinderColors.deepNavy,
+          onSurface: RenewdColors.deepNavy,
           onError: Colors.white,
         ),
         appBarTheme: AppBarTheme(
           elevation: 0,
-          backgroundColor: MinderColors.deepNavy,
+          backgroundColor: RenewdColors.deepNavy,
           foregroundColor: Colors.white,
           centerTitle: false,
-          titleTextStyle: MinderTextStyles.h3.copyWith(color: Colors.white),
+          titleTextStyle: RenewdTextStyles.h3.copyWith(color: Colors.white),
         ),
         cardTheme: CardThemeData(
           shape: RoundedRectangleBorder(
@@ -33,33 +33,33 @@ class MinderTheme {
           ),
           elevation: 0,
           color: Colors.white,
-          shadowColor: MinderColors.mist,
+          shadowColor: RenewdColors.mist,
           margin: EdgeInsets.zero,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: MinderColors.oceanBlue,
+            backgroundColor: RenewdColors.oceanBlue,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
             elevation: 0,
-            textStyle: MinderTextStyles.body.copyWith(
+            textStyle: RenewdTextStyles.body.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Colors.white,
-          selectedItemColor: MinderColors.oceanBlue,
-          unselectedItemColor: MinderColors.slate,
+          selectedItemColor: RenewdColors.oceanBlue,
+          unselectedItemColor: RenewdColors.slate,
           elevation: 8,
           type: BottomNavigationBarType.fixed,
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: MinderColors.cloudGray,
+          fillColor: RenewdColors.cloudGray,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -70,11 +70,11 @@ class MinderTheme {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: MinderColors.oceanBlue, width: 2),
+            borderSide: const BorderSide(color: RenewdColors.oceanBlue, width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: MinderColors.coralRed),
+            borderSide: const BorderSide(color: RenewdColors.coralRed),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
@@ -84,57 +84,57 @@ class MinderTheme {
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: MinderColors.charcoal,
+        scaffoldBackgroundColor: RenewdColors.charcoal,
         colorScheme: const ColorScheme.dark(
-          primary: MinderColors.oceanBlue,
-          secondary: MinderColors.lavender,
-          surface: MinderColors.darkSlate,
-          error: MinderColors.coralRed,
+          primary: RenewdColors.oceanBlue,
+          secondary: RenewdColors.lavender,
+          surface: RenewdColors.darkSlate,
+          error: RenewdColors.coralRed,
           onPrimary: Colors.white,
           onSecondary: Colors.white,
-          onSurface: MinderColors.softWhite,
+          onSurface: RenewdColors.softWhite,
           onError: Colors.white,
         ),
         appBarTheme: AppBarTheme(
           elevation: 0,
-          backgroundColor: MinderColors.charcoal,
-          foregroundColor: MinderColors.softWhite,
+          backgroundColor: RenewdColors.charcoal,
+          foregroundColor: RenewdColors.softWhite,
           centerTitle: false,
-          titleTextStyle: MinderTextStyles.h3.copyWith(color: MinderColors.softWhite),
+          titleTextStyle: RenewdTextStyles.h3.copyWith(color: RenewdColors.softWhite),
         ),
         cardTheme: CardThemeData(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           elevation: 0,
-          color: MinderColors.darkSlate,
+          color: RenewdColors.darkSlate,
           shadowColor: Colors.black26,
           margin: EdgeInsets.zero,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: MinderColors.oceanBlue,
+            backgroundColor: RenewdColors.oceanBlue,
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
             elevation: 0,
-            textStyle: MinderTextStyles.body.copyWith(
+            textStyle: RenewdTextStyles.body.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: MinderColors.darkSlate,
-          selectedItemColor: MinderColors.oceanBlue,
-          unselectedItemColor: MinderColors.slate,
+          backgroundColor: RenewdColors.darkSlate,
+          selectedItemColor: RenewdColors.oceanBlue,
+          unselectedItemColor: RenewdColors.slate,
           elevation: 8,
           type: BottomNavigationBarType.fixed,
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: MinderColors.steel,
+          fillColor: RenewdColors.steel,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -145,11 +145,11 @@ class MinderTheme {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: MinderColors.oceanBlue, width: 2),
+            borderSide: const BorderSide(color: RenewdColors.oceanBlue, width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: MinderColors.coralRed),
+            borderSide: const BorderSide(color: RenewdColors.coralRed),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
