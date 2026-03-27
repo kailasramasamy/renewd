@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
 import '../../data/models/document_model.dart';
@@ -54,9 +55,13 @@ class ScanAddController extends GetxController {
       analyzeStep.value = 'Reading document with AI...';
       final result = await _docProvider.parseDocument(doc.id);
       analyzeStep.value = 'Extracting details...';
-      extraction.value = result['extraction'] as Map<String, dynamic>?;
-      _prefillBasicFields();
-      _prefillDateAndDetails();
+      debugPrint('=== PARSE RESULT KEYS: ${result.keys.toList()}');
+      debugPrint('=== EXTRACTION: ${result['extraction']}');
+      final ext = result['extraction'] as Map<String, dynamic>?;
+      debugPrint('=== EXT PARSED: $ext');
+      _prefillFromExtraction(ext);
+      debugPrint('=== AFTER PREFILL: name=${name.value}, provider=${providerName.value}, amount=${amount.value}, date=${renewalDate.value}, category=${category.value}');
+      extraction.value = ext;
     } catch (e) {
       Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {
@@ -65,9 +70,13 @@ class ScanAddController extends GetxController {
     }
   }
 
-  void _prefillBasicFields() {
-    final ext = extraction.value;
+  void _prefillFromExtraction(Map<String, dynamic>? ext) {
     if (ext == null) return;
+    _prefillBasicFields(ext);
+    _prefillDateAndDetails(ext);
+  }
+
+  void _prefillBasicFields(Map<String, dynamic> ext) {
     final provider = ext['provider'] as String?;
     final docType = ext['document_type'] as String?;
     if (provider != null) {
@@ -81,9 +90,7 @@ class ScanAddController extends GetxController {
     if (summary != null) notes.value = summary;
   }
 
-  void _prefillDateAndDetails() {
-    final ext = extraction.value;
-    if (ext == null) return;
+  void _prefillDateAndDetails(Map<String, dynamic> ext) {
     if (ext['amount'] != null) {
       amount.value = (ext['amount'] as num).toDouble();
     }

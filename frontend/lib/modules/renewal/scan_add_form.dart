@@ -53,10 +53,8 @@ class _ScanNameFieldState extends State<_ScanNameField> {
   @override
   void initState() {
     super.initState();
+    debugPrint('=== FORM INIT name.value: "${widget.c.name.value}"');
     _ctrl = TextEditingController(text: widget.c.name.value);
-    ever(widget.c.name, (v) {
-      if (_ctrl.text != v) _ctrl.text = v;
-    });
   }
 
   @override

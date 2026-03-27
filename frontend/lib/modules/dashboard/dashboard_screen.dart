@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -80,16 +79,7 @@ class _AddOptionsSheet extends StatelessWidget {
 
   Future<void> _onScanTap(BuildContext context) async {
     Navigator.of(context).pop();
-    final picker = ImagePicker();
-    final file = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
-    if (file == null) return;
-    final result = await Get.toNamed(
-      AppRoutes.scanAdd,
-      arguments: {'filePath': file.path, 'fileName': file.name},
-    );
+    final result = await Get.toNamed(AppRoutes.scanAdd);
     if (result == true) c.fetchRenewals();
   }
 

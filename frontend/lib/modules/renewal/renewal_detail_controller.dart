@@ -13,6 +13,7 @@ class RenewalDetailController extends GetxController {
   final RxList<DocumentModel> documents = <DocumentModel>[].obs;
   final RxBool isUploading = false.obs;
   final RxBool isParsing = false.obs;
+  bool dataChanged = false;
 
   @override
   void onInit() {

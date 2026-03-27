@@ -27,15 +27,23 @@ class RenewalDetailScreen extends StatelessWidget {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Iconsax.arrow_left),
-            onPressed: () => Get.back(),
+            onPressed: () => Get.back(result: c.dataChanged),
           ),
           title: Text(renewal?.name ?? 'Detail'),
           actions: [
             if (renewal != null) ...[
               IconButton(
                 icon: const Icon(Iconsax.edit),
-                onPressed: () => Get.toNamed(AppRoutes.editRenewal,
-                    arguments: renewal),
+                onPressed: () async {
+                  final result = await Get.toNamed(
+                    AppRoutes.editRenewal,
+                    arguments: renewal,
+                  );
+                  if (result == true) {
+                    c.dataChanged = true;
+                    c.fetchRenewal(renewal.id);
+                  }
+                },
               ),
               IconButton(
                 icon: const Icon(Iconsax.trash,
