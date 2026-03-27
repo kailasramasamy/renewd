@@ -133,7 +133,7 @@ class _AiSummarySection extends StatelessWidget {
             _AiRow('Type', parsed['document_type'] as String?),
             _AiRow('Issue Date', parsed['issue_date'] as String?),
             _AiRow('Expiry Date', parsed['expiry_date'] as String?),
-            _AiRow('Amount', parsed['amount'] as String?),
+            _AiRow('Amount', parsed['amount']?.toString()),
             _KeyDetails(details: parsed['key_details']),
           ] else
             Text(doc.ocrText!, style: RenewdTextStyles.bodySmall),
