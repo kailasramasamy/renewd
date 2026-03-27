@@ -70,8 +70,43 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
   });
 }
 
+async function registerMarkRenewed(app: FastifyInstance) {
+  app.post("/:id/renew", auth, async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    const renewal = await app.db.query(
+      "SELECT * FROM renewals WHERE id=$1 AND user_id=(SELECT id FROM users WHERE firebase_uid=$2)",
+      [id, request.user.uid]
+    );
+    if (renewal.rows.length === 0) throw new NotFoundError("Renewal");
+
+    const r = renewal.rows[0];
+    const nextDate = calculateNextDate(r.renewal_date, r.frequency, r.frequency_days);
+
+    const result = await app.db.query(
+      "UPDATE renewals SET renewal_date=$1, updated_at=NOW() WHERE id=$2 RETURNING *",
+      [nextDate.toISOString().split("T")[0], id]
+    );
+    return reply.send({ renewal: result.rows[0] });
+  });
+}
+
+function calculateNextDate(current: string, frequency: string, customDays: number | null): Date {
+  const date = new Date(current);
+  switch (frequency) {
+    case "monthly": date.setMonth(date.getMonth() + 1); break;
+    case "quarterly": date.setMonth(date.getMonth() + 3); break;
+    case "yearly": date.setFullYear(date.getFullYear() + 1); break;
+    case "weekly": date.setDate(date.getDate() + 7); break;
+    case "custom": date.setDate(date.getDate() + (customDays ?? 30)); break;
+    default: date.setFullYear(date.getFullYear() + 1);
+  }
+  return date;
+}
+
 export default async function renewalRoutes(app: FastifyInstance) {
   await registerListAndGet(app);
   await registerCreate(app);
   await registerUpdateAndDelete(app);
+  await registerMarkRenewed(app);
 }

@@ -184,5 +184,9 @@
     }
   },
   "active": "46c813632a9ba3d7",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "feature-spec.md",
+    "design-system.md",
+    "build-plan.md"
+  ]
 }

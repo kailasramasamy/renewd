@@ -7,4 +7,7 @@ abstract class AppRoutes {
   static const vault = '/vault';
   static const chat = '/chat';
   static const profile = '/profile';
+  static const addRenewal = '/add-renewal';
+  static const renewalDetail = '/renewal-detail';
+  static const editRenewal = '/edit-renewal';
 }

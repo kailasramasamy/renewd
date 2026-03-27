@@ -1,0 +1,75 @@
+import 'package:get/get.dart';
+import '../../core/constants/category_config.dart';
+import '../../data/providers/renewal_provider.dart';
+
+class AddRenewalController extends GetxController {
+  final _provider = RenewalProvider();
+
+  final RxString name = ''.obs;
+  final RxString providerName = ''.obs;
+  final RxString notes = ''.obs;
+  final Rx<RenewalCategory> category = RenewalCategory.subscription.obs;
+  final Rx<double?> amount = Rx<double?>(null);
+  final Rx<DateTime?> renewalDate = Rx<DateTime?>(null);
+  final RxString frequency = 'monthly'.obs;
+  final RxInt frequencyDays = 30.obs;
+  final RxBool autoRenew = false.obs;
+  final RxBool isLoading = false.obs;
+
+  static const List<String> frequencies = [
+    'monthly',
+    'quarterly',
+    'yearly',
+    'weekly',
+    'custom',
+  ];
+
+  static const Map<String, String> frequencyLabels = {
+    'monthly': 'Monthly',
+    'quarterly': 'Quarterly',
+    'yearly': 'Yearly',
+    'weekly': 'Weekly',
+    'custom': 'Custom',
+  };
+
+  bool get isCustomFrequency => frequency.value == 'custom';
+
+  String? validateAndGetError() {
+    if (name.value.trim().isEmpty) return 'Name is required';
+    if (renewalDate.value == null) return 'Renewal date is required';
+    if (isCustomFrequency && frequencyDays.value <= 0) {
+      return 'Enter a valid number of days';
+    }
+    return null;
+  }
+
+  Future<void> save() async {
+    final error = validateAndGetError();
+    if (error != null) {
+      Get.snackbar('Validation Error', error,
+          snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+    isLoading.value = true;
+    try {
+      final data = <String, dynamic>{
+        'name': name.value.trim(),
+        'category': category.value.name,
+        'renewal_date': renewalDate.value!.toIso8601String(),
+        'frequency': frequency.value,
+        'auto_renew': autoRenew.value,
+        if (providerName.value.trim().isNotEmpty)
+          'provider': providerName.value.trim(),
+        if (amount.value != null) 'amount': amount.value,
+        if (notes.value.trim().isNotEmpty) 'notes': notes.value.trim(),
+        if (isCustomFrequency) 'frequency_days': frequencyDays.value,
+      };
+      await _provider.create(data);
+      Get.back(result: true);
+    } catch (e) {
+      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}

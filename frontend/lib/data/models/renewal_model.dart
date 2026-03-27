@@ -45,7 +45,9 @@ class RenewalModel {
           orElse: () => RenewalCategory.other,
         ),
         provider: json['provider'] as String?,
-        amount: (json['amount'] as num?)?.toDouble(),
+        amount: json['amount'] != null
+            ? double.tryParse(json['amount'].toString())
+            : null,
         renewalDate: DateTime.parse(json['renewal_date'] as String),
         frequency: json['frequency'] as String?,
         frequencyDays: json['frequency_days'] as int?,

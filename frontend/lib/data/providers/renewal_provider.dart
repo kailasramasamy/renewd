@@ -35,4 +35,11 @@ class RenewalProvider {
   Future<void> delete(String id) async {
     await _client.safeDelete(ApiEndpoints.renewalById(id));
   }
+
+  Future<RenewalModel> markRenewed(String id) async {
+    final response =
+        await _client.safePost('${ApiEndpoints.renewals}/$id/renew', {});
+    final body = response.body as Map<String, dynamic>;
+    return RenewalModel.fromJson(body['renewal'] as Map<String, dynamic>);
+  }
 }
