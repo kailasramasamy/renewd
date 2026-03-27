@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -60,7 +60,7 @@ class ChatScreen extends StatelessWidget {
             const SizedBox(width: RenewdSpacing.sm),
             IconButton(
               onPressed: () {},
-              icon: const Icon(Iconsax.send_1),
+              icon: Icon(LucideIcons.send),
               color: RenewdColors.oceanBlue,
             ),
           ],

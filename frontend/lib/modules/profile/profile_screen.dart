@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -12,10 +12,10 @@ class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   static const List<_ProfileItem> _items = [
-    _ProfileItem(icon: Iconsax.notification, label: 'Notifications'),
-    _ProfileItem(icon: Iconsax.export, label: 'Data Export'),
-    _ProfileItem(icon: Iconsax.crown, label: 'Premium', isPremium: true),
-    _ProfileItem(icon: Iconsax.info_circle, label: 'About'),
+    _ProfileItem(icon: LucideIcons.bell, label: 'Notifications'),
+    _ProfileItem(icon: LucideIcons.download, label: 'Data Export'),
+    _ProfileItem(icon: LucideIcons.crown, label: 'Premium', isPremium: true),
+    _ProfileItem(icon: LucideIcons.info, label: 'About'),
   ];
 
   @override
@@ -46,7 +46,7 @@ class ProfileScreen extends StatelessWidget {
           CircleAvatar(
             radius: 36,
             backgroundColor: RenewdColors.cloudGray,
-            child: const Icon(Iconsax.user, size: 36, color: RenewdColors.slate),
+            child: Icon(LucideIcons.user, size: 36, color: RenewdColors.slate),
           ),
           const SizedBox(height: RenewdSpacing.sm),
           Text('Your Name',
@@ -71,7 +71,7 @@ class ProfileScreen extends StatelessWidget {
                     style: RenewdTextStyles.caption
                         .copyWith(color: RenewdColors.amber)),
               )
-            : const Icon(Iconsax.arrow_right_3, color: RenewdColors.slate),
+            : Icon(LucideIcons.chevronRight, color: RenewdColors.slate),
         onTap: () => _onItemTap(item.label),
       );
 
@@ -85,7 +85,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildSignOut() => ListTile(
-        leading: const Icon(Iconsax.logout, color: RenewdColors.coralRed),
+        leading: Icon(LucideIcons.logOut, color: RenewdColors.coralRed),
         title: Text('Sign Out',
             style: RenewdTextStyles.body.copyWith(color: RenewdColors.coralRed)),
         onTap: () => Get.find<AuthService>().signOut(),

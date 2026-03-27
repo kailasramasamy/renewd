@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -73,7 +73,7 @@ class _PickerScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: RenewdColors.charcoal,
         leading: IconButton(
-          icon: const Icon(Iconsax.arrow_left),
+          icon: Icon(LucideIcons.arrowLeft),
           onPressed: () => Get.back(),
         ),
         title: Text('Scan Document',
@@ -85,7 +85,7 @@ class _PickerScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Iconsax.document_upload,
+            Icon(LucideIcons.uploadCloud,
                 size: 64, color: RenewdColors.lavender),
             const SizedBox(height: RenewdSpacing.xl),
             Text(
@@ -102,13 +102,13 @@ class _PickerScreen extends StatelessWidget {
             ),
             const SizedBox(height: RenewdSpacing.xxl),
             _PickerOption(
-              icon: Iconsax.camera,
+              icon: LucideIcons.camera,
               label: 'Take a Photo',
               onTap: () => _pickImage(context, ImageSource.camera),
             ),
             const SizedBox(height: RenewdSpacing.md),
             _PickerOption(
-              icon: Iconsax.gallery,
+              icon: LucideIcons.image,
               label: 'Choose from Gallery',
               onTap: () => _pickImage(context, ImageSource.gallery),
             ),
@@ -147,7 +147,7 @@ class _PickerOption extends StatelessWidget {
             Text(label,
                 style: RenewdTextStyles.body.copyWith(color: Colors.white)),
             const Spacer(),
-            const Icon(Iconsax.arrow_right_3,
+            Icon(LucideIcons.chevronRight,
                 color: RenewdColors.slate, size: 18),
           ],
         ),
@@ -179,7 +179,7 @@ class _AnalyzingScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: RenewdColors.steel),
                   ),
-                  child: const Icon(Iconsax.document_text,
+                  child: Icon(LucideIcons.fileText,
                       size: 36, color: RenewdColors.lavender),
                 ),
                 const SizedBox(height: RenewdSpacing.xl),
@@ -221,7 +221,7 @@ class _ReviewFormScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Iconsax.arrow_left),
+          icon: Icon(LucideIcons.arrowLeft),
           onPressed: () => Get.back(),
         ),
         title: const Text('Review Details'),
@@ -241,7 +241,7 @@ class _ReviewFormScreen extends StatelessWidget {
             const SizedBox(height: RenewdSpacing.xxl),
             Obx(() => RenewdButton(
                   label: 'Create Renewal',
-                  icon: Iconsax.tick_circle,
+                  icon: LucideIcons.checkCircle,
                   isLoading: c.isSaving.value,
                   onPressed: c.save,
                 )),

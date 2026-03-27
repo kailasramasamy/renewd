@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../middleware/auth.js";
 import { NotFoundError, AppError } from "../../lib/errors.js";
 import { extractDocumentData } from "../../services/ai.js";
+import { maskExtractionJson } from "../../services/masking.js";
 import { getFileFromS3, deleteFromS3, s3KeyFromUrl } from "../../services/storage.js";
 import {
   saveFileToS3,
@@ -70,7 +71,8 @@ async function registerParse(app: FastifyInstance) {
     const doc = docResult.rows[0];
     const key = s3KeyFromUrl(doc.file_url);
     const { buffer } = await getFileFromS3(app.s3, key);
-    const extraction = await extractDocumentData(buffer, doc.mime_type, doc.file_name);
+    const rawExtraction = await extractDocumentData(buffer, doc.mime_type, doc.file_name);
+    const extraction = maskExtractionJson(rawExtraction);
 
     const updateResult = await app.db.query(
       `UPDATE documents SET ocr_text = $1, issue_date = COALESCE($2, issue_date), expiry_date = COALESCE($3, expiry_date)
@@ -88,6 +90,24 @@ async function registerQueries(app: FastifyInstance) {
     const result = await app.db.query(
       "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE u.firebase_uid = $1 ORDER BY d.created_at DESC",
       [request.user.uid]
+    );
+    return reply.send({ documents: result.rows, total: result.rowCount });
+  });
+
+  app.get("/search", auth, async (request, reply) => {
+    const { q } = request.query as { q?: string };
+    if (!q || q.trim().length === 0) {
+      return reply.send({ documents: [], total: 0 });
+    }
+
+    const result = await app.db.query(
+      `SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id
+       WHERE u.firebase_uid = $1
+         AND (d.file_name ILIKE $2
+           OR d.doc_type ILIKE $2
+           OR to_tsvector('english', COALESCE(d.ocr_text, '')) @@ plainto_tsquery('english', $3))
+       ORDER BY d.created_at DESC`,
+      [request.user.uid, `%${q}%`, q]
     );
     return reply.send({ documents: result.rows, total: result.rowCount });
   });
@@ -143,6 +163,53 @@ async function registerLink(app: FastifyInstance) {
   });
 }
 
+async function registerSuggestLink(app: FastifyInstance) {
+  app.get("/:id/suggest-link", auth, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const docResult = await app.db.query(
+      "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE d.id = $1 AND u.firebase_uid = $2",
+      [id, request.user.uid]
+    );
+    if (docResult.rows.length === 0) throw new NotFoundError("Document");
+
+    const doc = docResult.rows[0];
+    let provider: string | null = null;
+
+    if (doc.ocr_text) {
+      try {
+        const parsed = JSON.parse(doc.ocr_text);
+        provider = parsed.provider ?? null;
+      } catch { /* not JSON */ }
+    }
+
+    const conditions: string[] = [];
+    const params: unknown[] = [request.user.uid];
+
+    if (provider) {
+      params.push(`%${provider}%`);
+      conditions.push(`(r.provider ILIKE $${params.length} OR r.name ILIKE $${params.length})`);
+    }
+    if (doc.file_name) {
+      params.push(`%${doc.file_name.split('.')[0].replace(/[_-]/g, '%')}%`);
+      conditions.push(`(r.name ILIKE $${params.length} OR r.provider ILIKE $${params.length})`);
+    }
+
+    if (conditions.length === 0) {
+      return reply.send({ suggestions: [] });
+    }
+
+    const result = await app.db.query(
+      `SELECT r.id, r.name, r.provider, r.category FROM renewals r
+       JOIN users u ON u.id = r.user_id
+       WHERE u.firebase_uid = $1 AND (${conditions.join(" OR ")})
+       ORDER BY r.name ASC LIMIT 5`,
+      params
+    );
+
+    return reply.send({ suggestions: result.rows });
+  });
+}
+
 async function registerDelete(app: FastifyInstance) {
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
@@ -167,5 +234,6 @@ export default async function documentRoutes(app: FastifyInstance) {
   await registerQueries(app);
   await registerFileServe(app);
   await registerLink(app);
+  await registerSuggestLink(app);
   await registerDelete(app);
 }

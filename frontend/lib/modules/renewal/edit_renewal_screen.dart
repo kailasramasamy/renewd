@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -18,7 +18,7 @@ class EditRenewalScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Iconsax.arrow_left),
+          icon: Icon(LucideIcons.arrowLeft),
           onPressed: () => Get.back(),
         ),
         title: const Text('Edit Renewal'),
@@ -97,7 +97,7 @@ class EditRenewalScreen extends StatelessWidget {
                 const SizedBox(height: RenewdSpacing.xxl),
                 RenewdButton(
                   label: 'Save Changes',
-                  icon: Iconsax.tick_circle,
+                  icon: LucideIcons.checkCircle,
                   isLoading: c.isLoading.value,
                   onPressed: c.save,
                 ),
@@ -168,7 +168,7 @@ class EditRenewalScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Iconsax.calendar, size: 18, color: RenewdColors.slate),
+            Icon(LucideIcons.calendar, size: 18, color: RenewdColors.slate),
             const SizedBox(width: RenewdSpacing.sm),
             Text(
               c.renewalDate.value != null

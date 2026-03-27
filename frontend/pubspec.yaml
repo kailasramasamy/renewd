@@ -25,6 +25,7 @@ dependencies:
   path_provider: ^2.1.5
   firebase_messaging: ^16.1.3
   flutter_local_notifications: ^18.0.0
+  lucide_icons: ^0.257.0
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,7 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -21,7 +21,7 @@ class VaultScreen extends StatelessWidget {
         title: const Text('Vault'),
         actions: [
           IconButton(
-            icon: const Icon(Iconsax.refresh),
+            icon: Icon(LucideIcons.refreshCw),
             onPressed: c.fetchAll,
           ),
         ],
@@ -43,7 +43,7 @@ class VaultScreen extends StatelessWidget {
                     width: 22, height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2,
                         color: Colors.white))
-                : const Icon(Iconsax.document_upload),
+                : Icon(LucideIcons.uploadCloud),
           )),
     );
   }
@@ -71,7 +71,7 @@ class _SearchBar extends StatelessWidget {
         onChanged: (v) => c.searchQuery.value = v,
         decoration: InputDecoration(
           hintText: 'Search documents...',
-          prefixIcon: const Icon(Iconsax.search_normal, size: 18),
+          prefixIcon: Icon(LucideIcons.search, size: 18),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: RenewdColors.steel),
@@ -198,7 +198,7 @@ class _Empty extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Iconsax.document, size: 48, color: RenewdColors.steel),
+          Icon(LucideIcons.file, size: 48, color: RenewdColors.steel),
           const SizedBox(height: RenewdSpacing.md),
           Text('No documents yet',
               style: RenewdTextStyles.body.copyWith(color: RenewdColors.slate)),
@@ -266,7 +266,7 @@ class DocumentCard extends StatelessWidget {
                   const SizedBox(height: RenewdSpacing.xs),
                   Row(
                     children: [
-                      const Icon(Iconsax.magic_star, size: 10,
+                      Icon(LucideIcons.sparkles, size: 10,
                           color: RenewdColors.lavender),
                       const SizedBox(width: RenewdSpacing.xs),
                       Text('AI analyzed',
@@ -278,7 +278,7 @@ class DocumentCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Iconsax.arrow_right_3, size: 16,
+          Icon(LucideIcons.chevronRight, size: 16,
               color: RenewdColors.slate),
         ],
       ),
@@ -316,7 +316,7 @@ class _PdfIcon extends StatelessWidget {
         color: RenewdColors.coralRed.withAlpha(26),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Icon(Iconsax.document_text, size: 24,
+      child: Icon(LucideIcons.fileText, size: 24,
           color: RenewdColors.coralRed),
     );
   }

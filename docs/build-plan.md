@@ -77,21 +77,21 @@
 
 ---
 
-## Sprint 5 (Week 5): Document OCR + AI Extraction
+## Sprint 5 (Week 5): Document OCR + AI Extraction ✅ COMPLETED 2026-03-27
 **Goal:** Scan a document → AI fills renewal fields automatically
 
-| # | Task | F/B | Effort |
-|---|------|-----|--------|
-| 1 | Google Vision OCR integration (image → text) | Backend | 3hr |
-| 2 | Claude API extraction (OCR text → structured JSON) | Backend | 4hr |
-| 3 | POST /documents/:id/parse endpoint | Backend | 2hr |
-| 4 | Upload flow: scan → show extracted fields with confidence indicators | Frontend | 4hr |
-| 5 | Confirm/correct → auto-create renewal item | Frontend | 2hr |
-| 6 | Auto-link suggestion | Both | 2hr |
-| 7 | Sensitive data masking (Aadhaar last 4 digits) | Backend | 1hr |
-| 8 | Full-text search on OCR content in vault | Backend | 1hr |
+| # | Task | F/B | Effort | Status |
+|---|------|-----|--------|--------|
+| 1 | Google Vision OCR integration (image → text) | Backend | 3hr | ✅ |
+| 2 | Claude API extraction (OCR text → structured JSON) | Backend | 4hr | ✅ |
+| 3 | POST /documents/:id/parse endpoint | Backend | 2hr | ✅ |
+| 4 | Upload flow: scan → show extracted fields with confidence indicators | Frontend | 4hr | ✅ |
+| 5 | Confirm/correct → auto-create renewal item | Frontend | 2hr | ✅ |
+| 6 | Auto-link suggestion | Both | 2hr | ✅ |
+| 7 | Sensitive data masking (Aadhaar/PAN) | Backend | 1hr | ✅ |
+| 8 | Full-text search on OCR content in vault | Both | 1hr | ✅ |
 
-**Deliverable:** Scan any document → AI creates the renewal. Magical first-use experience.
+**Delivered:** Full scan-to-renewal flow, auto-link suggestions, PII masking, full-text OCR search in vault
 
 ---
 
@@ -142,6 +142,6 @@
 | 2 | Renewal CRUD | ✅ Core tracking works end-to-end |
 | 3 | Document Vault | ✅ Upload, scan, search documents |
 | 4 | Reminders | ✅ Push notifications before expiry |
-| 5 | OCR + AI Extraction | Scan → auto-create renewal |
+| 5 | OCR + AI Extraction | ✅ Scan → auto-create renewal |
 | 6 | Payments + AI Chat | Track spending, chat with Renewd |
 | 7-8 | Offers + Polish | Find better deals, launch-ready |

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -19,7 +19,7 @@ class DocumentDetailScreen extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Iconsax.arrow_left),
+            icon: Icon(LucideIcons.arrowLeft),
             onPressed: () => Get.back(),
           ),
           title: Text(doc?.fileName ?? 'Document',
@@ -33,7 +33,7 @@ class DocumentDetailScreen extends StatelessWidget {
                           width: 20, height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2)))
                   : IconButton(
-                      icon: const Icon(Iconsax.share),
+                      icon: Icon(LucideIcons.share),
                       onPressed: c.shareDocument,
                     )),
           ],
@@ -94,7 +94,7 @@ class _PdfPlaceholder extends StatelessWidget {
     return RenewdCard(
       child: Row(
         children: [
-          const Icon(Iconsax.document_text, size: 48, color: RenewdColors.coralRed),
+          Icon(LucideIcons.fileText, size: 48, color: RenewdColors.coralRed),
           const SizedBox(width: RenewdSpacing.lg),
           Expanded(
             child: Column(
@@ -131,7 +131,7 @@ class _AiSummarySection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Iconsax.magic_star, size: 16, color: RenewdColors.lavender),
+              Icon(LucideIcons.sparkles, size: 16, color: RenewdColors.lavender),
               const SizedBox(width: RenewdSpacing.sm),
               Text('AI Analysis',
                   style: RenewdTextStyles.bodySmall.copyWith(
@@ -203,7 +203,7 @@ class _KeyDetails extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: RenewdSpacing.xs),
               child: Row(
                 children: [
-                  const Icon(Iconsax.arrow_right_3, size: 12,
+                  Icon(LucideIcons.chevronRight, size: 12,
                       color: RenewdColors.lavender),
                   const SizedBox(width: RenewdSpacing.xs),
                   Expanded(
@@ -240,7 +240,7 @@ class _AnalyzeButton extends StatelessWidget {
                     width: 18, height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2,
                         color: Colors.white))
-                : const Icon(Iconsax.magic_star, size: 18),
+                : Icon(LucideIcons.sparkles, size: 18),
             label: Text(c.isParsing.value ? 'Analyzing...' : 'Analyze with AI',
                 style: RenewdTextStyles.body
                     .copyWith(fontWeight: FontWeight.w600, color: Colors.white)),
@@ -262,7 +262,7 @@ class _ReAnalyzeButton extends StatelessWidget {
                   width: 14, height: 14,
                   child: CircularProgressIndicator(strokeWidth: 2,
                       color: RenewdColors.lavender))
-              : const Icon(Iconsax.refresh, size: 14,
+              : Icon(LucideIcons.refreshCw, size: 14,
                   color: RenewdColors.lavender),
           label: Text(c.isParsing.value ? 'Re-analyzing...' : 'Re-analyze',
               style: RenewdTextStyles.caption
@@ -282,7 +282,7 @@ class _DeleteBar extends StatelessWidget {
           RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, RenewdSpacing.xl),
       child: Obx(() => RenewdButton(
             label: 'Delete Document',
-            icon: Iconsax.trash,
+            icon: LucideIcons.trash2,
             variant: RenewdButtonVariant.danger,
             isLoading: c.isDeleting.value,
             onPressed: () => _confirmDelete(context, c),

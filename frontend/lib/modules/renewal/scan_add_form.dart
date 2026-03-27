@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -20,8 +20,6 @@ class ScanAddForm extends StatelessWidget {
         _ScanNameField(c: c),
         const SizedBox(height: RenewdSpacing.xl),
         _ScanCategorySection(c: c),
-        const SizedBox(height: RenewdSpacing.xl),
-        _ScanGroupSection(c: c),
         const SizedBox(height: RenewdSpacing.xl),
         _ScanProviderField(c: c),
         const SizedBox(height: RenewdSpacing.xl),
@@ -368,7 +366,7 @@ class _ScanDateField extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Iconsax.calendar,
+                    Icon(LucideIcons.calendar,
                         size: 18, color: RenewdColors.slate),
                     const SizedBox(width: RenewdSpacing.sm),
                     Text(

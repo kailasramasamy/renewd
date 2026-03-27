@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
@@ -190,7 +190,7 @@ class _CategoryHeader extends StatelessWidget {
             CountBadge(count: itemCount, color: color),
             const SizedBox(width: RenewdSpacing.sm),
             Icon(
-              isExpanded ? Iconsax.arrow_up_2 : Iconsax.arrow_down_1,
+              isExpanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
               size: 16, color: RenewdColors.slate,
             ),
           ],
@@ -290,8 +290,8 @@ class _SubGroupRow extends StatelessWidget {
                   const SizedBox(width: RenewdSpacing.sm),
                   Icon(
                     isExpanded
-                        ? Iconsax.arrow_up_2
-                        : Iconsax.arrow_right_3,
+                        ? LucideIcons.chevronUp
+                        : LucideIcons.chevronRight,
                     size: 14, color: RenewdColors.slate,
                   ),
                 ],

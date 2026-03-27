@@ -9,6 +9,7 @@ class DashboardController extends GetxController {
   final RxList<RenewalModel> renewals = <RenewalModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
+  final RxString searchQuery = ''.obs;
   final RxMap<String, bool> expandedCategories = <String, bool>{}.obs;
   final RxMap<String, bool> expandedSubGroups = <String, bool>{}.obs;
 
@@ -36,6 +37,15 @@ class DashboardController extends GetxController {
       .length;
 
   bool get hasAlerts => overdueCount > 0 || urgentCount > 0;
+
+  List<RenewalModel> get filteredRenewals {
+    final q = searchQuery.value.toLowerCase().trim();
+    if (q.isEmpty) return renewals;
+    return renewals.where((r) =>
+        r.name.toLowerCase().contains(q) ||
+        (r.provider?.toLowerCase().contains(q) ?? false) ||
+        CategoryConfig.label(r.category).toLowerCase().contains(q)).toList();
+  }
 
   List<RenewalModel> get dueSoon =>
       renewals.where((r) => r.daysRemaining >= 0 && r.daysRemaining <= 7).toList();

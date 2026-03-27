@@ -14,7 +14,8 @@ class SplashController extends GetxController {
     await Future.delayed(const Duration(seconds: 2));
 
     // Dev mode: skip auth, go straight to home
-    if (AppConstants.apiBaseUrl.contains('localhost')) {
+    if (AppConstants.apiBaseUrl.contains('localhost') ||
+        AppConstants.apiBaseUrl.contains('192.168.')) {
       Get.offAllNamed(AppRoutes.home);
       return;
     }

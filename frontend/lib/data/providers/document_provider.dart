@@ -68,6 +68,24 @@ class DocumentProvider {
     });
   }
 
+  Future<List<DocumentModel>> search(String query) async {
+    final response =
+        await _client.safeGet(ApiEndpoints.documentSearch(query));
+    final body = response.body as Map<String, dynamic>;
+    final list = body['documents'] as List<dynamic>? ?? [];
+    return list
+        .map((e) => DocumentModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<Map<String, dynamic>>> suggestLink(String docId) async {
+    final response =
+        await _client.safeGet(ApiEndpoints.documentSuggestLink(docId));
+    final body = response.body as Map<String, dynamic>;
+    final list = body['suggestions'] as List<dynamic>? ?? [];
+    return list.cast<Map<String, dynamic>>();
+  }
+
   Future<void> delete(String id) async {
     await _client.safeDelete(ApiEndpoints.documentById(id));
   }

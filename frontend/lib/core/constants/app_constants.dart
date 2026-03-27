@@ -1,7 +1,9 @@
 class AppConstants {
   AppConstants._();
 
-  static const String apiBaseUrl = 'http://localhost:6000/api/v1';
+  // Use your Mac's local IP for physical device testing
+  // Change back to localhost for simulator/emulator
+  static const String apiBaseUrl = 'http://192.168.1.14:6000/api/v1';
   static const int maxFileSizeBytes = 10 * 1024 * 1024; // 10MB
 
   // Storage keys

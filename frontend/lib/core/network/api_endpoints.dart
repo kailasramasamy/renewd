@@ -18,6 +18,9 @@ class ApiEndpoints {
   // Documents
   static const String documents = '/documents';
   static String documentById(String id) => '/documents/$id';
+  static String documentSearch(String query) =>
+      '/documents/search?q=${Uri.encodeQueryComponent(query)}';
+  static String documentSuggestLink(String id) => '/documents/$id/suggest-link';
   static String documentsByRenewal(String renewalId) =>
       '/documents/by-renewal/$renewalId';
 

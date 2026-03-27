@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_colors.dart';
 
 enum RenewalCategory {
@@ -18,7 +18,7 @@ class CategoryConfig {
     RenewalCategory.insurance: _CategoryMeta(
       label: 'Insurance',
       color: RenewdColors.oceanBlue,
-      icon: Iconsax.shield_tick,
+      icon: LucideIcons.shieldCheck,
       suggestedGroups: [
         'Car Insurance',
         'Health Insurance',
@@ -31,7 +31,7 @@ class CategoryConfig {
     RenewalCategory.subscription: _CategoryMeta(
       label: 'Subscription',
       color: RenewdColors.lavender,
-      icon: Iconsax.refresh_circle,
+      icon: LucideIcons.refreshCcw,
       suggestedGroups: [
         'Entertainment',
         'Cloud Storage',
@@ -45,7 +45,7 @@ class CategoryConfig {
     RenewalCategory.government: _CategoryMeta(
       label: 'Government',
       color: RenewdColors.teal,
-      icon: Iconsax.building,
+      icon: LucideIcons.building2,
       suggestedGroups: [
         'Driving License',
         'Passport',
@@ -57,7 +57,7 @@ class CategoryConfig {
     RenewalCategory.utility: _CategoryMeta(
       label: 'Utility',
       color: RenewdColors.amber,
-      icon: Iconsax.flash,
+      icon: LucideIcons.zap,
       suggestedGroups: [
         'Electricity',
         'Water',
@@ -71,7 +71,7 @@ class CategoryConfig {
     RenewalCategory.membership: _CategoryMeta(
       label: 'Membership',
       color: RenewdColors.rose,
-      icon: Iconsax.crown,
+      icon: LucideIcons.crown,
       suggestedGroups: [
         'Gym',
         'Club',
@@ -83,7 +83,7 @@ class CategoryConfig {
     RenewalCategory.other: _CategoryMeta(
       label: 'Other',
       color: RenewdColors.slate,
-      icon: Iconsax.category,
+      icon: LucideIcons.layoutGrid,
       suggestedGroups: [],
     ),
   };

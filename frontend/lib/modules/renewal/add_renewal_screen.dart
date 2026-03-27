@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -18,7 +18,7 @@ class AddRenewalScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Iconsax.arrow_left),
+          icon: Icon(LucideIcons.arrowLeft),
           onPressed: () => Get.back(),
         ),
         title: const Text('Add Renewal'),
@@ -31,8 +31,6 @@ class AddRenewalScreen extends StatelessWidget {
             _NameField(c: c),
             const SizedBox(height: RenewdSpacing.xl),
             _CategorySection(c: c),
-            const SizedBox(height: RenewdSpacing.xl),
-            _GroupSection(c: c),
             const SizedBox(height: RenewdSpacing.xl),
             _ProviderField(c: c),
             const SizedBox(height: RenewdSpacing.xl),
@@ -48,7 +46,7 @@ class AddRenewalScreen extends StatelessWidget {
             const SizedBox(height: RenewdSpacing.xxl),
             Obx(() => RenewdButton(
                   label: 'Save Renewal',
-                  icon: Iconsax.tick_circle,
+                  icon: LucideIcons.checkCircle,
                   isLoading: c.isLoading.value,
                   onPressed: c.save,
                 )),
@@ -205,7 +203,7 @@ class _DateField extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Iconsax.calendar,
+                    Icon(LucideIcons.calendar,
                         size: 18, color: RenewdColors.slate),
                     const SizedBox(width: RenewdSpacing.sm),
                     Text(

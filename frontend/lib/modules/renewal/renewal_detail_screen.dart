@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
@@ -27,18 +27,18 @@ class RenewalDetailScreen extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Iconsax.arrow_left),
+            icon: Icon(LucideIcons.arrowLeft),
             onPressed: () => Get.back(result: c.dataChanged),
           ),
           title: Text(renewal?.name ?? 'Detail'),
           actions: [
             if (renewal != null) ...[
               IconButton(
-                icon: const Icon(Iconsax.notification),
+                icon: Icon(LucideIcons.bell),
                 onPressed: () => _showRemindersSheet(context, c),
               ),
               IconButton(
-                icon: const Icon(Iconsax.edit),
+                icon: Icon(LucideIcons.edit),
                 onPressed: () async {
                   final result = await Get.toNamed(
                     AppRoutes.editRenewal,
@@ -51,7 +51,7 @@ class RenewalDetailScreen extends StatelessWidget {
                 },
               ),
               IconButton(
-                icon: const Icon(Iconsax.trash,
+                icon: Icon(LucideIcons.trash2,
                     color: RenewdColors.coralRed),
                 onPressed: () => _confirmDelete(context, c),
               ),
@@ -82,7 +82,7 @@ class RenewalDetailScreen extends StatelessWidget {
           const SizedBox(height: RenewdSpacing.xl),
           Obx(() => RenewdButton(
                 label: 'Mark Renewed',
-                icon: Iconsax.tick_circle,
+                icon: LucideIcons.checkCircle,
                 isLoading: c.isLoading.value,
                 onPressed: c.markRenewed,
               )),
@@ -107,7 +107,7 @@ class RenewalDetailScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Iconsax.notification, size: 20, color: RenewdColors.oceanBlue),
+                Icon(LucideIcons.bell, size: 20, color: RenewdColors.oceanBlue),
                 const SizedBox(width: RenewdSpacing.sm),
                 Text('Reminders', style: RenewdTextStyles.h3),
               ],
@@ -244,30 +244,30 @@ class _InfoSection extends StatelessWidget {
             children: [
               if (renewal.provider != null) ...[
                 _InfoRow(
-                    icon: Iconsax.building,
+                    icon: LucideIcons.building2,
                     label: 'Provider',
                     value: renewal.provider!),
                 _Divider(),
               ],
               if (renewal.amount != null) ...[
                 _InfoRow(
-                    icon: Iconsax.wallet_3,
+                    icon: LucideIcons.wallet,
                     label: 'Amount',
                     value: '₹${renewal.amount!.toStringAsFixed(2)}'),
                 _Divider(),
               ],
               _InfoRow(
-                  icon: Iconsax.refresh_circle,
+                  icon: LucideIcons.refreshCcw,
                   label: 'Frequency',
                   value: _formatFrequency(renewal)),
               _Divider(),
               _InfoRow(
-                  icon: Iconsax.calendar,
+                  icon: LucideIcons.calendar,
                   label: 'Next Renewal',
                   value: RenewdDateUtils.formatDate(renewal.renewalDate)),
               _Divider(),
               _InfoRow(
-                  icon: Iconsax.autobrightness,
+                  icon: LucideIcons.rotateCcw,
                   label: 'Auto-renew',
                   value: renewal.autoRenew ? 'Enabled' : 'Disabled'),
               _Divider(),
@@ -490,7 +490,7 @@ class _DocumentsSection extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2,
                         color: RenewdColors.oceanBlue))
                 : IconButton(
-                    icon: const Icon(Iconsax.document_upload,
+                    icon: Icon(LucideIcons.uploadCloud,
                         color: RenewdColors.oceanBlue),
                     onPressed: () => _pickAndUpload(c),
                     tooltip: 'Upload document',

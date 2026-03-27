@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import type { FastifyInstance } from "fastify";
 import { extractDocumentData } from "../../services/ai.js";
+import { maskExtractionJson } from "../../services/masking.js";
 import { uploadToS3, getFileFromS3, s3KeyFromUrl } from "../../services/storage.js";
 
 export function computeHash(buffer: Buffer): string {
@@ -81,7 +82,8 @@ export async function runExtractionAndSave(
 ): Promise<void> {
   const key = s3KeyFromUrl(fileUrl);
   const { buffer } = await getFileFromS3(app.s3, key);
-  const extraction = await extractDocumentData(buffer, mimeType, fileName);
+  const rawExtraction = await extractDocumentData(buffer, mimeType, fileName);
+  const extraction = maskExtractionJson(rawExtraction);
 
   await app.db.query(
     `UPDATE documents SET ocr_text = $1, issue_date = COALESCE($2, issue_date), expiry_date = COALESCE($3, expiry_date)

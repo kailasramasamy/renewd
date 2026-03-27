@@ -41,7 +41,8 @@ class NotificationSettingsScreen extends StatelessWidget {
         ),
         value: c.enabled.value,
         onChanged: c.toggleEnabled,
-        activeTrackColor: RenewdColors.oceanBlue,
+        activeTrackColor: RenewdColors.oceanBlue.withValues(alpha: 0.3),
+        thumbColor: WidgetStatePropertyAll(RenewdColors.oceanBlue),
       ),
     );
   }
@@ -91,7 +92,8 @@ class NotificationSettingsScreen extends StatelessWidget {
         ),
         value: c.dailyDigestEnabled.value,
         onChanged: c.toggleDigest,
-        activeTrackColor: RenewdColors.oceanBlue,
+        activeTrackColor: RenewdColors.oceanBlue.withValues(alpha: 0.3),
+        thumbColor: WidgetStatePropertyAll(RenewdColors.oceanBlue),
       ),
     );
   }
