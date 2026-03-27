@@ -244,10 +244,10 @@ class _GroupedRenewalList extends StatelessWidget {
           ],
         ),
         const SizedBox(height: RenewdSpacing.md),
-        ...groupNames.map((name) => Obx(() => Padding(
+        ...groupNames.map((name) => Padding(
               padding: const EdgeInsets.only(bottom: RenewdSpacing.md),
               child: GroupCard(c: c, groupName: name),
-            ))),
+            )),
       ],
     );
   }

@@ -78,45 +78,47 @@ class GroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groups = c.groupedRenewals;
-    final items = groups[groupName] ?? [];
-    if (items.isEmpty) return const SizedBox.shrink();
-    final first = items.first;
-    final catColor = CategoryConfig.color(first.category);
-    final catIcon = CategoryConfig.icon(first.category);
-    final nextDays = first.daysRemaining;
-    final totalAmount =
-        items.fold<double>(0, (sum, r) => sum + (r.amount ?? 0));
-    final isExpanded = c.isGroupExpanded(groupName);
+    return Obx(() {
+      final groups = c.groupedRenewals;
+      final items = groups[groupName] ?? [];
+      if (items.isEmpty) return const SizedBox.shrink();
+      final first = items.first;
+      final catColor = CategoryConfig.color(first.category);
+      final catIcon = CategoryConfig.icon(first.category);
+      final nextDays = first.daysRemaining;
+      final totalAmount =
+          items.fold<double>(0, (sum, r) => sum + (r.amount ?? 0));
+      final isExpanded = c.isGroupExpanded(groupName);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: RenewdColors.darkSlate,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: RenewdColors.steel),
-      ),
-      child: Column(
-        children: [
-          GroupHeader(
-            groupName: groupName,
-            catColor: catColor,
-            catIcon: catIcon,
-            itemCount: items.length,
-            nextDays: nextDays,
-            totalAmount: totalAmount,
-            isExpanded: isExpanded,
-            onTap: () => c.toggleGroup(groupName),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            child: isExpanded
-                ? ExpandedItems(items: items, c: c)
-                : const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
+      return Container(
+        decoration: BoxDecoration(
+          color: RenewdColors.darkSlate,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: RenewdColors.steel),
+        ),
+        child: Column(
+          children: [
+            GroupHeader(
+              groupName: groupName,
+              catColor: catColor,
+              catIcon: catIcon,
+              itemCount: items.length,
+              nextDays: nextDays,
+              totalAmount: totalAmount,
+              isExpanded: isExpanded,
+              onTap: () => c.toggleGroup(groupName),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              child: isExpanded
+                  ? ExpandedItems(items: items, c: c)
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 
