@@ -11,6 +11,7 @@ class ScanAddController extends GetxController {
   final RxBool isUploading = false.obs;
   final RxBool isParsing = false.obs;
   final RxBool isSaving = false.obs;
+  final RxString analyzeStep = ''.obs;
   final Rx<DocumentModel?> document = Rx(null);
   final Rx<Map<String, dynamic>?> extraction = Rx(null);
 
@@ -41,6 +42,7 @@ class ScanAddController extends GetxController {
 
   Future<void> uploadAndParse(String filePath, String fileName) async {
     isUploading.value = true;
+    analyzeStep.value = 'Uploading document...';
     try {
       final doc = await _docProvider.upload(
         filePath: filePath,
@@ -49,7 +51,9 @@ class ScanAddController extends GetxController {
       document.value = doc;
       isUploading.value = false;
       isParsing.value = true;
+      analyzeStep.value = 'Reading document with AI...';
       final result = await _docProvider.parseDocument(doc.id);
+      analyzeStep.value = 'Extracting details...';
       extraction.value = result['extraction'] as Map<String, dynamic>?;
       _prefillBasicFields();
       _prefillDateAndDetails();

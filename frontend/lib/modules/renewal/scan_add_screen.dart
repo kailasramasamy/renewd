@@ -9,22 +9,37 @@ import '../../widgets/minder_button.dart';
 import 'scan_add_controller.dart';
 import 'scan_add_form.dart';
 
-class ScanAddScreen extends StatelessWidget {
+class ScanAddScreen extends StatefulWidget {
   const ScanAddScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final c = Get.put(ScanAddController());
+  State<ScanAddScreen> createState() => _ScanAddScreenState();
+}
+
+class _ScanAddScreenState extends State<ScanAddScreen> {
+  late final ScanAddController c;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    c = Get.put(ScanAddController());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startIfNeeded());
+  }
+
+  void _startIfNeeded() {
+    if (_started) return;
     final args = Get.arguments as Map<String, dynamic>?;
     final filePath = args?['filePath'] as String?;
     final fileName = args?['fileName'] as String?;
+    if (filePath != null && fileName != null) {
+      _started = true;
+      c.uploadAndParse(filePath, fileName);
+    }
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (filePath != null && fileName != null) {
-        c.uploadAndParse(filePath, fileName);
-      }
-    });
-
+  @override
+  Widget build(BuildContext context) {
     return Obx(() {
       if (c.isAnalyzing) {
         return _AnalyzingScreen(c: c);
@@ -182,11 +197,9 @@ class _AnalyzingScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: RenewdSpacing.xl),
                 Obx(() => Text(
-                      c.isUploading.value
-                          ? 'Uploading...'
-                          : 'Reading document with AI...',
-                      style: RenewdTextStyles.caption
-                          .copyWith(color: RenewdColors.slate),
+                      c.analyzeStep.value,
+                      style: RenewdTextStyles.body
+                          .copyWith(color: RenewdColors.silver),
                     )),
               ],
             ),
