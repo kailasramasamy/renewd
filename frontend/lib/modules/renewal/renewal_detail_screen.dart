@@ -453,7 +453,12 @@ class _DocumentsSection extends StatelessWidget {
               )
             : const SizedBox.shrink()),
         Obx(() {
-          final docs = c.documents;
+          final docs = c.documents.toList()
+            ..sort((a, b) {
+              if (a.isCurrent && !b.isCurrent) return -1;
+              if (!a.isCurrent && b.isCurrent) return 1;
+              return b.createdAt.compareTo(a.createdAt);
+            });
           if (docs.isEmpty) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.md),
@@ -477,6 +482,11 @@ class _DocumentsSection extends StatelessWidget {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
     if (image == null) return;
-    await c.uploadDocument(image.path, image.name);
+    final renewal = c.renewal.value;
+    final ext = image.name.split('.').last;
+    final name = renewal != null
+        ? '${renewal.name.replaceAll(RegExp(r'[^\w\s]'), '').trim()}_${DateTime.now().millisecondsSinceEpoch}.$ext'
+        : image.name;
+    await c.uploadDocument(image.path, name);
   }
 }

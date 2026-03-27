@@ -52,7 +52,9 @@ class VaultScreen extends StatelessWidget {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
     if (image == null) return;
-    await c.uploadUnlinked(image.path, image.name);
+    final ext = image.name.split('.').last;
+    final name = 'Document_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    await c.uploadUnlinked(image.path, name);
   }
 }
 
@@ -223,10 +225,31 @@ class DocumentCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(doc.fileName,
-                    style: RenewdTextStyles.bodySmall
-                        .copyWith(fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(doc.fileName,
+                          style: RenewdTextStyles.bodySmall.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: doc.isCurrent ? null : RenewdColors.slate),
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                    if (doc.isCurrent) ...[
+                      const SizedBox(width: RenewdSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: RenewdColors.emerald.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text('Current',
+                            style: RenewdTextStyles.caption
+                                .copyWith(color: RenewdColors.emerald, fontSize: 10)),
+                      ),
+                    ],
+                  ],
+                ),
                 const SizedBox(height: RenewdSpacing.xs),
                 Row(
                   children: [

@@ -60,7 +60,9 @@ class _PickerScreen extends StatelessWidget {
     final picker = ImagePicker();
     final file = await picker.pickImage(source: source, imageQuality: 85);
     if (file != null) {
-      await c.uploadAndParse(file.path, file.name);
+      final ext = file.name.split('.').last;
+      final name = 'Scan_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      await c.uploadAndParse(file.path, name);
     }
   }
 
