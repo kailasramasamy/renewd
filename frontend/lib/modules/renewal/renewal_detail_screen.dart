@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -72,6 +73,7 @@ class RenewalDetailScreen extends StatelessWidget {
           const SizedBox(height: RenewdSpacing.xl),
           _InfoSection(renewal: renewal),
           const SizedBox(height: RenewdSpacing.xl),
+          _PolicySummary(c: c),
           _DocumentsSection(c: c),
           const SizedBox(height: RenewdSpacing.xl),
           Obx(() => RenewdButton(
@@ -263,11 +265,16 @@ class _InfoRow extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: RenewdColors.slate),
         const SizedBox(width: RenewdSpacing.sm),
-        Text(label,
-            style: RenewdTextStyles.bodySmall
-                .copyWith(color: RenewdColors.slate)),
-        const Spacer(),
-        Text(value, style: RenewdTextStyles.bodySmall),
+        SizedBox(
+          width: 100,
+          child: Text(label,
+              style: RenewdTextStyles.bodySmall
+                  .copyWith(color: RenewdColors.slate)),
+        ),
+        Expanded(
+          child: Text(value, style: RenewdTextStyles.bodySmall,
+              textAlign: TextAlign.right),
+        ),
       ],
     );
   }
@@ -279,6 +286,125 @@ class _Divider extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: RenewdSpacing.sm),
       child: Divider(color: RenewdColors.steel, height: 1),
+    );
+  }
+}
+
+class _PolicySummary extends StatelessWidget {
+  final RenewalDetailController c;
+  const _PolicySummary({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final current = c.documents
+          .where((d) => d.isCurrent && d.hasAiSummary)
+          .toList();
+      if (current.isEmpty) return const SizedBox.shrink();
+      final doc = current.first;
+      final parsed = _parseOcrText(doc.ocrText!);
+      if (parsed == null) return const SizedBox.shrink();
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _PolicyHeader(),
+          const SizedBox(height: RenewdSpacing.sm),
+          if (parsed['summary'] != null)
+            _SummaryText(text: parsed['summary'] as String),
+          if (parsed['key_details'] != null)
+            _KeyDetailsTable(
+                details: parsed['key_details'] as List<dynamic>),
+          const SizedBox(height: RenewdSpacing.xl),
+        ],
+      );
+    });
+  }
+
+  Map<String, dynamic>? _parseOcrText(String text) {
+    try {
+      final decoded = json.decode(text);
+      return decoded is Map<String, dynamic> ? decoded : null;
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+class _PolicyHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.auto_awesome,
+            size: 16, color: RenewdColors.lavender),
+        const SizedBox(width: RenewdSpacing.sm),
+        Text('Policy Summary',
+            style: RenewdTextStyles.h3
+                .copyWith(color: RenewdColors.lavender)),
+      ],
+    );
+  }
+}
+
+class _SummaryText extends StatelessWidget {
+  final String text;
+  const _SummaryText({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: RenewdSpacing.md),
+      child: Text(text,
+          style: RenewdTextStyles.bodySmall
+              .copyWith(color: RenewdColors.slate)),
+    );
+  }
+}
+
+class _KeyDetailsTable extends StatelessWidget {
+  final List<dynamic> details;
+  const _KeyDetailsTable({required this.details});
+
+  @override
+  Widget build(BuildContext context) {
+    return RenewdCard(
+      padding: const EdgeInsets.all(RenewdSpacing.md),
+      child: Column(
+        children: details.asMap().entries.map((entry) {
+          final detail = entry.value.toString();
+          final parts = detail.split(':');
+          final label = parts.first.trim();
+          final value =
+              parts.length > 1 ? parts.sublist(1).join(':').trim() : '';
+
+          return Column(
+            children: [
+              if (entry.key > 0)
+                const Divider(color: RenewdColors.steel, height: 1),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: RenewdSpacing.sm),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: Text(label,
+                          style: RenewdTextStyles.caption
+                              .copyWith(color: RenewdColors.slate)),
+                    ),
+                    Expanded(
+                      child: Text(
+                          value.isNotEmpty ? value : detail,
+                          style: RenewdTextStyles.bodySmall),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
 }
