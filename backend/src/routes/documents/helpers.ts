@@ -1,23 +1,25 @@
-import fs from "fs";
-import path from "path";
 import crypto from "crypto";
 import type { FastifyInstance } from "fastify";
 import { extractDocumentData } from "../../services/ai.js";
-import { AppError } from "../../lib/errors.js";
-
-export const UPLOADS_DIR = path.join(process.cwd(), "uploads");
-
-export function saveFileToDisk(buffer: Buffer, originalName: string): string {
-  const ext = path.extname(originalName);
-  const uuid = crypto.randomUUID();
-  const fileName = `${uuid}${ext}`;
-  const filePath = path.join(UPLOADS_DIR, fileName);
-  fs.writeFileSync(filePath, buffer);
-  return filePath;
-}
+import { uploadToS3, getFileFromS3, s3KeyFromUrl } from "../../services/storage.js";
 
 export function computeHash(buffer: Buffer): string {
   return crypto.createHash("sha256").update(buffer).digest("hex");
+}
+
+export function generateS3Key(originalName: string): string {
+  const ext = originalName.split(".").pop() ?? "bin";
+  return `documents/${crypto.randomUUID()}.${ext}`;
+}
+
+export async function saveFileToS3(
+  app: FastifyInstance,
+  buffer: Buffer,
+  originalName: string,
+  mimeType: string
+): Promise<string> {
+  const key = generateS3Key(originalName);
+  return uploadToS3(app.s3, key, buffer, mimeType);
 }
 
 export async function findDuplicateDocument(
@@ -37,7 +39,7 @@ export async function insertDocument(
   params: {
     userId: string;
     renewalId: string | null;
-    filePath: string;
+    fileUrl: string;
     fileName: string;
     fileSize: number;
     fileHash: string;
@@ -50,14 +52,9 @@ export async function insertDocument(
      VALUES ((SELECT id FROM users WHERE firebase_uid = $1), $2, $3, $4, $5, $6, $7, $8, true)
      RETURNING *`,
     [
-      params.userId,
-      params.renewalId ?? null,
-      params.filePath,
-      params.fileName,
-      params.fileSize,
-      params.fileHash,
-      params.mimeType,
-      params.docType ?? "other",
+      params.userId, params.renewalId ?? null, params.fileUrl,
+      params.fileName, params.fileSize, params.fileHash,
+      params.mimeType, params.docType ?? "other",
     ]
   );
   return result.rows[0];
@@ -77,21 +74,12 @@ export async function deactivatePreviousDoc(
 export async function runExtractionAndSave(
   app: FastifyInstance,
   docId: string,
-  filePath: string,
+  fileUrl: string,
   mimeType: string,
   fileName: string
 ): Promise<void> {
-  let buffer: Buffer;
-  try {
-    buffer = fs.readFileSync(filePath);
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      app.log.error(`File not found for extraction: ${filePath}`);
-      return;
-    }
-    throw err;
-  }
-
+  const key = s3KeyFromUrl(fileUrl);
+  const { buffer } = await getFileFromS3(app.s3, key);
   const extraction = await extractDocumentData(buffer, mimeType, fileName);
 
   await app.db.query(
@@ -104,14 +92,4 @@ export async function runExtractionAndSave(
       docId,
     ]
   );
-}
-
-export function deleteFileFromDisk(filePath: string): void {
-  try {
-    fs.unlinkSync(filePath);
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
-      throw new AppError(`Failed to delete file: ${(err as Error).message}`, 500, "FILE_DELETE_ERROR");
-    }
-  }
 }

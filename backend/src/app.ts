@@ -45,10 +45,10 @@ export async function buildApp() {
     app.log.warn("Firebase not configured — auth will be skipped in dev");
   }
 
-  if (env.DO_SPACES_KEY) {
+  if (env.AWS_ACCESS_KEY_ID) {
     await app.register(s3Plugin);
   } else {
-    app.log.warn("DO Spaces not configured — file uploads disabled");
+    app.log.warn("AWS S3 not configured — file uploads disabled");
   }
 
   app.decorate("authenticate", authMiddleware);

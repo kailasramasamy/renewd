@@ -11,17 +11,15 @@ declare module "fastify" {
 
 async function plugin(app: FastifyInstance) {
   const s3 = new S3Client({
-    endpoint: env.DO_SPACES_ENDPOINT,
-    region: "blr1",
+    region: env.AWS_REGION,
     credentials: {
-      accessKeyId: env.DO_SPACES_KEY,
-      secretAccessKey: env.DO_SPACES_SECRET,
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
     },
-    forcePathStyle: false,
   });
 
   app.decorate("s3", s3);
-  app.log.info("S3 client (DO Spaces) initialized");
+  app.log.info(`S3 client initialized (region: ${env.AWS_REGION}, bucket: ${env.S3_BUCKET})`);
 }
 
 export const s3Plugin = fp(plugin, { name: "s3" });

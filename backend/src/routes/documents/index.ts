@@ -1,22 +1,20 @@
 import type { FastifyInstance } from "fastify";
-import fs from "fs";
 import { authMiddleware } from "../../middleware/auth.js";
 import { NotFoundError, AppError } from "../../lib/errors.js";
 import { extractDocumentData } from "../../services/ai.js";
+import { getFileFromS3, deleteFromS3, s3KeyFromUrl } from "../../services/storage.js";
 import {
-  UPLOADS_DIR,
-  saveFileToDisk,
+  saveFileToS3,
   computeHash,
   findDuplicateDocument,
   insertDocument,
   deactivatePreviousDoc,
   runExtractionAndSave,
-  deleteFileFromDisk,
 } from "./helpers.js";
 
 const auth = { preHandler: authMiddleware };
 
-export default async function documentRoutes(app: FastifyInstance) {
+async function registerUpload(app: FastifyInstance) {
   app.post("/upload", auth, async (request, reply) => {
     const data = await request.file();
     if (!data) throw new AppError("No file provided", 400, "MISSING_FILE");
@@ -26,17 +24,20 @@ export default async function documentRoutes(app: FastifyInstance) {
 
     const duplicate = await findDuplicateDocument(app, request.user.uid, hash);
     if (duplicate) {
-      return reply.status(409).send({ error: "Duplicate file", code: "DUPLICATE_DOCUMENT", document: duplicate });
+      return reply.status(409).send({
+        error: "Duplicate file", code: "DUPLICATE_DOCUMENT", document: duplicate,
+      });
     }
 
     const renewalId = (data.fields.renewal_id as { value: string } | undefined)?.value ?? null;
     const docType = (data.fields.doc_type as { value: string } | undefined)?.value ?? "other";
 
-    const filePath = saveFileToDisk(buffer, data.filename);
+    const fileUrl = await saveFileToS3(app, buffer, data.filename, data.mimetype);
+
     const doc = await insertDocument(app, {
       userId: request.user.uid,
       renewalId,
-      filePath,
+      fileUrl,
       fileName: data.filename,
       fileSize: buffer.length,
       fileHash: hash,
@@ -49,14 +50,15 @@ export default async function documentRoutes(app: FastifyInstance) {
     }
 
     setImmediate(() => {
-      runExtractionAndSave(app, doc.id as string, filePath, data.mimetype, data.filename).catch((err) => {
-        app.log.error({ err }, "Background AI extraction failed");
-      });
+      runExtractionAndSave(app, doc.id as string, fileUrl, data.mimetype, data.filename)
+        .catch((err) => app.log.error({ err }, "Background AI extraction failed"));
     });
 
     return reply.status(201).send({ document: doc });
   });
+}
 
+async function registerParse(app: FastifyInstance) {
   app.post("/:id/parse", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
     const docResult = await app.db.query(
@@ -66,33 +68,22 @@ export default async function documentRoutes(app: FastifyInstance) {
     if (docResult.rows.length === 0) throw new NotFoundError("Document");
 
     const doc = docResult.rows[0];
-
-    let buffer: Buffer;
-    try {
-      buffer = fs.readFileSync(doc.file_url);
-    } catch (err) {
-      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-        throw new AppError("File not found on disk", 404, "FILE_NOT_FOUND");
-      }
-      throw new AppError("Failed to read file", 500, "FILE_READ_ERROR");
-    }
-
+    const key = s3KeyFromUrl(doc.file_url);
+    const { buffer } = await getFileFromS3(app.s3, key);
     const extraction = await extractDocumentData(buffer, doc.mime_type, doc.file_name);
 
     const updateResult = await app.db.query(
       `UPDATE documents SET ocr_text = $1, issue_date = COALESCE($2, issue_date), expiry_date = COALESCE($3, expiry_date)
        WHERE id = $4 RETURNING *`,
-      [
-        JSON.stringify(extraction),
-        (extraction.issue_date as string) ?? null,
-        (extraction.expiry_date as string) ?? null,
-        id,
-      ]
+      [JSON.stringify(extraction), (extraction.issue_date as string) ?? null,
+       (extraction.expiry_date as string) ?? null, id]
     );
 
     return reply.send({ document: updateResult.rows[0], extraction });
   });
+}
 
+async function registerQueries(app: FastifyInstance) {
   app.get("/", auth, async (request, reply) => {
     const result = await app.db.query(
       "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE u.firebase_uid = $1 ORDER BY d.created_at DESC",
@@ -120,7 +111,9 @@ export default async function documentRoutes(app: FastifyInstance) {
     if (result.rows.length === 0) throw new NotFoundError("Document");
     return reply.send({ document: result.rows[0] });
   });
+}
 
+async function registerFileServe(app: FastifyInstance) {
   app.get("/:id/file", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
     const result = await app.db.query(
@@ -130,24 +123,13 @@ export default async function documentRoutes(app: FastifyInstance) {
     if (result.rows.length === 0) throw new NotFoundError("Document");
 
     const doc = result.rows[0];
-    let fileStream: fs.ReadStream;
-    try {
-      fileStream = fs.createReadStream(doc.file_url);
-    } catch (err) {
-      throw new AppError("Failed to read file", 500, "FILE_READ_ERROR");
-    }
-
-    fileStream.on("error", (err) => {
-      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-        reply.status(404).send({ error: "File not found", code: "FILE_NOT_FOUND" });
-      } else {
-        reply.status(500).send({ error: "File read error", code: "FILE_READ_ERROR" });
-      }
-    });
-
-    return reply.type(doc.mime_type).send(fileStream);
+    const key = s3KeyFromUrl(doc.file_url);
+    const { buffer, contentType } = await getFileFromS3(app.s3, key);
+    return reply.type(contentType).send(buffer);
   });
+}
 
+async function registerDelete(app: FastifyInstance) {
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
     const result = await app.db.query(
@@ -156,7 +138,19 @@ export default async function documentRoutes(app: FastifyInstance) {
     );
     if (result.rows.length === 0) throw new NotFoundError("Document");
 
-    deleteFileFromDisk(result.rows[0].file_url);
+    const key = s3KeyFromUrl(result.rows[0].file_url);
+    await deleteFromS3(app.s3, key).catch((err) =>
+      app.log.error({ err }, "Failed to delete file from S3")
+    );
+
     return reply.send({ deleted: true, id: result.rows[0].id });
   });
+}
+
+export default async function documentRoutes(app: FastifyInstance) {
+  await registerUpload(app);
+  await registerParse(app);
+  await registerQueries(app);
+  await registerFileServe(app);
+  await registerDelete(app);
 }

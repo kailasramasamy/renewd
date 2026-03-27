@@ -1,4 +1,4 @@
-import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -49,11 +49,10 @@ class VaultScreen extends StatelessWidget {
   }
 
   Future<void> _pickAndUpload(VaultController c) async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    if (file.path == null) return;
-    await c.uploadUnlinked(file.path!, file.name);
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return;
+    await c.uploadUnlinked(image.path, image.name);
   }
 }
 
