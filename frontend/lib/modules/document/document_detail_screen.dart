@@ -24,6 +24,19 @@ class DocumentDetailScreen extends StatelessWidget {
           ),
           title: Text(doc?.fileName ?? 'Document',
               overflow: TextOverflow.ellipsis),
+          actions: [
+            if (doc != null)
+              Obx(() => c.isSharing.value
+                  ? const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: SizedBox(
+                          width: 20, height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2)))
+                  : IconButton(
+                      icon: const Icon(Iconsax.share),
+                      onPressed: c.shareDocument,
+                    )),
+          ],
         ),
         body: doc == null
             ? const Center(child: CircularProgressIndicator())

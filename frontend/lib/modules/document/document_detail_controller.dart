@@ -1,5 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart' show Share, XFile;
 import '../../data/models/document_model.dart';
 import '../../data/providers/document_provider.dart';
 
@@ -54,6 +58,30 @@ class DocumentDetailController extends GetxController {
           snackPosition: SnackPosition.BOTTOM);
     } finally {
       isParsing.value = false;
+    }
+  }
+
+  final RxBool isSharing = false.obs;
+
+  Future<void> shareDocument() async {
+    final doc = document.value;
+    if (doc == null) return;
+    isSharing.value = true;
+    try {
+      final url = fileUrl();
+      final response = await http.get(Uri.parse(url));
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/${doc.fileName}');
+      await file.writeAsBytes(response.bodyBytes);
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: doc.fileName,
+      );
+    } catch (e) {
+      Get.snackbar('Share failed', e.toString(),
+          snackPosition: SnackPosition.BOTTOM);
+    } finally {
+      isSharing.value = false;
     }
   }
 
