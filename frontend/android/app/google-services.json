@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "360842637861",
+    "project_id": "renewd-279a8",
+    "storage_bucket": "renewd-279a8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:360842637861:android:4722ac11e3f62f7adf45cc",
+        "android_client_info": {
+          "package_name": "com.quartex.renewd"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "360842637861-sq0kg26gjitchb2kq6fso2g9h6gvdlqb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.quartex.renewd",
+            "certificate_hash": "d5fb0f9b9f1135dbd6aad783af19a2db1183ef3e"
+          }
+        },
+        {
+          "client_id": "360842637861-aci7ivs2uqr8rfajo121nltvlbv9d1do.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnfvKn0LimMrAqjQbX_sAUuqOj6hkdBoY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "360842637861-aci7ivs2uqr8rfajo121nltvlbv9d1do.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "360842637861-denfn7lu3lnr6844c6e8f99cih2qh9jp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.quartex.renewd"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
