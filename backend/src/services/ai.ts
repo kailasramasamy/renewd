@@ -44,6 +44,15 @@ export async function chat(message: string, context?: string): Promise<string> {
   }
 }
 
+function parseJsonResponse(text: string): Record<string, unknown> {
+  let cleaned = text.trim();
+  // Strip markdown code blocks if present
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+  }
+  return JSON.parse(cleaned) as Record<string, unknown>;
+}
+
 export async function extractDocumentData(
   fileBuffer: Buffer,
   mimeType: string,
@@ -86,7 +95,7 @@ export async function extractDocumentData(
       throw new AppError("Unexpected AI response type", 502, "AI_ERROR");
     }
 
-    return JSON.parse(block.text) as Record<string, unknown>;
+    return parseJsonResponse(block.text);
   } catch (err) {
     if (err instanceof AppError) throw err;
     if (err instanceof SyntaxError) {
