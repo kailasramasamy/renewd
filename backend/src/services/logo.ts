@@ -1,6 +1,10 @@
+import Anthropic from "@anthropic-ai/sdk";
 import type { Pool } from "pg";
+import { env } from "../config/env.js";
 
-// Common brand → domain mappings for Indian market
+const client = new Anthropic({ apiKey: env.CLAUDE_API_KEY });
+
+// Common brand → domain mappings for fast lookup (no AI call needed)
 const BRAND_DOMAINS: Record<string, string> = {
   netflix: "netflix.com",
   amazon: "amazon.in",
@@ -49,32 +53,54 @@ const BRAND_DOMAINS: Record<string, string> = {
   bwssb: "bwssb.gov.in",
 };
 
-function findDomain(name: string, provider: string | null): string | null {
+function findDomainFromMap(name: string, provider: string | null): string | null {
   const search = (provider || name).toLowerCase().trim();
 
-  // Direct match
   if (BRAND_DOMAINS[search]) return BRAND_DOMAINS[search];
 
-  // Partial match
   for (const [brand, domain] of Object.entries(BRAND_DOMAINS)) {
     if (search.includes(brand) || brand.includes(search)) return domain;
-  }
-
-  // Try provider as domain directly (e.g., "Netflix Inc." → "netflix.com")
-  const cleaned = search
-    .replace(/\s*(inc|ltd|llp|pvt|private|limited|corp|co)\s*\.?\s*/gi, "")
-    .trim();
-  if (cleaned.length > 2) {
-    return `${cleaned.replace(/\s+/g, "")}.com`;
   }
 
   return null;
 }
 
-export function getLogoUrl(name: string, provider: string | null): string | null {
-  const domain = findDomain(name, provider);
-  if (!domain) return null;
+async function findDomainWithAI(name: string, provider: string | null): Promise<string | null> {
+  const query = provider ? `${name} by ${provider}` : name;
+
+  try {
+    const response = await client.messages.create({
+      model: env.CLAUDE_MODEL,
+      max_tokens: 50,
+      messages: [
+        {
+          role: "user",
+          content: `What is the main website domain for "${query}"? Reply with ONLY the domain (e.g. "netflix.com"), nothing else. If you don't know or it's not a real company/service, reply "unknown".`,
+        },
+      ],
+    });
+
+    const block = response.content[0];
+    if (block.type !== "text") return null;
+
+    const domain = block.text.trim().toLowerCase();
+    if (domain === "unknown" || domain.includes(" ") || !domain.includes(".")) {
+      return null;
+    }
+    return domain;
+  } catch {
+    return null;
+  }
+}
+
+function buildLogoUrl(domain: string): string {
   return `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${domain}&size=128`;
+}
+
+export function getLogoUrl(name: string, provider: string | null): string | null {
+  const domain = findDomainFromMap(name, provider);
+  if (!domain) return null;
+  return buildLogoUrl(domain);
 }
 
 export async function updateRenewalLogo(
@@ -83,8 +109,16 @@ export async function updateRenewalLogo(
   name: string,
   provider: string | null
 ): Promise<void> {
-  const logoUrl = getLogoUrl(name, provider);
-  if (logoUrl) {
+  // Try static map first (free, instant)
+  let domain = findDomainFromMap(name, provider);
+
+  // Fall back to AI lookup (costs tokens, but accurate)
+  if (!domain) {
+    domain = await findDomainWithAI(name, provider);
+  }
+
+  if (domain) {
+    const logoUrl = buildLogoUrl(domain);
     await db.query("UPDATE renewals SET logo_url = $1 WHERE id = $2", [
       logoUrl,
       renewalId,

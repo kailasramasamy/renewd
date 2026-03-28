@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/category_config.dart';
+import '../../widgets/brand_logo.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -191,6 +192,8 @@ class _RenewalItem extends StatelessWidget {
         ),
         child: Row(
           children: [
+            BrandLogo(renewal: renewal, size: 32),
+            const SizedBox(width: RenewdSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
