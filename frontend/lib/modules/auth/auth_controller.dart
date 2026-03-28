@@ -1,11 +1,7 @@
-import 'dart:convert';
-import 'dart:math';
-import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../app/routes/app_routes.dart';
@@ -106,26 +102,44 @@ class AuthController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final rawNonce = _generateNonce();
-      final nonce = _sha256ofString(rawNonce);
+      final appleProvider = AppleAuthProvider()
+        ..addScope('email')
+        ..addScope('name');
 
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        nonce: nonce,
-      );
+      final result = await _auth.signInWithProvider(appleProvider);
+      final user = result.user;
+      if (user == null) {
+        errorMessage.value = 'Apple sign-in failed';
+        isLoading.value = false;
+        return;
+      }
 
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        rawNonce: rawNonce,
-      );
+      final token = await user.getIdToken();
+      final storage = Get.find<StorageService>();
+      storage.saveToken(token!);
+      storage.saveUserData({
+        'uid': user.uid,
+        'phone': user.phoneNumber,
+        'email': user.email,
+        'name': user.displayName,
+        'photo': user.photoURL,
+      });
 
-      await _signInWithCredential(oauthCredential);
+      isLoading.value = false;
+
+      final needsName = (user.displayName ?? '').isEmpty;
+      final needsEmail = (user.email ?? '').isEmpty;
+      final needsPhone = (user.phoneNumber ?? '').isEmpty;
+
+      if (needsName || needsEmail || needsPhone) {
+        Get.offAllNamed(AppRoutes.completeProfile);
+      } else {
+        showSuccessSnack('Welcome to Renewd!');
+        Get.offAllNamed(AppRoutes.home);
+      }
     } catch (e) {
       isLoading.value = false;
-      if (e.toString().contains('canceled')) return; // user cancelled
+      if (e.toString().contains('canceled') || e.toString().contains('cancelled')) return;
       errorMessage.value = 'Apple sign-in failed';
       debugPrint('[Auth] Apple error: $e');
     }
@@ -174,17 +188,4 @@ class AuthController extends GetxController {
     }
   }
 
-  String _generateNonce([int length = 32]) {
-    const charset =
-        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
-    final random = Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
-        .join();
-  }
-
-  String _sha256ofString(String input) {
-    final bytes = utf8.encode(input);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
-  }
 }

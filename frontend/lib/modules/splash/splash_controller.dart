@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/storage_service.dart';
-import '../../core/constants/app_constants.dart';
 import '../../app/routes/app_routes.dart';
 
 class SplashController extends GetxController {
@@ -22,13 +21,7 @@ class SplashController extends GetxController {
       return;
     }
 
-    // Dev mode: skip auth, go straight to home
-    if (AppConstants.apiBaseUrl.contains('localhost') ||
-        AppConstants.apiBaseUrl.contains('192.168.')) {
-      Get.offAllNamed(AppRoutes.home);
-      return;
-    }
-
+    // Check if user is logged in
     final auth = Get.find<AuthService>();
     if (auth.isLoggedIn) {
       Get.offAllNamed(AppRoutes.home);
