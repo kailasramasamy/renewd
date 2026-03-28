@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../core/utils/document_picker.dart' show imagesToPdf;
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -56,14 +60,39 @@ class _PickerScreen extends StatelessWidget {
   final ScanAddController c;
   const _PickerScreen({required this.c});
 
-  Future<void> _pickImage(BuildContext context, ImageSource source) async {
-    final picker = ImagePicker();
-    final file = await picker.pickImage(source: source, imageQuality: 85);
-    if (file != null) {
-      final ext = file.name.split('.').last;
-      final name = 'Scan_${DateTime.now().millisecondsSinceEpoch}.$ext';
-      await c.uploadAndParse(file.path, name);
+  Future<void> _scanDocument(BuildContext context) async {
+    try {
+      final result = await FlutterDocScanner().getScannedDocumentAsImages(page: 10);
+      if (result == null || result.images.isEmpty) return;
+      final pdf = await imagesToPdf(result.images, 'Scan');
+      await c.uploadAndParse(pdf.path, pdf.name);
+    } on PlatformException catch (e) {
+      debugPrint('[ScanAdd] Scanner failed: $e');
+      final picker = ImagePicker();
+      final file = await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+      if (file == null) return;
+      final pdf = await imagesToPdf([file.path], 'Scan');
+      await c.uploadAndParse(pdf.path, pdf.name);
     }
+  }
+
+  Future<void> _pickFromGallery(BuildContext context) async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (file == null) return;
+    final pdf = await imagesToPdf([file.path], 'Photo');
+    await c.uploadAndParse(pdf.path, pdf.name);
+  }
+
+  Future<void> _pickFile(BuildContext context) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.first;
+    if (file.path == null) return;
+    await c.uploadAndParse(file.path!, file.name);
   }
 
   @override
@@ -102,15 +131,21 @@ class _PickerScreen extends StatelessWidget {
             ),
             const SizedBox(height: RenewdSpacing.xxl),
             _PickerOption(
-              icon: LucideIcons.camera,
-              label: 'Take a Photo',
-              onTap: () => _pickImage(context, ImageSource.camera),
+              icon: LucideIcons.scanLine,
+              label: 'Scan Document',
+              onTap: () => _scanDocument(context),
             ),
             const SizedBox(height: RenewdSpacing.md),
             _PickerOption(
               icon: LucideIcons.image,
-              label: 'Choose from Gallery',
-              onTap: () => _pickImage(context, ImageSource.gallery),
+              label: 'Photo Library',
+              onTap: () => _pickFromGallery(context),
+            ),
+            const SizedBox(height: RenewdSpacing.md),
+            _PickerOption(
+              icon: LucideIcons.folderOpen,
+              label: 'Browse Files',
+              onTap: () => _pickFile(context),
             ),
           ],
         ),

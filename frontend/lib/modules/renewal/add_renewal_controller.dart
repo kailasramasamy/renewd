@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
+import '../../core/utils/snackbar_helper.dart';
 import '../../data/providers/renewal_provider.dart';
 
 class AddRenewalController extends GetxController {
@@ -47,8 +48,7 @@ class AddRenewalController extends GetxController {
   Future<void> save() async {
     final error = validateAndGetError();
     if (error != null) {
-      Get.snackbar('Missing info', error,
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack(error);
       return;
     }
     isLoading.value = true;
@@ -69,11 +69,9 @@ class AddRenewalController extends GetxController {
       };
       await _provider.create(data);
       Get.back(result: true);
-      Get.snackbar('Done', '${name.value.trim()} added',
-          snackPosition: SnackPosition.BOTTOM);
+      showSuccessSnack('${name.value.trim()} added');
     } catch (e) {
-      Get.snackbar('Error', e.toString(),
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Failed to add renewal');
     } finally {
       isLoading.value = false;
     }

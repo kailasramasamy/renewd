@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'pdf_viewer_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../widgets/minder_button.dart';
 import '../../widgets/minder_card.dart';
 import 'document_detail_controller.dart';
 
@@ -26,24 +26,139 @@ class DocumentDetailScreen extends StatelessWidget {
               overflow: TextOverflow.ellipsis),
           actions: [
             if (doc != null)
-              Obx(() => c.isSharing.value
-                  ? const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2)))
-                  : IconButton(
-                      icon: Icon(LucideIcons.share),
-                      onPressed: c.shareDocument,
-                    )),
+              IconButton(
+                icon: Icon(LucideIcons.moreVertical),
+                onPressed: () => _showActions(context, c),
+              ),
           ],
         ),
         body: doc == null
             ? const Center(child: CircularProgressIndicator())
             : _buildBody(context, c),
-        bottomNavigationBar: _DeleteBar(c: c),
       );
     });
+  }
+
+  void _showActions(BuildContext context, DocumentDetailController c) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(RenewdSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: RenewdColors.slate.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.lg),
+              ListTile(
+                leading: Icon(LucideIcons.edit, color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
+                title: const Text('Rename'),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showRenameDialog(context, c);
+                },
+              ),
+              ListTile(
+                leading: Obx(() => c.isSharing.value
+                    ? const SizedBox(width: 24, height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : Icon(LucideIcons.share, color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy)),
+                title: const Text('Share'),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onTap: () {
+                  Navigator.pop(context);
+                  c.shareDocument();
+                },
+              ),
+              ListTile(
+                leading: Icon(LucideIcons.trash2, color: RenewdColors.coralRed),
+                title: Text('Delete', style: TextStyle(color: RenewdColors.coralRed)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDelete(context, c);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, DocumentDetailController c) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Document'),
+        content: const Text('This will permanently delete the document.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              c.deleteDocument();
+            },
+            child: Text('Delete',
+                style: TextStyle(color: RenewdColors.coralRed)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRenameDialog(BuildContext context, DocumentDetailController c) {
+    final doc = c.document.value;
+    if (doc == null) return;
+    final nameCtrl = TextEditingController(
+      text: doc.fileName.replaceAll(RegExp(r'\.[^.]+$'), ''),
+    );
+    final ext = doc.fileName.contains('.')
+        ? '.${doc.fileName.split('.').last}'
+        : '';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename Document'),
+        content: TextField(
+          controller: nameCtrl,
+          autofocus: true,
+          decoration: InputDecoration(
+            suffixText: ext,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final newName = '${nameCtrl.text.trim()}$ext';
+              if (newName.isEmpty) return;
+              Navigator.pop(ctx);
+              c.renameDocument(newName);
+            },
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildBody(BuildContext context, DocumentDetailController c) {
@@ -69,18 +184,6 @@ class _DocumentPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final doc = c.document.value!;
-    final url = c.fileUrl();
-    if (doc.isImage) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          url,
-          width: double.infinity,
-          fit: BoxFit.contain,
-          errorBuilder: (context2, error, stack) => _PdfPlaceholder(doc: doc),
-        ),
-      );
-    }
     return _PdfPlaceholder(doc: doc);
   }
 }
@@ -91,27 +194,56 @@ class _PdfPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = Get.find<DocumentDetailController>();
     return RenewdCard(
-      child: Row(
+      child: Column(
         children: [
-          Icon(LucideIcons.fileText, size: 48, color: RenewdColors.coralRed),
-          const SizedBox(width: RenewdSpacing.lg),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(doc.fileName, style: RenewdTextStyles.body,
-                    overflow: TextOverflow.ellipsis),
-                if (doc.fileSizeLabel.isNotEmpty)
-                  Text(doc.fileSizeLabel,
-                      style: RenewdTextStyles.caption
-                          .copyWith(color: RenewdColors.slate)),
-              ],
+          Row(
+            children: [
+              Icon(LucideIcons.fileText, size: 40, color: RenewdColors.oceanBlue),
+              const SizedBox(width: RenewdSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(doc.fileName, style: RenewdTextStyles.bodySmall
+                        .copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 2, overflow: TextOverflow.ellipsis),
+                    if (doc.fileSizeLabel.isNotEmpty)
+                      Text(doc.fileSizeLabel,
+                          style: RenewdTextStyles.caption
+                              .copyWith(color: RenewdColors.slate)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: RenewdSpacing.md),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _openDocument(c),
+              icon: Icon(LucideIcons.eye, size: 16),
+              label: const Text('View Document'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: RenewdColors.oceanBlue,
+                side: const BorderSide(color: RenewdColors.oceanBlue),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _openDocument(DocumentDetailController c) {
+    final d = c.document.value!;
+    Get.to(() => PdfViewerScreen(
+          url: c.fileUrl(),
+          title: d.fileName,
+        ));
   }
 }
 
@@ -271,45 +403,3 @@ class _ReAnalyzeButton extends StatelessWidget {
   }
 }
 
-class _DeleteBar extends StatelessWidget {
-  final DocumentDetailController c;
-  const _DeleteBar({required this.c});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, RenewdSpacing.xl),
-      child: Obx(() => RenewdButton(
-            label: 'Delete Document',
-            icon: LucideIcons.trash2,
-            variant: RenewdButtonVariant.danger,
-            isLoading: c.isDeleting.value,
-            onPressed: () => _confirmDelete(context, c),
-          )),
-    );
-  }
-
-  void _confirmDelete(BuildContext context, DocumentDetailController c) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Document'),
-        content: const Text('This will permanently delete the document.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              c.deleteDocument();
-            },
-            child: const Text('Delete',
-                style: TextStyle(color: RenewdColors.coralRed)),
-          ),
-        ],
-      ),
-    );
-  }
-}

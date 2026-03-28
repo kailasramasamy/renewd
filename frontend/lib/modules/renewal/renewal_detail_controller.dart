@@ -1,20 +1,30 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/utils/snackbar_helper.dart';
+import '../../widgets/irrelevant_doc_sheet.dart';
 import '../../data/models/document_model.dart';
+import '../../data/models/payment_model.dart';
 import '../../data/models/renewal_model.dart';
 import '../../data/providers/document_provider.dart';
+import '../../data/providers/payment_provider.dart';
 import '../../data/providers/renewal_provider.dart';
 
 class RenewalDetailController extends GetxController {
   final _provider = RenewalProvider();
   final _docProvider = DocumentProvider();
+  final _payProvider = PaymentProvider();
 
   final Rx<RenewalModel?> renewal = Rx<RenewalModel?>(null);
   final RxBool isLoading = false.obs;
   final RxList<DocumentModel> documents = <DocumentModel>[].obs;
+  final RxList<PaymentModel> payments = <PaymentModel>[].obs;
   final RxList<int> reminderDays = <int>[].obs;
   final RxBool isUploading = false.obs;
   final RxBool isParsing = false.obs;
   bool dataChanged = false;
+
+  final RxBool showPaymentPrompt = false.obs;
+  DateTime? renewedForDate;
 
   @override
   void onInit() {
@@ -22,21 +32,23 @@ class RenewalDetailController extends GetxController {
     final arg = Get.arguments;
     if (arg is RenewalModel) {
       renewal.value = arg;
-      fetchDocuments();
-      fetchReminders();
+      _fetchSupplementary();
     } else if (arg is String) {
       fetchRenewal(arg);
     }
+  }
+
+  Future<void> _fetchSupplementary() async {
+    await Future.wait([fetchDocuments(), fetchPayments(), fetchReminders()]);
   }
 
   Future<void> fetchRenewal(String id) async {
     isLoading.value = true;
     try {
       renewal.value = await _provider.getById(id);
-      await fetchDocuments();
-      await fetchReminders();
-    } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      await _fetchSupplementary();
+    } catch (_) {
+      showErrorSnack('Failed to load renewal');
     } finally {
       isLoading.value = false;
     }
@@ -47,9 +59,15 @@ class RenewalDetailController extends GetxController {
     if (id == null) return;
     try {
       documents.assignAll(await _docProvider.getByRenewal(id));
-    } catch (_) {
-      // documents are supplementary — silent fail
-    }
+    } catch (_) {}
+  }
+
+  Future<void> fetchPayments() async {
+    final id = renewal.value?.id;
+    if (id == null) return;
+    try {
+      payments.assignAll(await _payProvider.getByRenewal(id));
+    } catch (_) {}
   }
 
   Future<void> fetchReminders() async {
@@ -63,16 +81,13 @@ class RenewalDetailController extends GetxController {
           .toList();
 
       if (unsent.isEmpty) {
-        // Pre-existing renewal with no reminders — create defaults
         const defaults = [7, 1];
         await _provider.updateReminders(id, defaults);
         reminderDays.assignAll(defaults);
       } else {
         reminderDays.assignAll(unsent);
       }
-    } catch (_) {
-      // reminders are supplementary — silent fail
-    }
+    } catch (_) {}
   }
 
   Future<void> updateReminders(List<int> days) async {
@@ -81,10 +96,9 @@ class RenewalDetailController extends GetxController {
     try {
       await _provider.updateReminders(id, days);
       reminderDays.assignAll(days);
-      Get.snackbar('Updated', 'Reminders updated',
-          snackPosition: SnackPosition.BOTTOM);
-    } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      showSuccessSnack('Reminders updated');
+    } catch (_) {
+      showErrorSnack('Failed to update reminders');
     }
   }
 
@@ -93,15 +107,44 @@ class RenewalDetailController extends GetxController {
     if (id == null) return;
     isLoading.value = true;
     try {
+      renewedForDate = renewal.value?.renewalDate;
       renewal.value = await _provider.markRenewed(id);
-      Get.snackbar('Renewed', 'Next renewal date updated',
-          snackPosition: SnackPosition.BOTTOM);
-      Get.back(result: true);
-    } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      dataChanged = true;
+      showPaymentPrompt.value = true;
+    } catch (_) {
+      showErrorSnack('Failed to mark as renewed');
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> logPayment({
+    required double amount,
+    String? method,
+    String? referenceNumber,
+    DateTime? paidDate,
+  }) async {
+    final r = renewal.value;
+    if (r == null) return;
+    final date = paidDate ?? DateTime.now();
+    try {
+      final payment = await _payProvider.create({
+        'renewal_id': r.id,
+        'amount': amount,
+        'paid_date': date.toIso8601String().split('T')[0],
+        'method': method,
+        'reference_number': referenceNumber,
+      });
+      payments.insert(0, payment);
+      showPaymentPrompt.value = false;
+      showSuccessSnack('₹${amount.toStringAsFixed(0)} payment recorded');
+    } catch (_) {
+      showErrorSnack('Failed to log payment');
+    }
+  }
+
+  void skipPaymentPrompt() {
+    showPaymentPrompt.value = false;
   }
 
   Future<void> deleteRenewal() async {
@@ -111,8 +154,8 @@ class RenewalDetailController extends GetxController {
     try {
       await _provider.delete(id);
       Get.back(result: true);
-    } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+    } catch (_) {
+      showErrorSnack('Failed to delete renewal');
       isLoading.value = false;
     }
   }
@@ -127,35 +170,66 @@ class RenewalDetailController extends GetxController {
         fileName: fileName,
         renewalId: id,
       );
-      documents.add(doc);
-      await parseDocument(doc.id);
-    } catch (e) {
-      Get.snackbar('Upload failed', e.toString(),
-          snackPosition: SnackPosition.BOTTOM);
+      await _parseAndCheck(doc.id);
+    } catch (_) {
+      showErrorSnack('Upload failed');
     } finally {
       isUploading.value = false;
+    }
+  }
+
+  Future<void> _parseAndCheck(String docId) async {
+    isParsing.value = true;
+    try {
+      final result = await _docProvider.parseDocument(docId);
+      final extraction = result['extraction'] as Map<String, dynamic>?;
+      final isRelevant = extraction?['is_relevant'] as bool? ?? true;
+      final summary = extraction?['summary'] as String? ?? 'Document analyzed';
+
+      if (!isRelevant) {
+        isParsing.value = false;
+        _showIrrelevantDocDialog(docId, summary);
+      } else {
+        await fetchDocuments();
+        isParsing.value = false;
+        showSuccessSnack(summary);
+      }
+    } catch (_) {
+      await fetchDocuments();
+      isParsing.value = false;
+      showErrorSnack('AI analysis failed');
     }
   }
 
   Future<void> parseDocument(String docId) async {
     isParsing.value = true;
     try {
-      final result = await _docProvider.parseDocument(docId);
+      await _docProvider.parseDocument(docId);
       await fetchDocuments();
-      final extraction = result['extraction'] as Map<String, dynamic>?;
-      if (extraction != null) {
-        Get.snackbar(
-          'AI Analysis Complete',
-          extraction['summary'] as String? ?? 'Document analyzed',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 4),
-        );
-      }
-    } catch (e) {
-      Get.snackbar('Analysis failed', e.toString(),
-          snackPosition: SnackPosition.BOTTOM);
+    } catch (_) {
+      showErrorSnack('AI analysis failed');
     } finally {
       isParsing.value = false;
     }
+  }
+
+  void _showIrrelevantDocDialog(String docId, String summary) {
+    Get.bottomSheet(
+      IrrelevantDocSheet(
+        summary: summary,
+        onKeep: () {
+          Get.back();
+        },
+        onDelete: () async {
+          Get.back();
+          await _docProvider.delete(docId);
+          documents.removeWhere((d) => d.id == docId);
+          showSuccessSnack('Document removed');
+        },
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    );
   }
 }

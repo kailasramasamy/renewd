@@ -95,21 +95,21 @@
 
 ---
 
-## Sprint 6 (Week 6): Payment Tracking + AI Chat
+## Sprint 6 (Week 6): Payment Tracking + AI Chat ✅ COMPLETED 2026-03-27
 **Goal:** Track payment history. Chat with Renewd about your renewals.
 
-| # | Task | F/B | Effort |
-|---|------|-----|--------|
-| 1 | Payment log API (CRUD) | Backend | 2hr |
-| 2 | Mark Renewed flow → payment logging prompt | Frontend | 3hr |
-| 3 | Payment history timeline on renewal detail | Frontend | 2hr |
-| 4 | Spending analytics API (by category, by month) | Backend | 2hr |
-| 5 | Price change detection | Backend | 1hr |
-| 6 | AI chat API: Claude with function calling | Backend | 4hr |
-| 7 | Chat screen UI: message bubbles, structured response cards, input bar | Frontend | 4hr |
-| 8 | Chat queries working end-to-end | Both | 2hr |
+| # | Task | F/B | Effort | Status |
+|---|------|-----|--------|--------|
+| 1 | Payment log API (CRUD) | Backend | 2hr | ✅ |
+| 2 | Mark Renewed flow → payment logging prompt | Frontend | 3hr | ✅ |
+| 3 | Payment history timeline on renewal detail | Frontend | 2hr | ✅ |
+| 4 | Spending analytics API (by category, by month) | Backend | 2hr | ✅ |
+| 5 | Price change detection | Backend | 1hr | ✅ |
+| 6 | AI chat API: Claude with function calling | Backend | 4hr | ✅ |
+| 7 | Chat screen UI: message bubbles, structured response cards, input bar | Frontend | 4hr | ✅ |
+| 8 | Chat queries working end-to-end | Both | 2hr | ✅ |
 
-**Deliverable:** P1 complete. Payment tracking + basic AI chat working.
+**Delivered:** Full payment CRUD, payment prompt after mark renewed, payment history timeline, spending analytics by category/month, price change detection, AI chat with Claude tool use (queries renewals, payments, analytics), chat UI with suggestions/bubbles/typing indicator
 
 ---
 
@@ -143,5 +143,5 @@
 | 3 | Document Vault | ✅ Upload, scan, search documents |
 | 4 | Reminders | ✅ Push notifications before expiry |
 | 5 | OCR + AI Extraction | ✅ Scan → auto-create renewal |
-| 6 | Payments + AI Chat | Track spending, chat with Renewd |
+| 6 | Payments + AI Chat | ✅ Track spending, chat with Renewd |
 | 7-8 | Offers + Polish | Find better deals, launch-ready |

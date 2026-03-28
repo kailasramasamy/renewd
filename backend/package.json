@@ -10,7 +10,7 @@
     "migrate": "tsx migrate.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.20.0",
+    "@anthropic-ai/sdk": "^0.80.0",
     "@aws-sdk/client-s3": "^3.500.0",
     "@aws-sdk/s3-request-presigner": "^3.500.0",
     "@fastify/cors": "^9.0.0",

@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import '../../data/providers/notification_provider.dart';
+import '../utils/snackbar_helper.dart';
 
 class NotificationService extends GetxService {
   final _messaging = FirebaseMessaging.instance;
@@ -130,11 +131,9 @@ class NotificationService extends GetxService {
     if (renewalId == null || reminderId == null) return;
     try {
       await _provider.snoozeReminder(renewalId, reminderId);
-      Get.snackbar('Snoozed', 'Reminder snoozed until tomorrow',
-          snackPosition: SnackPosition.BOTTOM);
+      showSuccessSnack('Reminder snoozed until tomorrow');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to snooze reminder',
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Failed to snooze reminder');
     }
   }
 }

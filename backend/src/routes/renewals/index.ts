@@ -73,6 +73,8 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
 
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    await app.db.query("DELETE FROM payments WHERE renewal_id = $1", [id]);
+    await app.db.query("DELETE FROM documents WHERE renewal_id = $1", [id]);
     await app.db.query("DELETE FROM reminders WHERE renewal_id = $1", [id]);
     const result = await app.db.query(
       "DELETE FROM renewals WHERE id=$1 AND user_id=(SELECT id FROM users WHERE firebase_uid=$2) RETURNING id",
@@ -122,10 +124,45 @@ function calculateNextDate(current: string, frequency: string, customDays: numbe
   return date;
 }
 
+async function registerPriceCheck(app: FastifyInstance) {
+  app.get("/:id/price-check", auth, async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    const renewal = await app.db.query(
+      "SELECT r.amount, r.previous_amount FROM renewals r JOIN users u ON u.id = r.user_id WHERE r.id = $1 AND u.firebase_uid = $2",
+      [id, request.user.uid]
+    );
+    if (renewal.rows.length === 0) throw new NotFoundError("Renewal");
+
+    const lastPayment = await app.db.query(
+      "SELECT amount FROM payments WHERE renewal_id = $1 ORDER BY paid_date DESC LIMIT 1",
+      [id]
+    );
+
+    const currentAmount = parseFloat(renewal.rows[0].amount) || 0;
+    const lastPaid = lastPayment.rows.length > 0
+      ? parseFloat(lastPayment.rows[0].amount) || 0
+      : null;
+    const previousAmount = parseFloat(renewal.rows[0].previous_amount) || null;
+
+    const changed = lastPaid !== null && lastPaid !== currentAmount;
+    const diff = changed ? lastPaid - currentAmount : 0;
+
+    return reply.send({
+      current_amount: currentAmount,
+      last_paid: lastPaid,
+      previous_amount: previousAmount,
+      price_changed: changed,
+      difference: diff,
+    });
+  });
+}
+
 export default async function renewalRoutes(app: FastifyInstance) {
   await registerListAndGet(app);
   await registerCreate(app);
   await registerUpdateAndDelete(app);
   await registerMarkRenewed(app);
   await registerReminderRoutes(app);
+  await registerPriceCheck(app);
 }

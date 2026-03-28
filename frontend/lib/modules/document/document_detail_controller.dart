@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart' show Share, XFile;
+import '../../core/services/storage_service.dart';
+import 'package:flutter/rendering.dart';
+import '../../core/utils/snackbar_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../data/providers/document_provider.dart';
 
@@ -46,16 +49,10 @@ class DocumentDetailController extends GetxController {
       document.value = await _provider.getById(id);
       final extraction = result['extraction'] as Map<String, dynamic>?;
       if (extraction != null) {
-        Get.snackbar(
-          'AI Analysis Complete',
-          extraction['summary'] as String? ?? 'Document analyzed',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 4),
-        );
+        showInfoSnack('AI Analysis Complete');
       }
     } catch (e) {
-      Get.snackbar('Analysis failed', e.toString(),
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Analysis failed');
     } finally {
       isParsing.value = false;
     }
@@ -69,17 +66,30 @@ class DocumentDetailController extends GetxController {
     isSharing.value = true;
     try {
       final url = fileUrl();
-      final response = await http.get(Uri.parse(url));
+      final storage = Get.find<StorageService>();
+      final token = storage.readToken();
+      final response = await http.get(
+        Uri.parse(url),
+        headers: token != null ? {'Authorization': 'Bearer $token'} : {},
+      );
+      if (response.statusCode != 200) {
+        showErrorSnack('Failed to download file');
+        return;
+      }
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/${doc.fileName}');
       await file.writeAsBytes(response.bodyBytes);
+      final box = Get.context?.findRenderObject() as RenderBox?;
       await Share.shareXFiles(
         [XFile(file.path)],
         text: doc.fileName,
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
+            : const Rect.fromLTWH(0, 0, 100, 100),
       );
     } catch (e) {
-      Get.snackbar('Share failed', e.toString(),
-          snackPosition: SnackPosition.BOTTOM);
+      debugPrint('[Share] Error: $e');
+      showErrorSnack('Share failed');
     } finally {
       isSharing.value = false;
     }
@@ -93,9 +103,20 @@ class DocumentDetailController extends GetxController {
       await _provider.delete(id);
       Get.back(result: true);
     } catch (e) {
-      Get.snackbar('Delete failed', e.toString(),
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Delete failed');
       isDeleting.value = false;
+    }
+  }
+
+  Future<void> renameDocument(String newName) async {
+    final id = document.value?.id;
+    if (id == null) return;
+    try {
+      await _provider.rename(id, newName);
+      document.value = await _provider.getById(id);
+      showSuccessSnack('Renamed to $newName');
+    } catch (_) {
+      showErrorSnack('Rename failed');
     }
   }
 }

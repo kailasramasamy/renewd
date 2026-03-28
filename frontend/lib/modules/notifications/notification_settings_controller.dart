@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../core/utils/snackbar_helper.dart';
 import '../../data/providers/notification_provider.dart';
 
 class NotificationSettingsController extends GetxController {
@@ -31,8 +32,7 @@ class NotificationSettingsController extends GetxController {
       dailyDigestEnabled.value = prefs['daily_digest_enabled'] as bool? ?? false;
       dailyDigestHour.value = prefs['daily_digest_hour'] as int? ?? 9;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load preferences',
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Failed to load preferences');
     } finally {
       isLoading.value = false;
     }
@@ -68,8 +68,7 @@ class NotificationSettingsController extends GetxController {
         'daily_digest_hour': dailyDigestHour.value,
       });
     } catch (e) {
-      Get.snackbar('Error', 'Failed to save preferences',
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Failed to save preferences');
     } finally {
       isSaving.value = false;
     }

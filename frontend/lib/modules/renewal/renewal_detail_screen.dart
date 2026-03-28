@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
+import '../../core/utils/document_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -9,12 +9,38 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_utils.dart';
+import '../../data/models/payment_model.dart';
 import '../../data/models/renewal_model.dart';
 import '../../widgets/minder_button.dart';
 import '../../widgets/minder_card.dart';
 import '../../widgets/status_badge.dart';
 import '../vault/vault_screen.dart';
 import 'renewal_detail_controller.dart';
+
+void _showSnack(BuildContext context,
+    {required IconData icon, required Color color, required String message}) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Row(
+      children: [
+        Container(
+          width: 28, height: 28,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Icon(icon, size: 14, color: color),
+        ),
+        const SizedBox(width: RenewdSpacing.sm),
+        Expanded(child: Text(message, style: RenewdTextStyles.bodySmall)),
+      ],
+    ),
+    backgroundColor: isDark ? RenewdColors.steel : Colors.white,
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    elevation: 4,
+  ));
+}
 
 class RenewalDetailScreen extends StatelessWidget {
   const RenewalDetailScreen({super.key});
@@ -78,14 +104,38 @@ class RenewalDetailScreen extends StatelessWidget {
           _InfoSection(renewal: renewal),
           const SizedBox(height: RenewdSpacing.xl),
           _PolicySummary(c: c),
+          _PaymentHistory(c: c),
           _DocumentsSection(c: c),
           const SizedBox(height: RenewdSpacing.xl),
-          Obx(() => RenewdButton(
-                label: 'Mark Renewed',
-                icon: LucideIcons.checkCircle,
-                isLoading: c.isLoading.value,
-                onPressed: c.markRenewed,
-              )),
+          Obx(() {
+            if (c.showPaymentPrompt.value) {
+              return _PaymentPrompt(c: c, renewal: renewal);
+            }
+            final days = renewal.daysRemaining;
+            if (days > 7) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.md),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? RenewdColors.darkSlate
+                      : RenewdColors.cloudGray,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text('Renews in $days days',
+                      style: RenewdTextStyles.bodySmall
+                          .copyWith(color: RenewdColors.slate)),
+                ),
+              );
+            }
+            return RenewdButton(
+              label: days < 0 ? 'Overdue — Mark Renewed' : 'Mark Renewed',
+              icon: LucideIcons.checkCircle,
+              isLoading: c.isLoading.value,
+              onPressed: c.markRenewed,
+            );
+          }),
           const SizedBox(height: RenewdSpacing.xl),
         ],
       ),
@@ -370,7 +420,7 @@ class _PolicySummary extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _PolicyHeader(),
+          _PolicyHeader(docType: parsed['document_type'] as String?),
           const SizedBox(height: RenewdSpacing.sm),
           if (parsed['summary'] != null)
             _SummaryText(text: parsed['summary'] as String),
@@ -394,14 +444,28 @@ class _PolicySummary extends StatelessWidget {
 }
 
 class _PolicyHeader extends StatelessWidget {
+  final String? docType;
+  const _PolicyHeader({this.docType});
+
+  String get _label {
+    switch (docType) {
+      case 'policy': return 'Policy Summary';
+      case 'receipt': return 'Receipt Summary';
+      case 'certificate': return 'Certificate Summary';
+      case 'invoice': return 'Invoice Summary';
+      case 'id': return 'ID Document Summary';
+      default: return 'Document Summary';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.auto_awesome,
+        Icon(LucideIcons.sparkles,
             size: 16, color: RenewdColors.lavender),
         const SizedBox(width: RenewdSpacing.sm),
-        Text('Policy Summary',
+        Text(_label,
             style: RenewdTextStyles.h3
                 .copyWith(color: RenewdColors.lavender)),
       ],
@@ -466,6 +530,246 @@ class _KeyDetailsTable extends StatelessWidget {
             ],
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+class _PaymentPrompt extends StatefulWidget {
+  final RenewalDetailController c;
+  final RenewalModel renewal;
+  const _PaymentPrompt({required this.c, required this.renewal});
+
+  @override
+  State<_PaymentPrompt> createState() => _PaymentPromptState();
+}
+
+class _PaymentPromptState extends State<_PaymentPrompt> {
+  late final TextEditingController _amountCtrl;
+  String? _method;
+  late DateTime _paidDate;
+
+  static const _methods = ['UPI', 'Card', 'Net Banking', 'Cash', 'Auto-debit'];
+
+  @override
+  void initState() {
+    super.initState();
+    _amountCtrl = TextEditingController(
+      text: widget.renewal.amount?.toStringAsFixed(0) ?? '',
+    );
+    _paidDate = DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    _amountCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _paidDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) setState(() => _paidDate = picked);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(RenewdSpacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? RenewdColors.darkSlate : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: RenewdColors.emerald.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.checkCircle,
+                  size: 18, color: RenewdColors.emerald),
+              const SizedBox(width: RenewdSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Renewed! Log payment?',
+                        style: RenewdTextStyles.body
+                            .copyWith(fontWeight: FontWeight.w600)),
+                    if (widget.c.renewedForDate != null)
+                      Text(
+                        'For period ending ${RenewdDateUtils.formatDate(widget.c.renewedForDate!)}',
+                        style: RenewdTextStyles.caption
+                            .copyWith(color: RenewdColors.slate),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: RenewdSpacing.md),
+          TextField(
+            controller: _amountCtrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              prefixText: '₹ ',
+              hintText: 'Amount paid',
+            ),
+          ),
+          const SizedBox(height: RenewdSpacing.sm),
+          // Date picker
+          GestureDetector(
+            onTap: _pickDate,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
+              decoration: BoxDecoration(
+                color: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(LucideIcons.calendar,
+                      size: 16, color: RenewdColors.slate),
+                  const SizedBox(width: RenewdSpacing.sm),
+                  Text(
+                    'Paid on ${RenewdDateUtils.formatDate(_paidDate)}',
+                    style: RenewdTextStyles.bodySmall,
+                  ),
+                  const Spacer(),
+                  Icon(LucideIcons.chevronDown,
+                      size: 14, color: RenewdColors.slate),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: RenewdSpacing.sm),
+          Wrap(
+            spacing: RenewdSpacing.sm,
+            children: _methods.map((m) {
+              final selected = _method == m;
+              return ChoiceChip(
+                label: Text(m, style: RenewdTextStyles.caption),
+                selected: selected,
+                onSelected: (_) => setState(() => _method = selected ? null : m),
+                selectedColor: RenewdColors.oceanBlue.withValues(alpha: 0.15),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: RenewdSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: widget.c.skipPaymentPrompt,
+                  child: Text('Skip',
+                      style: RenewdTextStyles.bodySmall
+                          .copyWith(color: RenewdColors.slate)),
+                ),
+              ),
+              const SizedBox(width: RenewdSpacing.sm),
+              Expanded(
+                flex: 2,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final amount = double.tryParse(_amountCtrl.text);
+                    if (amount == null || amount <= 0) {
+                      _showSnack(context,
+                          icon: LucideIcons.alertTriangle,
+                          color: RenewdColors.coralRed,
+                          message: 'Enter a valid amount');
+                      return;
+                    }
+                    widget.c.logPayment(
+                      amount: amount,
+                      method: _method,
+                      paidDate: _paidDate,
+                    );
+                  },
+                  child: const Text('Log Payment'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentHistory extends StatelessWidget {
+  final RenewalDetailController c;
+  const _PaymentHistory({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (c.payments.isEmpty) return const SizedBox.shrink();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.wallet, size: 16, color: RenewdColors.slate),
+              const SizedBox(width: RenewdSpacing.sm),
+              Text('Payment History', style: RenewdTextStyles.h3),
+            ],
+          ),
+          const SizedBox(height: RenewdSpacing.sm),
+          ...c.payments.take(5).map((p) => _PaymentRow(payment: p)),
+          const SizedBox(height: RenewdSpacing.xl),
+        ],
+      );
+    });
+  }
+}
+
+class _PaymentRow extends StatelessWidget {
+  final PaymentModel payment;
+  const _PaymentRow({required this.payment});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: RenewdSpacing.sm),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 32,
+            decoration: BoxDecoration(
+              color: RenewdColors.emerald,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: RenewdSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  RenewdDateUtils.formatDate(payment.paidDate),
+                  style: RenewdTextStyles.bodySmall,
+                ),
+                if (payment.method != null)
+                  Text(payment.method!,
+                      style: RenewdTextStyles.caption
+                          .copyWith(color: RenewdColors.slate)),
+              ],
+            ),
+          ),
+          Text('₹${payment.amount.toStringAsFixed(0)}',
+              style: RenewdTextStyles.body
+                  .copyWith(fontWeight: FontWeight.w600)),
+        ],
       ),
     );
   }
@@ -541,14 +845,14 @@ class _DocumentsSection extends StatelessWidget {
   }
 
   Future<void> _pickAndUpload(RenewalDetailController c) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return;
+    final ctx = Get.context;
+    if (ctx == null) return;
+    final doc = await showDocumentPicker(ctx);
+    if (doc == null) return;
     final renewal = c.renewal.value;
-    final ext = image.name.split('.').last;
-    final name = renewal != null
-        ? '${renewal.name.replaceAll(RegExp(r'[^\w\s]'), '').trim()}_${DateTime.now().millisecondsSinceEpoch}.$ext'
-        : image.name;
-    await c.uploadDocument(image.path, name);
+    final prefix = renewal != null
+        ? renewal.name.replaceAll(RegExp(r'[^\w\s]'), '').trim()
+        : 'Doc';
+    await c.uploadDocument(doc.path, '${prefix}_${doc.name}');
   }
 }

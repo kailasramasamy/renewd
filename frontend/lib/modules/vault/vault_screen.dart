@@ -1,4 +1,5 @@
-import 'package:image_picker/image_picker.dart';
+import '../../core/utils/document_picker.dart';
+import '../renewal/renewal_detail_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -49,12 +50,11 @@ class VaultScreen extends StatelessWidget {
   }
 
   Future<void> _pickAndUpload(VaultController c) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return;
-    final ext = image.name.split('.').last;
-    final name = 'Document_${DateTime.now().millisecondsSinceEpoch}.$ext';
-    await c.uploadUnlinked(image.path, name);
+    final ctx = Get.context;
+    if (ctx == null) return;
+    final doc = await showDocumentPicker(ctx);
+    if (doc == null) return;
+    await c.uploadUnlinked(doc.path, doc.name);
   }
 }
 
@@ -215,7 +215,17 @@ class DocumentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RenewdCard(
-      onTap: () => Get.toNamed(AppRoutes.documentDetail, arguments: doc),
+      onTap: () async {
+        final result = await Get.toNamed(AppRoutes.documentDetail, arguments: doc);
+        if (result == true) {
+          if (Get.isRegistered<VaultController>()) {
+            Get.find<VaultController>().fetchAll();
+          }
+          if (Get.isRegistered<RenewalDetailController>()) {
+            Get.find<RenewalDetailController>().fetchDocuments();
+          }
+        }
+      },
       padding: const EdgeInsets.all(RenewdSpacing.md),
       child: Row(
         children: [

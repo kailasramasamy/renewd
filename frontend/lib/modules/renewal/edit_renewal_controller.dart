@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
+import '../../core/utils/snackbar_helper.dart';
 import '../../data/models/renewal_model.dart';
 import '../../data/providers/renewal_provider.dart';
 
@@ -67,8 +68,7 @@ class EditRenewalController extends GetxController {
   Future<void> save() async {
     final err = validateAndGetError();
     if (err != null) {
-      Get.snackbar('Missing info', err,
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack(err);
       return;
     }
     isLoading.value = true;
@@ -92,10 +92,9 @@ class EditRenewalController extends GetxController {
       };
       await _provider.update(renewalId, data);
       Get.back(result: true);
-      Get.snackbar('Updated', '${name.value.trim()} saved',
-          snackPosition: SnackPosition.BOTTOM);
+      showSuccessSnack('${name.value.trim()} saved');
     } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Failed to update renewal');
     } finally {
       isLoading.value = false;
     }

@@ -25,7 +25,7 @@ class PaymentModel {
         id: json['id'] as String,
         userId: json['user_id'] as String,
         renewalId: json['renewal_id'] as String,
-        amount: (json['amount'] as num).toDouble(),
+        amount: double.parse(json['amount'].toString()),
         paidDate: DateTime.parse(json['paid_date'] as String),
         method: json['method'] as String?,
         referenceNumber: json['reference_number'] as String?,

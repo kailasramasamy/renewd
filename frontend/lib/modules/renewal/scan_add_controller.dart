@@ -1,9 +1,12 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
+import '../../core/utils/snackbar_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../data/providers/document_provider.dart';
 import '../../data/providers/renewal_provider.dart';
+import '../../widgets/irrelevant_doc_sheet.dart';
 
 class ScanAddController extends GetxController {
   final _docProvider = DocumentProvider();
@@ -58,15 +61,46 @@ class ScanAddController extends GetxController {
       debugPrint('=== PARSE RESULT KEYS: ${result.keys.toList()}');
       debugPrint('=== EXTRACTION: ${result['extraction']}');
       final ext = result['extraction'] as Map<String, dynamic>?;
-      debugPrint('=== EXT PARSED: $ext');
+      final isRelevant = ext?['is_relevant'] as bool? ?? true;
+
+      if (!isRelevant) {
+        await _handleIrrelevantDoc(doc.id, ext?['summary'] as String? ?? 'Not a renewal document');
+        return;
+      }
+
       _prefillFromExtraction(ext);
-      debugPrint('=== AFTER PREFILL: name=${name.value}, provider=${providerName.value}, amount=${amount.value}, date=${renewalDate.value}, category=${category.value}');
       extraction.value = ext;
     } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Failed to analyze document');
     } finally {
       isUploading.value = false;
       isParsing.value = false;
+    }
+  }
+
+  Future<void> _handleIrrelevantDoc(String docId, String summary) async {
+    final completer = Completer<bool>();
+    Get.bottomSheet(
+      IrrelevantDocSheet(
+        summary: summary,
+        onKeep: () {
+          Get.back();
+          completer.complete(true);
+        },
+        onDelete: () {
+          Get.back();
+          completer.complete(false);
+        },
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    );
+    final keep = await completer.future;
+    if (!keep) {
+      await _docProvider.delete(docId);
+      document.value = null;
+      Get.back();
     }
   }
 
@@ -194,7 +228,7 @@ class ScanAddController extends GetxController {
   Future<void> save() async {
     final error = validateAndGetError();
     if (error != null) {
-      Get.snackbar('Missing info', error, snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack(error);
       return;
     }
     isSaving.value = true;
@@ -204,12 +238,9 @@ class ScanAddController extends GetxController {
         await _docProvider.linkToRenewal(document.value!.id, renewal.id);
       }
       Get.back(result: true);
-      Get.snackbar(
-        'Done', '${name.value.trim()} added from document',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      showSuccessSnack('${name.value.trim()} added from document');
     } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Failed to save renewal');
     } finally {
       isSaving.value = false;
     }

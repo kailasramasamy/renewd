@@ -12,6 +12,7 @@ import authRoutes from "./routes/auth/index.js";
 import renewalRoutes from "./routes/renewals/index.js";
 import documentRoutes from "./routes/documents/index.js";
 import chatRoutes from "./routes/chat/index.js";
+import paymentRoutes from "./routes/payments/index.js";
 import userRoutes from "./routes/users/index.js";
 
 export async function buildApp() {
@@ -58,6 +59,7 @@ export async function buildApp() {
   await app.register(renewalRoutes, { prefix: "/api/v1/renewals" });
   await app.register(documentRoutes, { prefix: "/api/v1/documents" });
   await app.register(chatRoutes, { prefix: "/api/v1/chat" });
+  await app.register(paymentRoutes, { prefix: "/api/v1/payments" });
   await app.register(userRoutes, { prefix: "/api/v1/users" });
 
   return app;

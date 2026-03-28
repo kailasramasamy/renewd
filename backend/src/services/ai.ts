@@ -7,9 +7,16 @@ const client = new Anthropic({ apiKey: env.CLAUDE_API_KEY });
 const SYSTEM_PROMPT = `You are a helpful assistant for the Renewd app — a personal renewal and subscription tracking tool.
 Help users manage their renewals, understand due dates, and get reminders. Be concise and practical.`;
 
-const EXTRACTION_PROMPT = `Analyze this document and extract the following information. Return ONLY valid JSON, no other text:
+const EXTRACTION_PROMPT = `Analyze this document image. This is for a renewal/subscription tracking app called Renewd.
+
+If this is a relevant document (insurance policy, bill, invoice, receipt, certificate, license, subscription confirmation, ID card, or government document), extract the details below.
+
+If this is NOT a relevant document (random photo, screenshot, meme, selfie, etc.), set is_relevant to false and explain why in the summary.
+
+Return ONLY valid JSON, no other text:
 {
-  "summary": "2-3 sentence summary of what this document is",
+  "is_relevant": true or false,
+  "summary": "2-3 sentence summary. If not relevant, explain what the document actually is and suggest what types of documents to upload instead",
   "provider": "company/organization name or null",
   "document_type": "policy/receipt/certificate/invoice/id/other",
   "issue_date": "YYYY-MM-DD or null",
@@ -59,10 +66,12 @@ export async function extractDocumentData(
   fileName: string
 ): Promise<Record<string, unknown>> {
   const isImage = mimeType.startsWith("image/");
+  const isPdf = mimeType === "application/pdf";
 
-  if (!isImage) {
+  if (!isImage && !isPdf) {
     return {
-      summary: `Document: ${fileName}`,
+      is_relevant: false,
+      summary: `Unsupported file type: ${fileName}. Upload an image or PDF.`,
       document_type: "other",
       provider: null,
       issue_date: null,
@@ -73,7 +82,10 @@ export async function extractDocumentData(
   }
 
   const base64 = fileBuffer.toString("base64");
-  const mediaType = mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+
+  const contentBlock = isPdf
+    ? { type: "document" as const, source: { type: "base64" as const, media_type: "application/pdf" as const, data: base64 } }
+    : { type: "image" as const, source: { type: "base64" as const, media_type: mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp", data: base64 } };
 
   try {
     const response = await client.messages.create({
@@ -83,7 +95,7 @@ export async function extractDocumentData(
         {
           role: "user",
           content: [
-            { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+            contentBlock,
             { type: "text", text: EXTRACTION_PROMPT },
           ],
         },

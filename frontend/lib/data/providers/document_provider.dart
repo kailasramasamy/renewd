@@ -86,6 +86,12 @@ class DocumentProvider {
     return list.cast<Map<String, dynamic>>();
   }
 
+  Future<void> rename(String id, String newName) async {
+    await _client.safePut('${ApiEndpoints.documents}/$id/rename', {
+      'file_name': newName,
+    });
+  }
+
   Future<void> delete(String id) async {
     await _client.safeDelete(ApiEndpoints.documentById(id));
   }

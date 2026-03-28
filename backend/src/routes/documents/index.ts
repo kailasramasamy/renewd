@@ -50,10 +50,8 @@ async function registerUpload(app: FastifyInstance) {
       await deactivatePreviousDoc(app, renewalId, doc.id as string);
     }
 
-    setImmediate(() => {
-      runExtractionAndSave(app, doc.id as string, fileUrl, data.mimetype, data.filename)
-        .catch((err) => app.log.error({ err }, "Background AI extraction failed"));
-    });
+    // AI extraction is triggered explicitly by the frontend via POST /:id/parse
+    // so it can check relevance before saving
 
     return reply.status(201).send({ document: doc });
   });
@@ -74,14 +72,20 @@ async function registerParse(app: FastifyInstance) {
     const rawExtraction = await extractDocumentData(buffer, doc.mime_type, doc.file_name);
     const extraction = maskExtractionJson(rawExtraction);
 
-    const updateResult = await app.db.query(
-      `UPDATE documents SET ocr_text = $1, issue_date = COALESCE($2, issue_date), expiry_date = COALESCE($3, expiry_date)
-       WHERE id = $4 RETURNING *`,
-      [JSON.stringify(extraction), (extraction.issue_date as string) ?? null,
-       (extraction.expiry_date as string) ?? null, id]
-    );
+    // Only save extraction to DB if the document is relevant
+    const isRelevant = extraction.is_relevant !== false;
+    if (isRelevant) {
+      const updateResult = await app.db.query(
+        `UPDATE documents SET ocr_text = $1, issue_date = COALESCE($2, issue_date), expiry_date = COALESCE($3, expiry_date)
+         WHERE id = $4 RETURNING *`,
+        [JSON.stringify(extraction), (extraction.issue_date as string) ?? null,
+         (extraction.expiry_date as string) ?? null, id]
+      );
+      return reply.send({ document: updateResult.rows[0], extraction });
+    }
 
-    return reply.send({ document: updateResult.rows[0], extraction });
+    // Return extraction without saving — frontend decides
+    return reply.send({ document: doc, extraction });
   });
 }
 
@@ -210,9 +214,29 @@ async function registerSuggestLink(app: FastifyInstance) {
   });
 }
 
+async function registerRename(app: FastifyInstance) {
+  app.put("/:id/rename", auth, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const { file_name } = request.body as { file_name: string };
+    if (!file_name) throw new ValidationError("file_name is required");
+
+    const result = await app.db.query(
+      "UPDATE documents SET file_name = $1 WHERE id = $2 AND user_id = (SELECT id FROM users WHERE firebase_uid = $3) RETURNING *",
+      [file_name, id, request.user.uid]
+    );
+    if (result.rows.length === 0) throw new NotFoundError("Document");
+    return reply.send({ document: result.rows[0] });
+  });
+}
+
 async function registerDelete(app: FastifyInstance) {
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    // Clear any payment references to this document
+    await app.db.query(
+      "UPDATE payments SET receipt_document_id = NULL WHERE receipt_document_id = $1",
+      [id]
+    );
     const result = await app.db.query(
       "DELETE FROM documents WHERE id = $1 AND user_id = (SELECT id FROM users WHERE firebase_uid = $2) RETURNING id, file_url",
       [id, request.user.uid]
@@ -235,5 +259,6 @@ export default async function documentRoutes(app: FastifyInstance) {
   await registerFileServe(app);
   await registerLink(app);
   await registerSuggestLink(app);
+  await registerRename(app);
   await registerDelete(app);
 }

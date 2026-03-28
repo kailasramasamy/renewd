@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../core/utils/snackbar_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../data/providers/document_provider.dart';
 
@@ -28,7 +29,7 @@ class VaultController extends GetxController {
     try {
       allDocuments.assignAll(await _provider.getAll());
     } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Failed to load documents');
     } finally {
       isLoading.value = false;
     }
@@ -93,8 +94,7 @@ class VaultController extends GetxController {
           filePath: filePath, fileName: fileName);
       allDocuments.insert(0, doc);
     } catch (e) {
-      Get.snackbar('Upload failed', e.toString(),
-          snackPosition: SnackPosition.BOTTOM);
+      showErrorSnack('Upload failed');
     } finally {
       isUploading.value = false;
     }
