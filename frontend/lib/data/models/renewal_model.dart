@@ -15,6 +15,7 @@ class RenewalModel {
   final String? notes;
   final String status;
   final String? groupName;
+  final String? logoUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -32,6 +33,7 @@ class RenewalModel {
     this.notes,
     required this.status,
     this.groupName,
+    this.logoUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -60,6 +62,7 @@ class RenewalModel {
         notes: json['notes'] as String?,
         status: json['status'] as String? ?? 'active',
         groupName: json['group_name'] as String?,
+        logoUrl: json['logo_url'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String),
         updatedAt: DateTime.parse(json['updated_at'] as String),
       );

@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_utils.dart';
+import '../../widgets/brand_logo.dart';
 import '../../widgets/skeleton_loader.dart';
 import '../../data/models/renewal_model.dart';
 import 'dashboard_controller.dart';
@@ -425,7 +426,6 @@ class _RenewalRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final days = renewal.daysRemaining;
-    final catColor = CategoryConfig.color(renewal.category);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
@@ -445,17 +445,8 @@ class _RenewalRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Category icon
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: catColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(CategoryConfig.icon(renewal.category),
-                  size: 18, color: catColor),
-            ),
+            // Brand logo or category icon
+            BrandLogo(renewal: renewal, size: 40),
             const SizedBox(width: RenewdSpacing.md),
             // Name + provider
             Expanded(

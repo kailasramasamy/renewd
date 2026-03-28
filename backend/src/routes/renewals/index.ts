@@ -3,6 +3,7 @@ import { authMiddleware } from "../../middleware/auth.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { createDefaultReminders, deleteUnsentReminders } from "./helpers.js";
 import { registerReminderRoutes } from "./reminders.js";
+import { updateRenewalLogo } from "../../services/logo.js";
 
 const auth = { preHandler: authMiddleware };
 
@@ -46,6 +47,9 @@ async function registerCreate(app: FastifyInstance) {
     const renewal = result.rows[0];
     await createDefaultReminders(app.db, userId, renewal.id, renewal.renewal_date);
 
+    // Lookup brand logo (non-blocking)
+    updateRenewalLogo(app.db, renewal.id, renewal.name, renewal.provider).catch(() => {});
+
     return reply.status(201).send({ renewal });
   });
 }
@@ -67,6 +71,7 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
     const renewal = result.rows[0];
     await deleteUnsentReminders(app.db, id);
     await createDefaultReminders(app.db, renewal.user_id, id, renewal.renewal_date);
+    updateRenewalLogo(app.db, id, renewal.name, renewal.provider).catch(() => {});
 
     return reply.send({ renewal });
   });
@@ -158,6 +163,20 @@ async function registerPriceCheck(app: FastifyInstance) {
   });
 }
 
+async function registerBackfillLogos(app: FastifyInstance) {
+  app.post("/backfill-logos", auth, async (_request, reply) => {
+    const result = await app.db.query(
+      "SELECT id, name, provider FROM renewals WHERE logo_url IS NULL"
+    );
+    let updated = 0;
+    for (const row of result.rows) {
+      await updateRenewalLogo(app.db, row.id, row.name, row.provider);
+      updated++;
+    }
+    return reply.send({ updated, total: result.rowCount });
+  });
+}
+
 export default async function renewalRoutes(app: FastifyInstance) {
   await registerListAndGet(app);
   await registerCreate(app);
@@ -165,4 +184,5 @@ export default async function renewalRoutes(app: FastifyInstance) {
   await registerMarkRenewed(app);
   await registerReminderRoutes(app);
   await registerPriceCheck(app);
+  await registerBackfillLogos(app);
 }
