@@ -31,6 +31,8 @@ class FeaturesScreen extends StatelessWidget {
               delegate: SliverChildListDelegate([
                 const SizedBox(height: RenewdSpacing.md),
                 ..._features.map((f) => _FeatureCard(feature: f, isDark: isDark)),
+                const SizedBox(height: RenewdSpacing.lg),
+                _SecuritySection(isDark: isDark),
                 const SizedBox(height: RenewdSpacing.xxl),
                 _ComingSoon(isDark: isDark),
                 const SizedBox(height: RenewdSpacing.xxxl),
@@ -502,6 +504,103 @@ class _CategoriesGraphic extends StatelessWidget {
 }
 
 // ─── Coming Soon ──────────────────────────────────────
+
+class _SecuritySection extends StatelessWidget {
+  final bool isDark;
+  const _SecuritySection({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(RenewdSpacing.xl),
+      decoration: BoxDecoration(
+        color: isDark ? RenewdColors.darkSlate : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: RenewdColors.emerald.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 48, height: 48,
+            decoration: BoxDecoration(
+              color: RenewdColors.emerald.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(LucideIcons.shieldCheck,
+                size: 24, color: RenewdColors.emerald),
+          ),
+          const SizedBox(height: RenewdSpacing.lg),
+          Text('Your Data is Secure',
+              style: RenewdTextStyles.h3
+                  .copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: RenewdSpacing.md),
+          _SecurityItem(
+            icon: LucideIcons.lock,
+            title: 'AES-256 Encryption',
+            subtitle: 'All documents encrypted at rest using military-grade encryption',
+          ),
+          _SecurityItem(
+            icon: LucideIcons.globe,
+            title: 'Encrypted in Transit',
+            subtitle: 'All data transferred over HTTPS/TLS secure connections',
+          ),
+          _SecurityItem(
+            icon: LucideIcons.eyeOff,
+            title: 'PII Masking',
+            subtitle: 'Aadhaar and PAN numbers are automatically masked',
+          ),
+          _SecurityItem(
+            icon: LucideIcons.cloudOff,
+            title: 'Private Cloud Storage',
+            subtitle: 'Documents stored in your own private S3 vault',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SecurityItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _SecurityItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: RenewdSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: RenewdColors.emerald),
+          const SizedBox(width: RenewdSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: RenewdTextStyles.bodySmall
+                        .copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                    style: RenewdTextStyles.caption
+                        .copyWith(color: RenewdColors.slate)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _ComingSoon extends StatelessWidget {
   final bool isDark;

@@ -47,6 +47,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       subtitle:
           'Ask questions about your spending, upcoming dues, and get personalized suggestions.',
     ),
+    _PageData(
+      icon: LucideIcons.shieldCheck,
+      color: Color(0xFF10B981),
+      title: 'Bank-Grade Security',
+      subtitle:
+          'Your documents are protected with AES-256 encryption. Aadhaar & PAN numbers are automatically masked. Your data stays private.',
+    ),
   ];
 
   void _next() {

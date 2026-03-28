@@ -30,6 +30,7 @@ class VaultScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          _SecurityBadge(),
           _SearchBar(c: c),
           _TabRow(c: c),
           Expanded(child: _Body(c: c)),
@@ -56,6 +57,48 @@ class VaultScreen extends StatelessWidget {
     final doc = await showDocumentPicker(ctx);
     if (doc == null) return;
     await c.uploadUnlinked(doc.path, doc.name);
+  }
+}
+
+class _SecurityBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+          RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, 0),
+      padding: const EdgeInsets.symmetric(
+          horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
+      decoration: BoxDecoration(
+        color: isDark
+            ? RenewdColors.emerald.withValues(alpha: 0.08)
+            : RenewdColors.emerald.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(LucideIcons.shieldCheck,
+              size: 14, color: RenewdColors.emerald),
+          const SizedBox(width: RenewdSpacing.sm),
+          Text(
+            'AES-256 encrypted',
+            style: RenewdTextStyles.caption.copyWith(
+              color: RenewdColors.emerald,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+            ),
+          ),
+          const SizedBox(width: RenewdSpacing.xs),
+          Text(
+            '·  Your documents are stored securely',
+            style: RenewdTextStyles.caption.copyWith(
+              color: RenewdColors.emerald.withValues(alpha: 0.7),
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
