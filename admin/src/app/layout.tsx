@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Sidebar } from "./sidebar";
+import { LayoutShell } from "./layout-shell";
 
 export const metadata: Metadata = {
   title: "Renewd Admin",
@@ -14,9 +14,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="bg-[#111] text-gray-100 min-h-screen flex">
-        <Sidebar />
-        <main className="flex-1 p-8 ml-56">{children}</main>
+      <body className="bg-[#111] text-gray-100 min-h-screen">
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
