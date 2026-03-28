@@ -5,8 +5,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../categories/categories_screen.dart';
+import '../chat/chat_screen.dart';
 import '../vault/vault_screen.dart';
-import '../profile/profile_screen.dart';
 import 'home_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
     DashboardScreen(),
     CategoriesScreen(),
     VaultScreen(),
-    ProfileScreen(),
+    ChatScreen(),
   ];
 
   @override
@@ -83,13 +83,13 @@ class HomeScreen extends StatelessWidget {
               BottomNavigationBarItem(
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.userCircle2),
+                  child: Icon(LucideIcons.sparkles),
                 ),
                 activeIcon: Padding(
                   padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.userCircle2, color: RenewdColors.oceanBlue),
+                  child: Icon(LucideIcons.sparkles, color: RenewdColors.oceanBlue),
                 ),
-                label: 'Profile',
+                label: 'AI Chat',
               ),
             ],
           ),

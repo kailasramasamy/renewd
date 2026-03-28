@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
+import '../../core/services/storage_service.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -16,7 +17,9 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(DashboardController());
-    return Scaffold(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
       body: Obx(() {
         if (c.isLoading.value && c.renewals.isEmpty) {
           return const Center(child: CircularProgressIndicator());
@@ -27,6 +30,7 @@ class DashboardScreen extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: c.fetchRenewals,
           child: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(
                 RenewdSpacing.lg, 0, RenewdSpacing.lg, 100),
             children: [
@@ -55,6 +59,7 @@ class DashboardScreen extends StatelessWidget {
         backgroundColor: RenewdColors.oceanBlue,
         child: const Icon(Icons.add, color: Colors.white),
       ),
+    ),
     );
   }
 }
@@ -65,52 +70,87 @@ class _SearchBar extends StatelessWidget {
   final DashboardController c;
   const _SearchBar({required this.c});
 
+  String get _greeting {
+    final storage = Get.find<StorageService>();
+    final userData = storage.readUserData();
+    final name = userData?['name'] as String?;
+    if (name != null && name.isNotEmpty) {
+      final firstName = name.split(' ').first;
+      return 'Hi, $firstName';
+    }
+    return 'Hi there';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.only(top: RenewdSpacing.sm),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              height: 44,
-              decoration: BoxDecoration(
-                color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: TextField(
-                onChanged: (v) => c.searchQuery.value = v,
-                style: RenewdTextStyles.bodySmall,
-                decoration: InputDecoration(
-                  hintText: 'Search renewals...',
-                  hintStyle: RenewdTextStyles.bodySmall
-                      .copyWith(color: RenewdColors.slate),
-                  prefixIcon: Icon(LucideIcons.search,
-                      size: 18, color: RenewdColors.slate),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 12),
-                  filled: false,
+    return Column(
+      children: [
+        // Profile row
+        Padding(
+          padding: const EdgeInsets.only(top: RenewdSpacing.sm),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => Get.toNamed(AppRoutes.profile),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
+                  child: Icon(LucideIcons.user, size: 18,
+                      color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
                 ),
               ),
+              const SizedBox(width: RenewdSpacing.md),
+              Expanded(
+                child: Text(_greeting,
+                    style: RenewdTextStyles.h3.copyWith(fontWeight: FontWeight.w600)),
+              ),
+              Obx(() {
+                final count = c.unreadNotificationCount.value;
+                return IconButton(
+                  icon: Badge(
+                    isLabelVisible: count > 0,
+                    label: Text('$count',
+                        style: const TextStyle(fontSize: 10, color: Colors.white)),
+                    backgroundColor: RenewdColors.coralRed,
+                    child: Icon(LucideIcons.bell,
+                        size: 22, color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
+                  ),
+                  onPressed: () async {
+                    await Get.toNamed(AppRoutes.notificationInbox);
+                    c.fetchUnreadCount();
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+        // Search field
+        const SizedBox(height: RenewdSpacing.md),
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: TextField(
+            onChanged: (v) => c.searchQuery.value = v,
+            style: RenewdTextStyles.bodySmall,
+            decoration: InputDecoration(
+              hintText: 'Search renewals...',
+              hintStyle: RenewdTextStyles.bodySmall
+                  .copyWith(color: RenewdColors.slate),
+              prefixIcon: Icon(LucideIcons.search,
+                  size: 18, color: RenewdColors.slate),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              filled: false,
             ),
           ),
-          const SizedBox(width: RenewdSpacing.sm),
-          IconButton(
-            icon: Icon(LucideIcons.messageCircle,
-                size: 22, color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
-            onPressed: () => Get.toNamed(AppRoutes.chat),
-          ),
-          IconButton(
-            icon: Icon(LucideIcons.bell,
-                size: 22, color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
-            onPressed: () {},
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

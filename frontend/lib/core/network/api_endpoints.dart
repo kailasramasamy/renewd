@@ -33,6 +33,12 @@ class ApiEndpoints {
   static String snoozeReminder(String renewalId, String reminderId) =>
       '/renewals/$renewalId/reminders/$reminderId/snooze';
 
+  // Notification inbox
+  static const String notificationLog = '/notifications';
+  static const String notificationUnreadCount = '/notifications/unread-count';
+  static const String notificationMarkAllRead = '/notifications/mark-all-read';
+  static String notificationMarkRead(String id) => '/notifications/$id/read';
+
   // Payments
   static const String payments = '/payments';
   static String paymentsByRenewal(String renewalId) =>

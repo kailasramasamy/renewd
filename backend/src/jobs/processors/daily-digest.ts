@@ -49,11 +49,20 @@ async function sendDigestForUser(
   const names = rows.slice(0, 3).map((r) => r.name).join(", ");
   const suffix = rows.length > 3 ? ` and ${rows.length - 3} more` : "";
 
+  const digestTitle = "Your Week Ahead";
+  const digestBody = `${rows.length} renewal${rows.length > 1 ? "s" : ""} coming up: ${names}${suffix}`;
+
+  // Log to in-app inbox
+  await pool.query(
+    `INSERT INTO notification_log (user_id, title, body, type) VALUES ($1, $2, $3, 'digest')`,
+    [user.user_id, digestTitle, digestBody]
+  );
+
   try {
     await sendPushNotification({
       token: user.fcm_token,
-      title: "Your Week Ahead",
-      body: `${rows.length} renewal${rows.length > 1 ? "s" : ""} coming up: ${names}${suffix}`,
+      title: digestTitle,
+      body: digestBody,
       data: { action: "digest" },
     });
   } catch (err) {

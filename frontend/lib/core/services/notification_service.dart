@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/providers/notification_provider.dart';
 import '../utils/snackbar_helper.dart';
@@ -50,14 +51,25 @@ class NotificationService extends GetxService {
   }
 
   Future<void> _registerToken() async {
-    try {
-      final token = await _messaging.getToken();
-      if (token != null) {
-        await _provider.registerFcmToken(token);
+    // Wait for APNS token to be ready (iOS requires this before FCM token)
+    for (var attempt = 0; attempt < 5; attempt++) {
+      try {
+        final apnsToken = await _messaging.getAPNSToken();
+        if (apnsToken != null) {
+          final token = await _messaging.getToken();
+          if (token != null) {
+            debugPrint('[FCM] Token: ${token.substring(0, 20)}...');
+            await _provider.registerFcmToken(token);
+            debugPrint('[FCM] Token registered with backend');
+            return;
+          }
+        }
+      } catch (e) {
+        debugPrint('[FCM] Attempt ${attempt + 1} failed: $e');
       }
-    } catch (_) {
-      // APNS token not available (e.g. simulator) — skip silently
+      await Future.delayed(const Duration(seconds: 2));
     }
+    debugPrint('[FCM] Could not register token after 5 attempts');
   }
 
   void _listenForTokenRefresh() {

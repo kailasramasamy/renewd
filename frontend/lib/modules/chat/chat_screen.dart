@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
@@ -32,10 +33,6 @@ class ChatScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft),
-          onPressed: () => Get.back(),
-        ),
         title: Row(
           children: [
             Icon(LucideIcons.sparkles, size: 18, color: RenewdColors.oceanBlue),
@@ -183,17 +180,33 @@ class _MessageBubble extends StatelessWidget {
             bottomRight: Radius.circular(isUser ? 4 : 16),
           ),
         ),
-        child: Text(
-          message.text,
-          style: RenewdTextStyles.bodySmall.copyWith(
-            color: isUser
-                ? Colors.white
-                : isDark
-                    ? RenewdColors.warmWhite
-                    : RenewdColors.deepNavy,
-            height: 1.4,
-          ),
-        ),
+        child: isUser
+            ? Text(
+                message.text,
+                style: RenewdTextStyles.bodySmall.copyWith(
+                  color: Colors.white,
+                  height: 1.4,
+                ),
+              )
+            : MarkdownBody(
+                data: message.text,
+                selectable: true,
+                styleSheet: MarkdownStyleSheet(
+                  p: RenewdTextStyles.bodySmall.copyWith(
+                    color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy,
+                    height: 1.5,
+                  ),
+                  strong: RenewdTextStyles.bodySmall.copyWith(
+                    color: isDark ? Colors.white : RenewdColors.deepNavy,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  listBullet: RenewdTextStyles.bodySmall.copyWith(
+                    color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy,
+                  ),
+                  listBulletPadding: const EdgeInsets.only(right: 8),
+                  blockSpacing: 8,
+                ),
+              ),
       ),
     );
   }

@@ -200,7 +200,7 @@ class _PdfPlaceholder extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.fileText, size: 40, color: RenewdColors.oceanBlue),
+              Icon(_iconForFile(doc.fileName), size: 40, color: _colorForFile(doc.fileName)),
               const SizedBox(width: RenewdSpacing.md),
               Expanded(
                 child: Column(
@@ -236,6 +236,24 @@ class _PdfPlaceholder extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _iconForFile(String name) {
+    final ext = name.split('.').last.toLowerCase();
+    switch (ext) {
+      case 'pdf': return LucideIcons.fileText;
+      case 'jpg' || 'jpeg' || 'png' || 'webp': return LucideIcons.image;
+      default: return LucideIcons.file;
+    }
+  }
+
+  Color _colorForFile(String name) {
+    final ext = name.split('.').last.toLowerCase();
+    switch (ext) {
+      case 'pdf': return RenewdColors.coralRed;
+      case 'jpg' || 'jpeg' || 'png' || 'webp': return RenewdColors.oceanBlue;
+      default: return RenewdColors.slate;
+    }
   }
 
   void _openDocument(DocumentDetailController c) {

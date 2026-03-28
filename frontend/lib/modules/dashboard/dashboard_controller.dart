@@ -1,15 +1,19 @@
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
+import '../../core/network/api_client.dart';
+import '../../core/network/api_endpoints.dart';
 import '../../data/models/renewal_model.dart';
 import '../../data/providers/renewal_provider.dart';
 
 class DashboardController extends GetxController {
   final _provider = RenewalProvider();
+  final _client = Get.find<ApiClient>();
 
   final RxList<RenewalModel> renewals = <RenewalModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
   final RxString searchQuery = ''.obs;
+  final RxInt unreadNotificationCount = 0.obs;
   final RxMap<String, bool> expandedCategories = <String, bool>{}.obs;
   final RxMap<String, bool> expandedSubGroups = <String, bool>{}.obs;
 
@@ -106,6 +110,16 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     fetchRenewals();
+    fetchUnreadCount();
+  }
+
+  Future<void> fetchUnreadCount() async {
+    try {
+      final response =
+          await _client.safeGet(ApiEndpoints.notificationUnreadCount);
+      final body = response.body as Map<String, dynamic>;
+      unreadNotificationCount.value = body['count'] as int? ?? 0;
+    } catch (_) {}
   }
 
   Future<void> fetchRenewals() async {

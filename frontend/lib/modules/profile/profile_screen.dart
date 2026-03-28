@@ -22,7 +22,13 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Get.put(ProfileController());
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(LucideIcons.arrowLeft),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text('Profile'),
+      ),
       body: Column(
         children: [
           const SizedBox(height: RenewdSpacing.xl),

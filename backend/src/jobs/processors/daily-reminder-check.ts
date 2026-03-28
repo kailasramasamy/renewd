@@ -51,6 +51,13 @@ async function sendSingleReminder(pool: ReturnType<typeof getJobPool>, reminder:
       "UPDATE reminders SET is_sent = TRUE, sent_at = NOW() WHERE id = $1",
       [reminder.id]
     );
+
+    // Log to in-app notification inbox
+    await pool.query(
+      `INSERT INTO notification_log (user_id, renewal_id, title, body, type)
+       VALUES ($1, $2, $3, $4, 'reminder')`,
+      [reminder.user_id, reminder.renewal_id, title, body]
+    );
   } catch (err) {
     if (err instanceof Error && err.message.includes("INVALID_FCM_TOKEN")) {
       await pool.query(

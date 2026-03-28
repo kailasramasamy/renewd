@@ -16,7 +16,7 @@ export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  if (!env.FIREBASE_PROJECT_ID) {
+  if (!env.FIREBASE_PROJECT_ID || env.NODE_ENV === "development") {
     request.user = { uid: "dev-user", email: "dev@renewd.local" };
     return;
   }
