@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/services/version_check_service.dart';
 import '../../app/routes/app_routes.dart';
 
 class SplashController extends GetxController {
@@ -25,6 +26,8 @@ class SplashController extends GetxController {
     final auth = Get.find<AuthService>();
     if (auth.isLoggedIn) {
       Get.offAllNamed(AppRoutes.home);
+      // Check for updates after navigating (non-blocking)
+      VersionCheckService.check();
     } else {
       Get.offAllNamed(AppRoutes.login);
     }
