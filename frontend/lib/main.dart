@@ -35,7 +35,7 @@ class RenewdApp extends StatelessWidget {
       title: 'Renewd',
       theme: RenewdTheme.light,
       darkTheme: RenewdTheme.dark,
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
       initialBinding: InitialBinding(),

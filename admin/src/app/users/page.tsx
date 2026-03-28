@@ -37,6 +37,7 @@ export default async function UsersPage() {
               <th className="px-5 py-3">Email</th>
               <th className="px-5 py-3">Phone</th>
               <th className="px-5 py-3">Device</th>
+              <th className="px-5 py-3">App Version</th>
               <th className="px-5 py-3">Renewals</th>
               <th className="px-5 py-3">Joined</th>
             </tr>
@@ -57,7 +58,14 @@ export default async function UsersPage() {
                   {u.phone || "—"}
                 </td>
                 <td className="px-5 py-3 text-gray-400">
-                  {u.device_os ? `${u.device_os} ${u.app_version || ""}` : "—"}
+                  {u.device_os || "—"}
+                </td>
+                <td className="px-5 py-3">
+                  {u.app_version ? (
+                    <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-xs">
+                      v{u.app_version}
+                    </span>
+                  ) : "—"}
                 </td>
                 <td className="px-5 py-3">
                   <span className="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full text-xs">
