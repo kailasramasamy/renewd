@@ -32,6 +32,9 @@ dependencies:
   image: ^4.8.0
   flutter_pdfview: ^1.4.4
   flutter_markdown: ^0.7.7+1
+  sign_in_with_apple: ^7.0.1
+  google_sign_in: ^7.2.0
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
