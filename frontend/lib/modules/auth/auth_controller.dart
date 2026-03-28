@@ -155,8 +155,18 @@ class AuthController extends GetxController {
       });
 
       isLoading.value = false;
-      showSuccessSnack('Welcome to Renewd!');
-      Get.offAllNamed(AppRoutes.home);
+
+      // Check if profile needs completion
+      final needsName = (user.displayName ?? '').isEmpty;
+      final needsEmail = (user.email ?? '').isEmpty;
+      final needsPhone = (user.phoneNumber ?? '').isEmpty;
+
+      if (needsName || needsEmail || needsPhone) {
+        Get.offAllNamed(AppRoutes.completeProfile);
+      } else {
+        showSuccessSnack('Welcome to Renewd!');
+        Get.offAllNamed(AppRoutes.home);
+      }
     } catch (e) {
       isLoading.value = false;
       errorMessage.value = 'Sign in failed';

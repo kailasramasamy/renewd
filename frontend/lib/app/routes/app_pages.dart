@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../modules/splash/splash_screen.dart';
+import '../../modules/auth/complete_profile_screen.dart';
 import '../../modules/auth/login_screen.dart';
 import '../../modules/auth/otp_verify_screen.dart';
 import '../../modules/document/document_detail_screen.dart';
@@ -31,6 +32,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.otpVerify,
       page: () => const OtpVerifyScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.completeProfile,
+      page: () => const CompleteProfileScreen(),
     ),
     GetPage(
       name: AppRoutes.home,

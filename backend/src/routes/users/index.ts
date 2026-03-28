@@ -14,22 +14,26 @@ export default async function userRoutes(app: FastifyInstance) {
     return reply.send({ user: result.rows[0] });
   });
 
-  app.patch("/me", auth, async (request, reply) => {
+  const updateUser = async (request: any, reply: any) => {
     const body = request.body as Record<string, unknown>;
-    const { name, phone, avatar_url } = body;
+    const { name, phone, email, avatar_url } = body;
 
     const result = await app.db.query(
       `UPDATE users SET
         name = COALESCE($1, name),
         phone = COALESCE($2, phone),
-        avatar_url = COALESCE($3, avatar_url),
+        email = COALESCE($3, email),
+        avatar_url = COALESCE($4, avatar_url),
         updated_at = NOW()
-       WHERE firebase_uid = $4 RETURNING *`,
-      [name ?? null, phone ?? null, avatar_url ?? null, request.user.uid]
+       WHERE firebase_uid = $5 RETURNING *`,
+      [name ?? null, phone ?? null, email ?? null, avatar_url ?? null, request.user.uid]
     );
     if (result.rows.length === 0) throw new NotFoundError("User");
     return reply.send({ user: result.rows[0] });
-  });
+  };
+
+  app.patch("/me", auth, updateUser);
+  app.put("/me", auth, updateUser);
 
   await registerFcmToken(app);
   await registerNotificationPreferences(app);
