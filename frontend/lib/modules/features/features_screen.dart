@@ -15,7 +15,7 @@ class FeaturesScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 220,
+            expandedHeight: 160,
             pinned: true,
             leading: IconButton(
               icon: Icon(LucideIcons.arrowLeft),
@@ -34,8 +34,6 @@ class FeaturesScreen extends StatelessWidget {
                 const SizedBox(height: RenewdSpacing.lg),
                 _SecuritySection(isDark: isDark),
                 const SizedBox(height: RenewdSpacing.xxl),
-                _ComingSoon(isDark: isDark),
-                const SizedBox(height: RenewdSpacing.xxxl),
               ]),
             ),
           ),
@@ -66,7 +64,7 @@ class _HeroBanner extends StatelessWidget {
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-              RenewdSpacing.xl, RenewdSpacing.xxxl, RenewdSpacing.xl, RenewdSpacing.lg),
+              RenewdSpacing.xl, RenewdSpacing.lg, RenewdSpacing.xl, RenewdSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -602,37 +600,3 @@ class _SecurityItem extends StatelessWidget {
   }
 }
 
-class _ComingSoon extends StatelessWidget {
-  final bool isDark;
-  const _ComingSoon({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(RenewdSpacing.xl),
-      decoration: BoxDecoration(
-        color: isDark ? RenewdColors.darkSlate : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: RenewdColors.oceanBlue.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(LucideIcons.rocket, size: 32, color: RenewdColors.oceanBlue),
-          const SizedBox(height: RenewdSpacing.md),
-          Text('Coming Soon',
-              style: RenewdTextStyles.h3
-                  .copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: RenewdSpacing.sm),
-          Text(
-            'Payment tracking, AI-powered insights, better deal finder, and more.',
-            textAlign: TextAlign.center,
-            style: RenewdTextStyles.bodySmall
-                .copyWith(color: RenewdColors.slate, height: 1.4),
-          ),
-        ],
-      ),
-    );
-  }
-}

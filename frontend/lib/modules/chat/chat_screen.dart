@@ -47,6 +47,7 @@ class ChatScreen extends StatelessWidget {
             child: Obx(() {
               if (c.messages.isEmpty) return _EmptyChat();
               return ListView.builder(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 controller: scrollCtrl,
                 padding: const EdgeInsets.all(RenewdSpacing.lg),
                 itemCount: c.messages.length + (c.isLoading.value ? 1 : 0),

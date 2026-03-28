@@ -24,6 +24,7 @@ class EditRenewalScreen extends StatelessWidget {
         title: const Text('Edit Renewal'),
       ),
       body: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(RenewdSpacing.lg),
         child: Obx(() => Column(
               crossAxisAlignment: CrossAxisAlignment.start,

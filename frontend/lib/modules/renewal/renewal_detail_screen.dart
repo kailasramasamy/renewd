@@ -96,6 +96,7 @@ class RenewalDetailScreen extends StatelessWidget {
   Widget _buildBody(BuildContext context, RenewalDetailController c,
       RenewalModel renewal) {
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.all(RenewdSpacing.lg),
       child: Column(
         children: [

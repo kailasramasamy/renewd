@@ -24,6 +24,7 @@ class CategoriesScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         return ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(RenewdSpacing.lg),
           children: [
             ...RenewalCategory.values.map((cat) {

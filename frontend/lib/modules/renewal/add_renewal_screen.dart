@@ -24,6 +24,7 @@ class AddRenewalScreen extends StatelessWidget {
         title: const Text('Add Renewal'),
       ),
       body: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(RenewdSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

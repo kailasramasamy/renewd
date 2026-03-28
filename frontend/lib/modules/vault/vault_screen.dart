@@ -80,20 +80,27 @@ class _SecurityBadge extends StatelessWidget {
           Icon(LucideIcons.shieldCheck,
               size: 14, color: RenewdColors.emerald),
           const SizedBox(width: RenewdSpacing.sm),
-          Text(
-            'AES-256 encrypted',
-            style: RenewdTextStyles.caption.copyWith(
-              color: RenewdColors.emerald,
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
-          ),
-          const SizedBox(width: RenewdSpacing.xs),
-          Text(
-            '·  Your documents are stored securely',
-            style: RenewdTextStyles.caption.copyWith(
-              color: RenewdColors.emerald.withValues(alpha: 0.7),
-              fontSize: 11,
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'AES-256 encrypted',
+                    style: RenewdTextStyles.caption.copyWith(
+                      color: RenewdColors.emerald,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '  ·  Your documents are stored securely',
+                    style: RenewdTextStyles.caption.copyWith(
+                      color: RenewdColors.emerald.withValues(alpha: 0.7),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -197,6 +204,7 @@ class _GroupedList extends StatelessWidget {
     final grouped = c.groupedByRenewal;
     if (grouped.isEmpty) return _Empty();
     return ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.all(RenewdSpacing.lg),
       children: grouped.entries.map((entry) {
         return Column(

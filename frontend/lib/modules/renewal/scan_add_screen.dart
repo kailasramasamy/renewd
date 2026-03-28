@@ -262,6 +262,7 @@ class _ReviewFormScreen extends StatelessWidget {
         title: const Text('Review Details'),
       ),
       body: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(RenewdSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

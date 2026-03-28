@@ -121,6 +121,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(RenewdSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
