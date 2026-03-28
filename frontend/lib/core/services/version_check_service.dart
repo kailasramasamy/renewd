@@ -85,7 +85,7 @@ class VersionCheckService {
     // iOS App Store URL (replace with actual ID after publishing)
     const iosUrl = 'https://apps.apple.com/app/renewd/id000000000';
     const androidUrl =
-        'https://play.google.com/store/apps/details?id=com.quartex.frontend';
+        'https://play.google.com/store/apps/details?id=com.quartex.renewd';
 
     final url = GetPlatform.isIOS ? iosUrl : androidUrl;
     final uri = Uri.parse(url);

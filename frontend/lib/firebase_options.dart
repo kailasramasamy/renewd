@@ -77,7 +77,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'renewd-279a8.firebasestorage.app',
     androidClientId: '360842637861-sq0kg26gjitchb2kq6fso2g9h6gvdlqb.apps.googleusercontent.com',
     iosClientId: '360842637861-egd8r94lg0bnslsrsi2eitqsk8vvrhmt.apps.googleusercontent.com',
-    iosBundleId: 'com.quartex.frontend',
+    iosBundleId: 'com.quartex.renewd',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
