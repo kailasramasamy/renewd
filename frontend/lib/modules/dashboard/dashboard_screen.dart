@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_utils.dart';
+import '../../widgets/skeleton_loader.dart';
 import '../../data/models/renewal_model.dart';
 import 'dashboard_controller.dart';
 
@@ -22,7 +23,7 @@ class DashboardScreen extends StatelessWidget {
       child: Scaffold(
       body: Obx(() {
         if (c.isLoading.value && c.renewals.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const SkeletonLoader();
         }
         if (c.error.value.isNotEmpty && c.renewals.isEmpty) {
           return _ErrorState(c: c);

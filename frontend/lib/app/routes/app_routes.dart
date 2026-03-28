@@ -14,5 +14,6 @@ abstract class AppRoutes {
   static const scanAdd = '/scan-add';
   static const notificationSettings = '/notification-settings';
   static const notificationInbox = '/notification-inbox';
+  static const onboarding = '/onboarding';
   static const features = '/features';
 }

@@ -113,24 +113,25 @@
 
 ---
 
-## Sprint 7-8 (Week 7-8): Offer Comparison + Polish
-**Goal:** AI finds better deals. App is polished for launch.
+## Sprint 7-8 (Week 7-8): Polish + Launch Ready ✅ COMPLETED 2026-03-28
+**Goal:** App is polished for launch.
 
-| # | Task | F/B | Effort |
-|---|------|-----|--------|
-| 1 | Offer finder API: web scraping + LLM comparison | Backend | 6hr |
-| 2 | Find Better Deals button → comparison cards | Frontend | 4hr |
-| 3 | Proactive offer notifications (30 days before renewal) | Backend | 3hr |
-| 4 | Profile screen: settings, notification prefs, data export | Frontend | 3hr |
-| 5 | Onboarding flow (4 screens) | Frontend | 4hr |
-| 6 | Pull-to-refresh, skeleton loading, empty states | Frontend | 3hr |
-| 7 | FAB speed dial (Add Manually / Scan / Import) | Frontend | 2hr |
-| 8 | Dark mode testing and fixes | Frontend | 2hr |
-| 9 | App icon + splash screen branding | Frontend | 1hr |
-| 10 | Web build testing + responsive layout fixes | Frontend | 2hr |
-| 11 | Admin panel: user stats, device breakdown, notification delivery, renewal analytics | Backend + Web | 4hr |
+| # | Task | F/B | Effort | Status |
+|---|------|-----|--------|--------|
+| 1 | Offer finder API: web scraping + LLM comparison | Backend | 6hr | Deferred post-MVP |
+| 2 | Find Better Deals button → comparison cards | Frontend | 4hr | Deferred post-MVP |
+| 3 | Proactive offer notifications (30 days before renewal) | Backend | 3hr | Deferred post-MVP |
+| 4 | Profile screen: settings, notification prefs, data export | Frontend | 3hr | ✅ |
+| 5 | Onboarding flow (4 screens) | Frontend | 4hr | ✅ |
+| 6 | Pull-to-refresh, skeleton loading, empty states | Frontend | 3hr | ✅ |
+| 7 | FAB speed dial (Add Manually / Scan / Import) | Frontend | 2hr | ✅ |
+| 8 | Dark mode testing and fixes | Frontend | 2hr | ✅ |
+| 9 | App icon + splash screen branding | Frontend | 1hr | ✅ |
+| 10 | Web build testing + responsive layout fixes | Frontend | 2hr | Deferred |
+| 11 | Admin panel | Backend + Web | 4hr | Deferred post-MVP |
+| 12 | OTP auth flow (Firebase phone auth) | Both | 3hr | ✅ |
 
-**Deliverable:** MVP complete. Ready for personal use + first demos.
+**Delivered:** Onboarding flow, branded app icon + splash, data export (CSV), skeleton loaders, Firebase phone OTP auth, in-app notification inbox with badge
 
 ---
 
@@ -144,4 +145,4 @@
 | 4 | Reminders | ✅ Push notifications before expiry |
 | 5 | OCR + AI Extraction | ✅ Scan → auto-create renewal |
 | 6 | Payments + AI Chat | ✅ Track spending, chat with Renewd |
-| 7-8 | Offers + Polish | Find better deals, launch-ready |
+| 7-8 | Polish + Launch Ready | ✅ Onboarding, branding, auth, export |

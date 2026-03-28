@@ -1,4 +1,5 @@
 import '../../core/utils/document_picker.dart';
+import '../../widgets/skeleton_loader.dart';
 import '../renewal/renewal_detail_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -132,7 +133,7 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       if (c.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return const VaultSkeletonLoader();
       }
       if (c.activeTab.value == VaultTab.byRenewal) {
         return _GroupedList(c: c);

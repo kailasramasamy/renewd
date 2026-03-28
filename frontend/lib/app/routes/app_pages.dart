@@ -1,12 +1,14 @@
 import 'package:get/get.dart';
 import '../../modules/splash/splash_screen.dart';
 import '../../modules/auth/login_screen.dart';
+import '../../modules/auth/otp_verify_screen.dart';
 import '../../modules/document/document_detail_screen.dart';
 import '../../modules/home/home_screen.dart';
 import '../../modules/chat/chat_screen.dart';
 import '../../modules/profile/profile_screen.dart';
 import '../../modules/features/features_screen.dart';
 import '../../modules/notifications/notification_inbox_screen.dart';
+import '../../modules/onboarding/onboarding_screen.dart';
 import '../../modules/notifications/notification_settings_screen.dart';
 import '../../modules/renewal/add_renewal_screen.dart';
 import '../../modules/renewal/renewal_detail_screen.dart';
@@ -25,6 +27,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.otpVerify,
+      page: () => const OtpVerifyScreen(),
     ),
     GetPage(
       name: AppRoutes.home,
@@ -57,6 +63,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.notificationInbox,
       page: () => const NotificationInboxScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.onboarding,
+      page: () => const OnboardingScreen(),
     ),
     GetPage(
       name: AppRoutes.chat,

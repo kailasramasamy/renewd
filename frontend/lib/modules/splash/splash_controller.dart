@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/storage_service.dart';
 import '../../core/constants/app_constants.dart';
 import '../../app/routes/app_routes.dart';
 
@@ -12,6 +13,14 @@ class SplashController extends GetxController {
 
   Future<void> _navigate() async {
     await Future.delayed(const Duration(seconds: 2));
+
+    final storage = Get.find<StorageService>();
+
+    // Show onboarding on first launch
+    if (!storage.isOnboardingComplete) {
+      Get.offAllNamed(AppRoutes.onboarding);
+      return;
+    }
 
     // Dev mode: skip auth, go straight to home
     if (AppConstants.apiBaseUrl.contains('localhost') ||

@@ -1,8 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/utils/snackbar_helper.dart';
+import '../../data/providers/renewal_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -85,8 +90,43 @@ class ProfileScreen extends StatelessWidget {
     switch (label) {
       case 'Notifications':
         Get.toNamed(AppRoutes.notificationSettings);
+      case 'Data Export':
+        _exportData();
       default:
         break;
+    }
+  }
+
+  Future<void> _exportData() async {
+    try {
+      final renewals = await RenewalProvider().getAll();
+      if (renewals.isEmpty) {
+        showInfoSnack('No renewals to export');
+        return;
+      }
+
+      final csv = StringBuffer();
+      csv.writeln('Name,Category,Provider,Amount,Renewal Date,Frequency,Auto-Renew,Status');
+      for (final r in renewals) {
+        csv.writeln(
+          '"${r.name}","${r.category.name}","${r.provider ?? ''}",${r.amount ?? ''},"${r.renewalDate.toIso8601String().split('T')[0]}","${r.frequency ?? ''}",${r.autoRenew},"${r.status}"',
+        );
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/renewd_export.csv');
+      await file.writeAsString(csv.toString());
+
+      final box = Get.context?.findRenderObject() as RenderBox?;
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Renewd Data Export',
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
+            : const Rect.fromLTWH(0, 0, 100, 100),
+      );
+    } catch (_) {
+      showErrorSnack('Export failed');
     }
   }
 
