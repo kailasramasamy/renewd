@@ -74,7 +74,7 @@ function findDomain(name: string, provider: string | null): string | null {
 export function getLogoUrl(name: string, provider: string | null): string | null {
   const domain = findDomain(name, provider);
   if (!domain) return null;
-  return `https://logo.clearbit.com/${domain}`;
+  return `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${domain}&size=128`;
 }
 
 export async function updateRenewalLogo(
