@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/storage_service.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../data/providers/renewal_provider.dart';
 import '../../core/theme/app_colors.dart';
@@ -52,18 +53,35 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar() => Column(
+  Widget _buildAvatar() {
+    final storage = Get.find<StorageService>();
+    final userData = storage.readUserData();
+    final name = userData?['name'] as String? ?? 'Your Name';
+    final email = userData?['email'] as String?;
+
+    return Column(
         children: [
           CircleAvatar(
             radius: 36,
-            backgroundColor: RenewdColors.cloudGray,
-            child: Icon(LucideIcons.user, size: 36, color: RenewdColors.slate),
+            backgroundColor: RenewdColors.oceanBlue.withValues(alpha: 0.12),
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: RenewdTextStyles.h1.copyWith(
+                color: RenewdColors.oceanBlue,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           const SizedBox(height: RenewdSpacing.sm),
-          Text('Your Name',
-              style: RenewdTextStyles.h3.copyWith(color: RenewdColors.deepNavy)),
+          Text(name, style: RenewdTextStyles.h3),
+          if (email != null && email.isNotEmpty) ...[
+            const SizedBox(height: RenewdSpacing.xs),
+            Text(email, style: RenewdTextStyles.caption
+                .copyWith(color: RenewdColors.slate)),
+          ],
         ],
       );
+  }
 
   Widget _buildItem(_ProfileItem item) => ListTile(
         leading: Icon(item.icon, color: RenewdColors.slate),
@@ -92,9 +110,61 @@ class ProfileScreen extends StatelessWidget {
         Get.toNamed(AppRoutes.notificationSettings);
       case 'Data Export':
         _exportData();
+      case 'Premium':
+        showInfoSnack('Premium features coming soon');
+      case 'About':
+        _showAbout();
       default:
         break;
     }
+  }
+
+  void _showAbout() {
+    Get.bottomSheet(
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: RenewdColors.slate.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(
+                  color: RenewdColors.oceanBlue,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(LucideIcons.refreshCcw, size: 32, color: Colors.white),
+              ),
+              const SizedBox(height: RenewdSpacing.lg),
+              Text('Renewd', style: RenewdTextStyles.h2.copyWith(
+                  fontWeight: FontWeight.w700)),
+              const SizedBox(height: RenewdSpacing.xs),
+              Text('Version 1.0.0', style: RenewdTextStyles.caption
+                  .copyWith(color: RenewdColors.slate)),
+              const SizedBox(height: RenewdSpacing.md),
+              Text(
+                'AI-powered personal renewal tracking.\nNever miss a renewal again.',
+                textAlign: TextAlign.center,
+                style: RenewdTextStyles.bodySmall.copyWith(
+                  color: RenewdColors.slate, height: 1.5),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+            ],
+          ),
+        ),
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    );
   }
 
   Future<void> _exportData() async {
