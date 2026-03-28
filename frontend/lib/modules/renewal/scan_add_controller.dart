@@ -58,8 +58,6 @@ class ScanAddController extends GetxController {
       analyzeStep.value = 'Reading document with AI...';
       final result = await _docProvider.parseDocument(doc.id);
       analyzeStep.value = 'Extracting details...';
-      debugPrint('=== PARSE RESULT KEYS: ${result.keys.toList()}');
-      debugPrint('=== EXTRACTION: ${result['extraction']}');
       final ext = result['extraction'] as Map<String, dynamic>?;
       final isRelevant = ext?['is_relevant'] as bool? ?? true;
 

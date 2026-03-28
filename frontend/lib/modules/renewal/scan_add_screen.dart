@@ -66,8 +66,7 @@ class _PickerScreen extends StatelessWidget {
       if (result == null || result.images.isEmpty) return;
       final pdf = await imagesToPdf(result.images, 'Scan');
       await c.uploadAndParse(pdf.path, pdf.name);
-    } on PlatformException catch (e) {
-      debugPrint('[ScanAdd] Scanner failed: $e');
+    } on PlatformException catch (_) {
       final picker = ImagePicker();
       final file = await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
       if (file == null) return;

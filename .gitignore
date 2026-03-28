@@ -1,0 +1,13 @@
+# Environment files with secrets
+**/.env
+**/.env.local
+**/.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

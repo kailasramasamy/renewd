@@ -1,9 +1,12 @@
+const bool _isProduction = bool.fromEnvironment('PRODUCTION', defaultValue: false);
+
 class AppConstants {
   AppConstants._();
 
-  // Use your Mac's local IP for physical device testing
-  // Change back to localhost for simulator/emulator
-  static const String apiBaseUrl = 'http://192.168.1.14:6000/api/v1';
+  static const String apiBaseUrl = _isProduction
+      ? 'https://api.renewd.app/api/v1'  // Production URL (update when deployed)
+      : 'http://localhost:6000/api/v1';   // Development
+
   static const int maxFileSizeBytes = 10 * 1024 * 1024; // 10MB
 
   // Storage keys

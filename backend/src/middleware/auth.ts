@@ -16,7 +16,8 @@ export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  if (!env.FIREBASE_PROJECT_ID || env.NODE_ENV === "development") {
+  // Dev bypass only when Firebase is NOT configured (no credentials at all)
+  if (!env.FIREBASE_PROJECT_ID) {
     request.user = { uid: "dev-user", email: "dev@renewd.local" };
     return;
   }

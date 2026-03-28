@@ -88,7 +88,6 @@ class DocumentDetailController extends GetxController {
             : const Rect.fromLTWH(0, 0, 100, 100),
       );
     } catch (e) {
-      debugPrint('[Share] Error: $e');
       showErrorSnack('Share failed');
     } finally {
       isSharing.value = false;

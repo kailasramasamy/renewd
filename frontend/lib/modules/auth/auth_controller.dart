@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../core/services/storage_service.dart';
@@ -91,7 +90,6 @@ class AuthController extends GetxController {
     } catch (e) {
       isLoading.value = false;
       errorMessage.value = 'Google sign-in failed';
-      debugPrint('[Auth] Google error: $e');
     }
   }
 
@@ -141,7 +139,6 @@ class AuthController extends GetxController {
       isLoading.value = false;
       if (e.toString().contains('canceled') || e.toString().contains('cancelled')) return;
       errorMessage.value = 'Apple sign-in failed';
-      debugPrint('[Auth] Apple error: $e');
     }
   }
 
@@ -184,7 +181,6 @@ class AuthController extends GetxController {
     } catch (e) {
       isLoading.value = false;
       errorMessage.value = 'Sign in failed';
-      debugPrint('[Auth] Credential error: $e');
     }
   }
 

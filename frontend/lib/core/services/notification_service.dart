@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/providers/notification_provider.dart';
 import '../utils/snackbar_helper.dart';
@@ -58,18 +57,15 @@ class NotificationService extends GetxService {
         if (apnsToken != null) {
           final token = await _messaging.getToken();
           if (token != null) {
-            debugPrint('[FCM] Token: ${token.substring(0, 20)}...');
             await _provider.registerFcmToken(token);
-            debugPrint('[FCM] Token registered with backend');
             return;
           }
         }
-      } catch (e) {
-        debugPrint('[FCM] Attempt ${attempt + 1} failed: $e');
+      } catch (_) {
+        // Retry after delay
       }
       await Future.delayed(const Duration(seconds: 2));
     }
-    debugPrint('[FCM] Could not register token after 5 attempts');
   }
 
   void _listenForTokenRefresh() {

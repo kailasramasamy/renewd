@@ -138,8 +138,7 @@ class _PickerSheet extends StatelessWidget {
       final pdf = await imagesToPdf(result.images, 'Scan');
       if (!context.mounted) return;
       Navigator.of(context).pop(pdf);
-    } on Exception catch (e) {
-      debugPrint('[DocumentPicker] Scanner failed: $e');
+    } on Exception catch (_) {
       if (!context.mounted) return;
       // Fallback to camera → single page PDF
       final picker = ImagePicker();
