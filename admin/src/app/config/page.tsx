@@ -3,7 +3,7 @@ import { ConfigForm } from "./config-form";
 
 async function getConfig() {
   const rows = await query<{ key: string; value: string; updated_at: string }>(
-    "SELECT key, value, updated_at::text FROM app_config ORDER BY key"
+    "SELECT key, value, updated_at::text FROM app_config WHERE key NOT LIKE 'free_%' AND key NOT LIKE 'premium_%' AND key NOT LIKE 'feature_%' AND key NOT LIKE 'iap_%' ORDER BY key"
   );
   const config: Record<string, { value: string; updated_at: string }> = {};
   for (const row of rows) {
