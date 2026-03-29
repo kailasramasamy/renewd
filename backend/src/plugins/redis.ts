@@ -19,7 +19,7 @@ async function plugin(app: FastifyInstance) {
     await redis.connect();
     app.log.info("Redis connected");
   } catch (err) {
-    app.log.error("Redis connection failed:", err);
+    app.log.error("Redis connection failed: %s", String(err));
     throw err;
   }
 

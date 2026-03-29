@@ -16,7 +16,7 @@ async function plugin(app: FastifyInstance) {
     await pool.query("SELECT 1");
     app.log.info("PostgreSQL connected");
   } catch (err) {
-    app.log.error("PostgreSQL connection failed:", err);
+    app.log.error("PostgreSQL connection failed: %s", String(err));
     throw err;
   }
 
