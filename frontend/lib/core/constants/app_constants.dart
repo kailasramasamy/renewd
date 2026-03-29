@@ -1,11 +1,11 @@
-const bool _isProduction = bool.fromEnvironment('PRODUCTION', defaultValue: false);
+const bool _isDev = bool.fromEnvironment('DEV', defaultValue: false);
 
 class AppConstants {
   AppConstants._();
 
-  static const String apiBaseUrl = _isProduction
-      ? 'https://api.renewd.app/api/v1'  // Production URL (update when deployed)
-      : 'http://192.168.1.5:6000/api/v1'; // Development (local IP)
+  static const String apiBaseUrl = _isDev
+      ? 'http://192.168.1.5:6000/api/v1'  // Development (local IP)
+      : 'https://api.renewd.app/api/v1';   // Production (default)
 
   static const int maxFileSizeBytes = 10 * 1024 * 1024; // 10MB
 

@@ -51,10 +51,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
     _PageData(
       icon: LucideIcons.shieldCheck,
-      color: Color(0xFF10B981),
+      color: Color(0xFF0EA5E9),
       title: 'Bank-Grade Security',
       subtitle:
-          'Your documents are protected with AES-256 encryption. Aadhaar & PAN numbers are automatically masked. Your data stays private.',
+          'Your documents are protected with AES-256 encryption. Sensitive ID numbers are automatically masked. Your data stays private.',
     ),
   ];
 

@@ -6,12 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import '../../data/providers/notification_provider.dart';
+import '../services/storage_service.dart';
 import '../utils/snackbar_helper.dart';
 
 class NotificationService extends GetxService {
   final _messaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
-  final _provider = NotificationProvider();
+  NotificationProvider? _provider;
 
   StreamSubscription<String>? _tokenRefreshSub;
   StreamSubscription<RemoteMessage>? _foregroundSub;
@@ -27,11 +28,19 @@ class NotificationService extends GetxService {
   Future<NotificationService> init() async {
     await _initLocalNotifications();
     await _requestPermission();
-    await _registerToken();
-    _listenForTokenRefresh();
     _listenForForegroundMessages();
     _listenForMessageTaps();
     await _handleInitialMessage();
+    // Defer token registration — only if user is logged in
+    // Otherwise, splash_controller calls registerToken() after login
+    Future.delayed(const Duration(seconds: 3), () {
+      final storage = Get.find<StorageService>();
+      if (storage.readToken() != null) {
+        _provider = NotificationProvider();
+        _registerToken();
+        _listenForTokenRefresh();
+      }
+    });
     return this;
   }
 
@@ -74,7 +83,10 @@ class NotificationService extends GetxService {
     );
   }
 
-  Future<void> registerToken() => _registerToken();
+  Future<void> registerToken() async {
+    _provider ??= NotificationProvider();
+    await _registerToken();
+  }
 
   Future<void> _registerToken() async {
     // Wait for APNS token to be ready (iOS requires this before FCM token)
@@ -84,7 +96,7 @@ class NotificationService extends GetxService {
         if (apnsToken != null) {
           final token = await _messaging.getToken();
           if (token != null) {
-            await _provider.registerFcmToken(token);
+            await _provider?.registerFcmToken(token);
             return;
           }
         }
@@ -97,7 +109,7 @@ class NotificationService extends GetxService {
 
   void _listenForTokenRefresh() {
     _tokenRefreshSub = _messaging.onTokenRefresh.listen((token) async {
-      await _provider.registerFcmToken(token);
+      await _provider?.registerFcmToken(token);
     });
   }
 
@@ -207,7 +219,8 @@ class NotificationService extends GetxService {
     final reminderId = data['reminder_id'] as String?;
     if (renewalId == null || reminderId == null) return;
     try {
-      await _provider.snoozeReminder(renewalId, reminderId);
+      _provider ??= NotificationProvider();
+      await _provider!.snoozeReminder(renewalId, reminderId);
       showSuccessSnack('Reminder snoozed until tomorrow');
     } catch (e) {
       showErrorSnack('Failed to snooze reminder');
