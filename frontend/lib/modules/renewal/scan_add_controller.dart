@@ -48,8 +48,8 @@ class ScanAddController extends GetxController {
     'yearly': 'Yearly', 'weekly': 'Weekly',
   };
 
-  List<String> get suggestedGroups =>
-      CategoryConfig.suggestedGroups(category.value);
+  List<String> get suggestedSubcategories =>
+      CategoryConfig.suggestedSubcategories(category.value);
 
   Future<void> uploadAndParse(String filePath, String fileName) async {
     isUploading.value = true;
@@ -235,6 +235,19 @@ class ScanAddController extends GetxController {
         p.contains('spotify') || p.contains('hotstar')) {
       return RenewalCategory.subscription;
     }
+    if (p.contains('loan') || p.contains('emi') || p.contains('bank') ||
+        p.contains('credit card') || p.contains('sip') || p.contains('mutual fund')) {
+      return RenewalCategory.finance;
+    }
+    if (p.contains('domain') || p.contains('hosting') || p.contains('ssl') ||
+        p.contains('godaddy') || p.contains('cloudflare') || p.contains('aws') ||
+        p.contains('vercel') || p.contains('railway')) {
+      return RenewalCategory.digital;
+    }
+    if (p.contains('school') || p.contains('university') || p.contains('college') ||
+        p.contains('course') || p.contains('udemy') || p.contains('coursera')) {
+      return RenewalCategory.education;
+    }
     return RenewalCategory.other;
   }
 
@@ -293,6 +306,9 @@ class ScanAddController extends GetxController {
     switch (cat) {
       case RenewalCategory.utility: return 'monthly';
       case RenewalCategory.subscription: return 'monthly';
+      case RenewalCategory.finance: return 'monthly';
+      case RenewalCategory.education: return 'quarterly';
+      case RenewalCategory.digital: return 'yearly';
       default: return 'yearly';
     }
   }

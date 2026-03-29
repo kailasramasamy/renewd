@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_endpoints.dart';
+import '../../data/models/banner_model.dart';
 import '../../data/models/renewal_model.dart';
 import '../../data/providers/renewal_provider.dart';
 
@@ -10,6 +11,7 @@ class DashboardController extends GetxController {
   final _client = Get.find<ApiClient>();
 
   final RxList<RenewalModel> renewals = <RenewalModel>[].obs;
+  final RxList<BannerModel> banners = <BannerModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
   final RxString searchQuery = ''.obs;
@@ -111,6 +113,17 @@ class DashboardController extends GetxController {
     super.onInit();
     fetchRenewals();
     fetchUnreadCount();
+    fetchBanners();
+  }
+
+  Future<void> fetchBanners() async {
+    try {
+      final response = await _client.safeGet(ApiEndpoints.banners);
+      final body = response.body as Map<String, dynamic>;
+      final list = body['banners'] as List<dynamic>? ?? [];
+      banners.assignAll(
+          list.map((e) => BannerModel.fromJson(e as Map<String, dynamic>)));
+    } catch (_) {}
   }
 
   Future<void> fetchUnreadCount() async {

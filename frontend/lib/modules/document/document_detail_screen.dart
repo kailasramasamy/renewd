@@ -138,6 +138,7 @@ class DocumentDetailScreen extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Rename Document'),
         content: TextField(
+          textCapitalization: TextCapitalization.sentences,
           controller: nameCtrl,
           autofocus: true,
           decoration: InputDecoration(

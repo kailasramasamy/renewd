@@ -17,6 +17,10 @@ class RenewdDateUtils {
   }
 
   static String formatShort(DateTime date) {
+    final now = DateTime.now();
+    if (date.year != now.year) {
+      return DateFormat("d MMM ''yy").format(date);
+    }
     return DateFormat('d MMM').format(date);
   }
 

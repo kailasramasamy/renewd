@@ -9,6 +9,7 @@ import 'core/network/api_client.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/premium_service.dart';
 import 'core/services/purchase_service.dart';
+import 'core/services/sharing_service.dart';
 import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
@@ -27,6 +28,7 @@ void main() async {
   await Get.putAsync(() => PremiumService().init());
   await Get.putAsync(() => PurchaseService().init());
   await Get.putAsync(() => NotificationService().init());
+  await Get.putAsync(() => SharingService().init());
   runApp(const RenewdApp());
 }
 

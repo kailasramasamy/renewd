@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../widgets/irrelevant_doc_sheet.dart';
 import '../../data/models/document_model.dart';
@@ -137,7 +138,7 @@ class RenewalDetailController extends GetxController {
       });
       payments.insert(0, payment);
       showPaymentPrompt.value = false;
-      showSuccessSnack('₹${amount.toStringAsFixed(0)} payment recorded');
+      showSuccessSnack('${RenewdCurrency.symbol}${amount.toStringAsFixed(0)} payment recorded');
     } catch (_) {
       showErrorSnack('Failed to log payment');
     }

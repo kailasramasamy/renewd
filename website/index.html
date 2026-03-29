@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewd — Never Miss a Renewal Again</title>
+  <meta name="description" content="AI-powered personal renewal tracking. Track insurance, subscriptions, government docs, and utilities. Get smart reminders before anything expires.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="icon.png">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { max-width: 100vw; overflow-x: hidden; }
+    p { font-size: 17px; line-height: 1.5; }
+
+    :root {
+      --bg: #0A0A0A;
+      --surface: #111111;
+      --card: #1C1C1E;
+      --border: #2C2C2E;
+      --text: #F2F2F7;
+      --text-secondary: #8E8E93;
+      --blue: #3B82F6;
+      --blue-dark: #1E3A5F;
+      --emerald: #34C759;
+      --amber: #FFCC00;
+      --purple: #BF5AF2;
+      --coral: #FF453A;
+      --orange: #FF9F0A;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(10, 10, 10, 0.8);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+
+    .logo span {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--blue) !important;
+      color: white !important;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 600 !important;
+    }
+
+    .nav-cta:hover { opacity: 0.9; }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 200;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .mobile-menu .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 160px 24px 100px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--blue);
+      font-weight: 500;
+      margin-bottom: 32px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--emerald);
+      border-radius: 50%;
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 7vw, 80px);
+      font-weight: 700;
+      letter-spacing: -2px;
+      line-height: 1.1;
+      max-width: 800px;
+      margin: 0 auto 24px;
+    }
+
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .btn-primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* App Preview */
+    .app-preview {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+      position: relative;
+    }
+
+    .phone-mockup {
+      width: 280px;
+      margin: 0 auto;
+      background: var(--card);
+      border-radius: 32px;
+      border: 2px solid var(--border);
+      padding: 12px;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    .phone-screen {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 24px 16px;
+      min-height: 500px;
+    }
+
+    .mock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .mock-greeting {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .mock-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--card);
+      border-radius: 50%;
+    }
+
+    .mock-stats {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .mock-stat {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .mock-stat-val {
+      font-size: 20px;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .mock-renewal {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--card);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border-left: 3px solid;
+    }
+
+    .mock-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .mock-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .mock-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .mock-amount {
+      font-size: 14px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .mock-days {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    /* Features */
+    .features {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 100px 24px;
+    }
+
+    .section-label {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--blue);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto 64px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--blue);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      font-size: 17px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Categories */
+    .categories {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    .category-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 48px;
+    }
+
+    .category-pill {
+      padding: 10px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* Security */
+    .security {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 100px 24px;
+    }
+
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .pricing-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .security-item {
+      text-align: center;
+      padding: 32px 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .security-item .icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .security-item h4 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .security-item p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* CTA */
+    .cta {
+      text-align: center;
+      padding: 100px 24px;
+      position: relative;
+    }
+
+    .cta::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta h2 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .cta p {
+      color: var(--text-secondary);
+      font-size: 18px;
+      margin-bottom: 40px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 24px;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    /* Responsive — Tablet */
+    @media (max-width: 768px) {
+      body { font-size: 17px; }
+      .nav-links { display: none; }
+      .menu-toggle { display: block; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .security-grid { grid-template-columns: 1fr 1fr; }
+      .hero { padding: 120px 20px 60px; }
+      .hero h1 { letter-spacing: -1px; }
+      .hero p { font-size: 17px; }
+      .phone-mockup { width: 240px; }
+      .features, .categories, .security, .cta { padding-left: 20px; padding-right: 20px; }
+      .section-title { letter-spacing: -0.5px; }
+      .section-desc { font-size: 16px; }
+      .feature-card { padding: 24px; }
+      .feature-card h3 { font-size: 22px; }
+      .feature-card p { font-size: 17px; }
+      .category-pills { gap: 8px; }
+      .category-pill { padding: 8px 16px; font-size: 13px; }
+      .footer-inner { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+
+    /* Responsive — Mobile */
+    @media (max-width: 480px) {
+      body { font-size: 16px; }
+      .nav-inner { padding: 12px 16px; }
+      .logo span { font-size: 18px; }
+      .logo img { width: 28px; height: 28px; }
+
+      .hero { padding: 100px 20px 40px; }
+      .hero h1 { font-size: 36px; letter-spacing: -1px; }
+      .hero p { font-size: 16px; max-width: 100%; margin-bottom: 32px; }
+      .hero-badge { font-size: 11px; padding: 5px 12px; margin-bottom: 24px; }
+      .hero-buttons { flex-direction: column; align-items: stretch; gap: 12px; }
+      .btn { justify-content: center; padding: 16px 24px; font-size: 17px; }
+
+      .app-preview { padding: 0 20px 60px; }
+      .phone-mockup { width: 200px; border-radius: 24px; padding: 8px; }
+      .phone-screen { padding: 14px 10px; min-height: 360px; border-radius: 18px; }
+      .mock-header { margin-bottom: 14px; }
+      .mock-greeting { font-size: 14px; }
+      .mock-avatar { width: 28px; height: 28px; }
+      .mock-stats { gap: 6px; margin-bottom: 14px; }
+      .mock-stat { padding: 8px 6px; font-size: 9px; }
+      .mock-stat-val { font-size: 16px; }
+      .mock-renewal { padding: 8px; border-radius: 10px; margin-bottom: 6px; }
+      .mock-icon { width: 28px; height: 28px; }
+      .mock-icon i { width: 14px !important; height: 14px !important; }
+      .mock-name { font-size: 12px; }
+      .mock-sub { font-size: 9px; }
+      .mock-amount { font-size: 12px; }
+      .mock-days { font-size: 9px; padding: 1px 6px; }
+
+      .features, .categories, .security, .cta { padding: 60px 20px; }
+      .section-label { font-size: 11px; letter-spacing: 1.5px; }
+      .section-title { font-size: 26px; letter-spacing: -0.5px; }
+      .section-desc { font-size: 16px; }
+      .feature-grid { gap: 16px; }
+      .feature-card { padding: 20px; }
+      .feature-card h3 { font-size: 20px; }
+      .feature-card p { font-size: 16px; }
+      .feature-icon { width: 40px; height: 40px; margin-bottom: 16px; }
+
+      .category-pills { gap: 8px; margin-top: 32px; }
+      .category-pill { padding: 8px 14px; font-size: 12px; }
+
+      .security-grid { grid-template-columns: 1fr; gap: 12px; }
+      .pricing-grid { grid-template-columns: 1fr !important; }
+      .security-item { padding: 20px 16px; }
+      .security-item .icon { margin-bottom: 12px; }
+      .security-item h4 { font-size: 18px; }
+      .security-item p { font-size: 15px; }
+
+      .cta h2 { font-size: 26px; }
+      .cta p { font-size: 16px; }
+
+      footer { padding: 32px 20px; }
+      .footer-inner { flex-direction: column; text-align: center; gap: 16px; }
+      .footer-links { flex-direction: column; gap: 12px; }
+      .footer-copy { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <img src="icon.png" alt="Renewd">
+        <span>Renewd</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#usecases">Use Cases</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#security">Security</a>
+        <a href="#download" class="nav-cta">Download</a>
+      </div>
+      <button class="menu-toggle" onclick="document.getElementById('mobileMenu').classList.add('open')" aria-label="Open menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="mobile-menu">
+    <button class="close-btn" onclick="document.getElementById('mobileMenu').classList.remove('open')" aria-label="Close menu">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <a href="#features" onclick="document.getElementById('mobileMenu').classList.remove('open')">Features</a>
+    <a href="#usecases" onclick="document.getElementById('mobileMenu').classList.remove('open')">Use Cases</a>
+    <a href="#pricing" onclick="document.getElementById('mobileMenu').classList.remove('open')">Pricing</a>
+    <a href="#security" onclick="document.getElementById('mobileMenu').classList.remove('open')">Security</a>
+    <a href="#download" onclick="document.getElementById('mobileMenu').classList.remove('open')" style="background: var(--blue); padding: 12px 32px; border-radius: 12px;">Download</a>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">AI-Powered Renewal Tracking</div>
+    <h1>Never Miss a<br><span class="gradient">Renewal Again</span></h1>
+    <p>Track insurance, subscriptions, government docs, and utilities in one place. AI scans your documents and reminds you before anything expires.</p>
+    <div class="hero-buttons">
+      <a href="#download" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6 6-6-6M12 21V3"/></svg>
+        Download Free
+      </a>
+      <a href="#features" class="btn btn-secondary">
+        Learn More
+      </a>
+    </div>
+  </section>
+
+  <!-- App Preview -->
+  <section class="app-preview">
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="mock-header">
+          <span class="mock-greeting">Hi, Priya</span>
+          <div class="mock-avatar"></div>
+        </div>
+        <div class="mock-stats">
+          <div class="mock-stat" style="background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.12);">
+            <span class="mock-stat-val" style="color: var(--orange);">2</span>DUE
+          </div>
+          <div class="mock-stat" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.12);">
+            <span class="mock-stat-val" style="color: var(--blue);">8</span>ACTIVE
+          </div>
+          <div class="mock-stat" style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.12);">
+            <span class="mock-stat-val" style="color: var(--emerald);">12K</span>MONTHLY
+          </div>
+        </div>
+        <div class="mock-renewal" style="border-color: var(--coral);">
+          <div class="mock-icon" style="background: rgba(59, 130, 246, 0.12);"><i data-lucide="shield-check" style="width: 18px; height: 18px; color: var(--blue);"></i></div>
+          <div>
+            <div class="mock-name">Car Insurance</div>
+            <div class="mock-sub">Tata AIG</div>
+          </div>
+          <div>
+            <div class="mock-amount">₹12,495</div>
+            <div class="mock-days" style="background: rgba(255, 69, 58, 0.15); color: var(--coral);">3d overdue</div>
+          </div>
+        </div>
+        <div class="mock-renewal" style="border-color: var(--orange);">
+          <div class="mock-icon" style="background: rgba(191, 90, 242, 0.12);"><i data-lucide="tv" style="width: 18px; height: 18px; color: var(--purple);"></i></div>
+          <div>
+            <div class="mock-name">Netflix</div>
+            <div class="mock-sub">Entertainment</div>
+          </div>
+          <div>
+            <div class="mock-amount">₹649</div>
+            <div class="mock-days" style="background: rgba(255, 159, 10, 0.15); color: var(--orange);">in 5d</div>
+          </div>
+        </div>
+        <div class="mock-renewal" style="border-color: var(--emerald);">
+          <div class="mock-icon" style="background: rgba(52, 199, 89, 0.12);"><i data-lucide="globe" style="width: 18px; height: 18px; color: var(--emerald);"></i></div>
+          <div>
+            <div class="mock-name">renewd.app</div>
+            <div class="mock-sub">GoDaddy</div>
+          </div>
+          <div>
+            <div class="mock-amount">₹1,599</div>
+            <div class="mock-days" style="background: rgba(52, 199, 89, 0.15); color: var(--emerald);">4 Sep</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything You Need</h2>
+    <p class="section-desc">From AI-powered document scanning to smart reminders, Renewd handles the complexity so you don't have to.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(191, 90, 242, 0.12);">
+          <i data-lucide="scan" style="color: var(--purple); width: 24px; height: 24px;"></i>
+        </div>
+        <h3>AI Document Scanning</h3>
+        <p>Point your camera at any policy, bill, or certificate. AI reads and extracts all renewal details automatically.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(59, 130, 246, 0.12);">
+          <i data-lucide="bell-ring" style="color: var(--blue); width: 24px; height: 24px;"></i>
+        </div>
+        <h3>Smart Reminders</h3>
+        <p>Get notified 7 days and 1 day before expiry. Set custom reminder schedules for each renewal.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(52, 199, 89, 0.12);">
+          <i data-lucide="file-lock-2" style="color: var(--emerald); width: 24px; height: 24px;"></i>
+        </div>
+        <h3>Document Vault</h3>
+        <p>Store all your important documents securely. Insurance policies, receipts, certificates — organized and accessible.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(255, 204, 0, 0.12);">
+          <i data-lucide="sparkles" style="color: var(--amber); width: 24px; height: 24px;"></i>
+        </div>
+        <h3>AI Chat Assistant</h3>
+        <p>"What's expiring this month?" "How much did I spend on insurance?" Ask anything about your renewals.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(255, 159, 10, 0.12);">
+          <i data-lucide="bar-chart-3" style="color: var(--orange); width: 24px; height: 24px;"></i>
+        </div>
+        <h3>Spending Analytics</h3>
+        <p>Track how much you spend by category and month. Visualize your renewal costs over time.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(255, 69, 58, 0.12);">
+          <i data-lucide="share-2" style="color: var(--coral); width: 24px; height: 24px;"></i>
+        </div>
+        <h3>Share to Renewd</h3>
+        <p>Received a policy on WhatsApp or email? Share it directly to Renewd — AI creates the renewal for you.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(52, 199, 89, 0.12);">
+          <i data-lucide="git-compare-arrows" style="color: var(--emerald); width: 24px; height: 24px;"></i>
+        </div>
+        <h3>AI Policy Comparison</h3>
+        <p>Compare your current policy with alternatives. AI finds better coverage at lower premiums so you never overpay at renewal time.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(59, 130, 246, 0.12);">
+          <i data-lucide="badge-indian-rupee" style="color: var(--blue); width: 24px; height: 24px;"></i>
+        </div>
+        <h3>Smart Savings</h3>
+        <p>Get AI-powered recommendations before each renewal. Find the best deals, discounts, and offers to maximize your savings.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="categories">
+    <div class="section-label">Categories</div>
+    <h2 class="section-title">Track Everything That Renews</h2>
+    <p class="section-desc">From car insurance to domain renewals, Renewd organizes all your recurring payments and documents.</p>
+
+    <div class="category-pills">
+      <div class="category-pill"><span class="cat-dot" style="background: var(--blue);"></span>Insurance</div>
+      <div class="category-pill"><span class="cat-dot" style="background: var(--purple);"></span>Subscriptions</div>
+      <div class="category-pill"><span class="cat-dot" style="background: #30D158;"></span>Government</div>
+      <div class="category-pill"><span class="cat-dot" style="background: var(--amber);"></span>Utilities</div>
+      <div class="category-pill"><span class="cat-dot" style="background: #FF375F;"></span>Memberships</div>
+      <div class="category-pill"><span class="cat-dot" style="background: var(--emerald);"></span>Finance</div>
+      <div class="category-pill"><span class="cat-dot" style="background: var(--orange);"></span>Digital</div>
+      <div class="category-pill"><span class="cat-dot" style="background: var(--blue);"></span>Education</div>
+    </div>
+  </section>
+
+  <!-- Use Cases -->
+  <section class="features" id="usecases">
+    <div class="section-label">Use Cases</div>
+    <h2 class="section-title">Built for Real Life</h2>
+    <p class="section-desc">Whether you're managing a family or running a business, Renewd keeps track of everything that expires.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card" style="border-left: 3px solid var(--blue);">
+        <h3>Car & Bike Insurance</h3>
+        <p>Scan your vehicle insurance policy. Renewd extracts provider, premium amount, and expiry date. Get reminded 7 days before so you never drive without cover.</p>
+      </div>
+      <div class="feature-card" style="border-left: 3px solid var(--purple);">
+        <h3>OTT & App Subscriptions</h3>
+        <p>Netflix, Spotify, YouTube Premium, iCloud — track every subscription in one place. Know exactly how much you spend monthly on subscriptions.</p>
+      </div>
+      <div class="feature-card" style="border-left: 3px solid #30D158;">
+        <h3>Government Documents</h3>
+        <p>Driving license, passport, vehicle registration, PUC certificate — never get caught with expired documents at a traffic stop.</p>
+      </div>
+      <div class="feature-card" style="border-left: 3px solid var(--amber);">
+        <h3>Utility Bills</h3>
+        <p>Electricity, water, internet, mobile recharge — track due dates and payment history. Never pay a late fee again.</p>
+      </div>
+      <div class="feature-card" style="border-left: 3px solid var(--orange);">
+        <h3>Domain & Hosting</h3>
+        <p>GoDaddy domains, SSL certificates, cloud hosting — critical renewals that can take your business offline if missed.</p>
+      </div>
+      <div class="feature-card" style="border-left: 3px solid var(--emerald);">
+        <h3>Loans & EMIs</h3>
+        <p>Track loan EMIs, credit card due dates, SIP investments, and FD maturity dates. Complete financial renewal tracking.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="security" id="pricing">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Free for Everyone</h2>
+    <p class="section-desc">All premium features are currently free. No limits, no credit card required. Just download and start tracking.</p>
+
+    <div class="security-grid pricing-grid" style="max-width: 800px; margin: 48px auto 0;">
+      <div class="security-item" style="border: 1px solid var(--border);">
+        <div style="font-size: 13px; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px;">CURRENT</div>
+        <div style="font-size: 36px; font-weight: 700; margin-bottom: 4px;">Free</div>
+        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">All features included</div>
+        <div style="text-align: left; font-size: 14px; color: var(--text-secondary); line-height: 2.2;">
+          <div>&#10003; &nbsp;Unlimited renewals</div>
+          <div>&#10003; &nbsp;AI document scanning</div>
+          <div>&#10003; &nbsp;Smart reminders</div>
+          <div>&#10003; &nbsp;Document vault</div>
+          <div>&#10003; &nbsp;AI chat assistant</div>
+          <div>&#10003; &nbsp;Spending analytics</div>
+          <div>&#10003; &nbsp;CSV export</div>
+        </div>
+      </div>
+      <div class="security-item" style="border: 1px solid var(--blue); position: relative;">
+        <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--blue); color: white; padding: 4px 16px; border-radius: 100px; font-size: 12px; font-weight: 600;">COMING SOON</div>
+        <div style="font-size: 13px; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px;">PREMIUM</div>
+        <div style="font-size: 36px; font-weight: 700; margin-bottom: 4px;">&#8377;99<span style="font-size: 16px; font-weight: 400; color: var(--text-secondary);">/mo</span></div>
+        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">or &#8377;799/year</div>
+        <div style="text-align: left; font-size: 14px; color: var(--text-secondary); line-height: 2.2;">
+          <div>&#10003; &nbsp;Everything in Free</div>
+          <div>&#10003; &nbsp;Priority support</div>
+          <div>&#10003; &nbsp;Offer finder (AI deals)</div>
+          <div>&#10003; &nbsp;Family sharing</div>
+          <div>&#10003; &nbsp;Advanced analytics</div>
+          <div>&#10003; &nbsp;Early access to features</div>
+          <div>&nbsp;</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security -->
+  <section class="security" id="security">
+    <div class="section-label">Security</div>
+    <h2 class="section-title">Your Data, Protected</h2>
+    <p class="section-desc">Enterprise-grade security for your most sensitive documents and renewal data.</p>
+
+    <div class="security-grid">
+      <div class="security-item">
+        <div class="icon"><i data-lucide="shield-check" style="width: 32px; height: 32px; color: var(--blue);"></i></div>
+        <h4>AES-256 Encryption</h4>
+        <p>All documents encrypted at rest with military-grade AES-256 encryption.</p>
+      </div>
+      <div class="security-item">
+        <div class="icon"><i data-lucide="eye-off" style="width: 32px; height: 32px; color: var(--purple);"></i></div>
+        <h4>PII Masking</h4>
+        <p>Aadhaar and PAN numbers are automatically masked. Your sensitive data stays private.</p>
+      </div>
+      <div class="security-item">
+        <div class="icon"><i data-lucide="lock" style="width: 32px; height: 32px; color: var(--emerald);"></i></div>
+        <h4>Secure Storage</h4>
+        <p>Documents stored on AWS with private access. No public URLs, authenticated access only.</p>
+      </div>
+      <div class="security-item">
+        <div class="icon"><i data-lucide="globe-lock" style="width: 32px; height: 32px; color: var(--amber);"></i></div>
+        <h4>TLS Encryption</h4>
+        <p>All data in transit protected with TLS. Your information is safe end-to-end.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="download">
+    <h2>Start Tracking Today</h2>
+    <p>Join thousands who never miss a renewal. Free to download.</p>
+    <div class="hero-buttons">
+      <a href="#" class="btn btn-primary" style="background: #000; border: 1px solid #333;">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        App Store
+      </a>
+      <a href="#" class="btn btn-primary" style="background: #000; border: 1px solid #333;">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3.18 23.67c-.56-.32-.89-.9-.89-1.57V1.9c0-.67.33-1.25.89-1.57l11.07 11.67L3.18 23.67zm1.44-22.97l8.8 9.28 2.47-2.6L4.62.7zm12.73 13.42l-2.47-2.6-8.8 9.28 11.27-6.68zm2.3-1.37l-2.75-1.63-2.75 2.9 2.75 2.9 2.75-1.63c.84-.5.84-2.04 0-2.54z"/></svg>
+        Google Play
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="logo">
+        <img src="icon.png" alt="Renewd">
+        <span>Renewd</span>
+      </div>
+      <div class="footer-links">
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Service</a>
+        <a href="#" onclick="window.location='mai'+'lto:'+'support'+'@'+'renewd.app';return false;">Support</a>
+      </div>
+      <div class="footer-copy">&copy; 2026 Quartex. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

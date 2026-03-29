@@ -6,7 +6,9 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/date_utils.dart';
+import '../../core/widgets/currency_converter.dart';
 import 'scan_add_controller.dart';
 
 class ScanAddForm extends StatelessWidget {
@@ -71,6 +73,7 @@ class _ScanNameFieldState extends State<_ScanNameField> {
                 .copyWith(color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           controller: _ctrl,
           onChanged: (v) => widget.c.name.value = v,
           decoration:
@@ -178,12 +181,12 @@ class _ScanGroupSectionState extends State<_ScanGroupSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Group',
+        Text('Subcategory',
             style: RenewdTextStyles.bodySmall
                 .copyWith(color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         Obx(() {
-          final suggestions = widget.c.suggestedGroups;
+          final suggestions = widget.c.suggestedSubcategories;
           final catColor = CategoryConfig.color(widget.c.category.value);
           if (suggestions.isEmpty) return const SizedBox.shrink();
           return Padding(
@@ -222,10 +225,11 @@ class _ScanGroupSectionState extends State<_ScanGroupSection> {
           );
         }),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           controller: _ctrl,
           onChanged: (v) => widget.c.groupName.value = v,
           decoration:
-              const InputDecoration(hintText: 'Or type a custom group...'),
+              const InputDecoration(hintText: 'Or type a custom subcategory...'),
         ),
       ],
     );
@@ -268,6 +272,7 @@ class _ScanProviderFieldState extends State<_ScanProviderField> {
                 .copyWith(color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           controller: _ctrl,
           onChanged: (v) => widget.c.providerName.value = v,
           decoration:
@@ -321,8 +326,9 @@ class _ScanAmountFieldState extends State<_ScanAmountField> {
               const TextInputType.numberWithOptions(decimal: true),
           onChanged: (v) => widget.c.amount.value = double.tryParse(v),
           decoration:
-              const InputDecoration(prefixText: '₹ ', hintText: '0.00'),
+              InputDecoration(prefixText: '${RenewdCurrency.symbol} ', hintText: '0.00'),
         ),
+        CurrencyConverter(amountController: _ctrl),
       ],
     );
   }
@@ -483,6 +489,7 @@ class _ScanNotesFieldState extends State<_ScanNotesField> {
                 .copyWith(color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           controller: _ctrl,
           onChanged: (v) => widget.c.notes.value = v,
           maxLines: 3,

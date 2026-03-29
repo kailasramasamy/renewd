@@ -42,6 +42,9 @@ class ApiEndpoints {
   // Premium
   static const String premiumConfig = '/premium-config';
 
+  // Banners
+  static const String banners = '/banners';
+
   // Payments
   static const String payments = '/payments';
   static String paymentsByRenewal(String renewalId) =>

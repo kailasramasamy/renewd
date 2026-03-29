@@ -29,8 +29,8 @@ class AddRenewalController extends GetxController {
 
   bool get isCustomFrequency => frequency.value == 'custom';
 
-  List<String> get suggestedGroups =>
-      CategoryConfig.suggestedGroups(category.value);
+  List<String> get suggestedSubcategories =>
+      CategoryConfig.suggestedSubcategories(category.value);
 
   String? validateAndGetError() {
     if (name.value.trim().isEmpty) {

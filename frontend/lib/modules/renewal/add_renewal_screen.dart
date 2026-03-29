@@ -7,7 +7,9 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_opacity.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/date_utils.dart';
+import '../../core/widgets/currency_converter.dart';
 import '../../core/utils/haptics.dart';
 import '../../widgets/minder_button.dart';
 import 'add_renewal_controller.dart';
@@ -36,6 +38,8 @@ class AddRenewalScreen extends StatelessWidget {
             _NameField(c: c),
             const SizedBox(height: RenewdSpacing.xl),
             _CategorySection(c: c),
+            const SizedBox(height: RenewdSpacing.xl),
+            _GroupSection(c: c),
             const SizedBox(height: RenewdSpacing.xl),
             _ProviderField(c: c),
             const SizedBox(height: RenewdSpacing.xl),
@@ -79,6 +83,7 @@ class _NameField extends StatelessWidget {
             color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           onChanged: (v) => c.name.value = v,
           decoration: const InputDecoration(hintText: 'e.g. Netflix, LIC Policy'),
         ),
@@ -158,6 +163,7 @@ class _ProviderField extends StatelessWidget {
             color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           onChanged: (v) => c.providerName.value = v,
           decoration: const InputDecoration(hintText: 'e.g. Netflix Inc.'),
         ),
@@ -166,9 +172,30 @@ class _ProviderField extends StatelessWidget {
   }
 }
 
-class _AmountField extends StatelessWidget {
+class _AmountField extends StatefulWidget {
   final AddRenewalController c;
   const _AmountField({required this.c});
+
+  @override
+  State<_AmountField> createState() => _AmountFieldState();
+}
+
+class _AmountFieldState extends State<_AmountField> {
+  final _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      widget.c.amount.value = double.tryParse(_controller.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,11 +206,12 @@ class _AmountField extends StatelessWidget {
             color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         TextField(
+          controller: _controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: (v) => c.amount.value = double.tryParse(v),
-          decoration: const InputDecoration(
-              prefixText: '₹ ', hintText: '0.00'),
+          decoration: InputDecoration(
+              prefixText: '${RenewdCurrency.symbol} ', hintText: '0.00'),
         ),
+        CurrencyConverter(amountController: _controller),
       ],
     );
   }
@@ -351,11 +379,11 @@ class _GroupSectionState extends State<_GroupSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Group', style: RenewdTextStyles.bodySmall.copyWith(
+        Text('Subcategory', style: RenewdTextStyles.bodySmall.copyWith(
             color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         Obx(() {
-          final suggestions = widget.c.suggestedGroups;
+          final suggestions = widget.c.suggestedSubcategories;
           final catColor = CategoryConfig.color(widget.c.category.value);
           if (suggestions.isEmpty) return const SizedBox.shrink();
           return Padding(
@@ -392,10 +420,11 @@ class _GroupSectionState extends State<_GroupSection> {
           );
         }),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           controller: _textController,
           onChanged: (v) => widget.c.groupName.value = v,
           decoration: const InputDecoration(
-              hintText: 'Or type a custom group...'),
+              hintText: 'Or type a custom subcategory...'),
         ),
       ],
     );
@@ -415,6 +444,7 @@ class _NotesField extends StatelessWidget {
             color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           onChanged: (v) => c.notes.value = v,
           maxLines: 3,
           decoration: const InputDecoration(

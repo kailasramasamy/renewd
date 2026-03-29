@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
@@ -9,6 +10,9 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_opacity.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/utils/currency.dart';
+import '../../data/models/banner_model.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/widgets/animated_list_item.dart';
 import '../../widgets/brand_logo.dart';
@@ -43,8 +47,10 @@ class DashboardScreen extends StatelessWidget {
                 bottom: false,
                 child: _SearchBar(c: c),
               ),
-              const SizedBox(height: RenewdSpacing.md),
-              const _FeatureBanner(),
+              if (c.banners.isNotEmpty) ...[
+                const SizedBox(height: RenewdSpacing.md),
+                _BannerCarousel(c: c),
+              ],
               const SizedBox(height: RenewdSpacing.md),
               _StatsRow(c: c),
               const SizedBox(height: RenewdSpacing.xxl),
@@ -171,66 +177,228 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-// ─── Feature Banner ───────────────────────────────────
+// ─── Banner Carousel ─────────────────────────────────
 
-class _FeatureBanner extends StatelessWidget {
-  const _FeatureBanner();
+class _BannerCarousel extends StatefulWidget {
+  final DashboardController c;
+  const _BannerCarousel({required this.c});
+
+  @override
+  State<_BannerCarousel> createState() => _BannerCarouselState();
+}
+
+class _BannerCarouselState extends State<_BannerCarousel> {
+  final _pageController = PageController(viewportFraction: 1.0);
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    return Obx(() {
+      final banners = widget.c.banners;
+      if (banners.isEmpty) return const SizedBox.shrink();
+
+      return Column(
+        children: [
+          SizedBox(
+            height: 140,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: banners.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
+              itemBuilder: (_, i) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: _BannerCard(banner: banners[i]),
+              ),
+            ),
+          ),
+          if (banners.length > 1) ...[
+            const SizedBox(height: RenewdSpacing.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(banners.length, (i) => Container(
+                width: _currentPage == i ? 20 : 6,
+                height: 6,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  color: _currentPage == i
+                      ? RenewdColors.oceanBlue
+                      : RenewdColors.slate.withValues(alpha: RenewdOpacity.moderate),
+                  borderRadius: RenewdRadius.pillAll,
+                ),
+              )),
+            ),
+          ],
+        ],
+      );
+    });
+  }
+}
+
+class _BannerCard extends StatelessWidget {
+  final BannerModel banner;
+  const _BannerCard({required this.banner});
+
+  Color _parseColor(String? hex) {
+    if (hex == null || hex.length != 7) return RenewdColors.oceanBlue;
+    return Color(int.parse(hex.substring(1), radix: 16) + 0xFF000000);
+  }
+
+  bool get _hasImage => banner.imageUrl != null && banner.imageUrl!.isNotEmpty;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth - RenewdSpacing.lg * 2;
+
+    if (_hasImage) {
+      return _buildImageBanner(cardWidth);
+    }
+    return _buildGradientBanner(cardWidth);
+  }
+
+  Widget _buildImageBanner(double width) {
+    final imageUrl = banner.imageUrl!.startsWith('/')
+        ? '${AppConstants.apiBaseUrl.replaceAll('/api/v1', '')}${banner.imageUrl}'
+        : banner.imageUrl!;
+
     return GestureDetector(
-      onTap: () => Get.toNamed(AppRoutes.features),
+      onTap: _handleTap,
+      child: ClipRRect(
+        borderRadius: RenewdRadius.lgAll,
+        child: SizedBox(
+          width: width,
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => _buildGradientBanner(width),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientBanner(double width) {
+    final startColor = _parseColor(banner.bgGradientStart ?? banner.bgColor);
+    final endColor = _parseColor(banner.bgGradientEnd ?? banner.bgColor);
+
+    return GestureDetector(
+      onTap: _handleTap,
       child: Container(
-        height: 72,
+        width: width,
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Color(0xFF1E3A5F),
-              Color(0xFF3B82F6),
-            ],
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [startColor, endColor],
           ),
           borderRadius: RenewdRadius.lgAll,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: RenewdSpacing.lg),
-        child: Row(
+        child: Stack(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: RenewdOpacity.medium),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(LucideIcons.sparkles,
-                  size: 20, color: Colors.white),
-            ),
-            const SizedBox(width: RenewdSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Discover Renewd',
-                      style: RenewdTextStyles.bodySmall.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      )),
-                  const SizedBox(height: 2),
-                  Text('AI scanning, smart reminders & more',
-                      style: RenewdTextStyles.caption.copyWith(
-                        color: Colors.white70,
-                      )),
-                ],
+            // Decorative circles
+            Positioned(
+              top: -20,
+              right: -10,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: RenewdOpacity.subtle),
+                ),
               ),
             ),
-            Icon(LucideIcons.chevronRight,
-                size: 18, color: Colors.white70),
+            Positioned(
+              bottom: -30,
+              right: 40,
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: RenewdOpacity.subtle),
+                ),
+              ),
+            ),
+            // Content
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: RenewdSpacing.sm,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: RenewdOpacity.medium),
+                          borderRadius: RenewdRadius.pillAll,
+                        ),
+                        child: Text(
+                          banner.type.toUpperCase(),
+                          style: RenewdTextStyles.caption.copyWith(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: RenewdSpacing.sm),
+                      Text(banner.title,
+                          style: RenewdTextStyles.body.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                      if (banner.subtitle != null) ...[
+                        const SizedBox(height: RenewdSpacing.xs),
+                        Text(banner.subtitle!,
+                            style: RenewdTextStyles.caption.copyWith(
+                              color: Colors.white.withValues(alpha: RenewdOpacity.strong),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: RenewdSpacing.md),
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: RenewdOpacity.medium),
+                    borderRadius: RenewdRadius.mdAll,
+                  ),
+                  child: Icon(LucideIcons.arrowRight, size: 22, color: Colors.white),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _handleTap() {
+    if (banner.deeplink != null && banner.deeplink!.isNotEmpty) {
+      Get.toNamed(banner.deeplink!);
+    } else if (banner.externalUrl != null && banner.externalUrl!.isNotEmpty) {
+      launchUrl(Uri.parse(banner.externalUrl!));
+    }
   }
 }
 
@@ -259,7 +427,7 @@ class _StatsRow extends StatelessWidget {
         ),
         const SizedBox(width: RenewdSpacing.sm),
         _StatCard(
-          value: '₹${c.monthlySpend.toStringAsFixed(0)}',
+          value: '${RenewdCurrency.symbol}${c.monthlySpend.toStringAsFixed(0)}',
           label: 'Monthly',
           icon: LucideIcons.indianRupee,
           color: RenewdColors.emerald,
@@ -372,7 +540,7 @@ class _SectionedList extends StatelessWidget {
   }
 }
 
-class _Section extends StatelessWidget {
+class _Section extends StatefulWidget {
   final String label;
   final Color color;
   final List<RenewalModel> items;
@@ -386,7 +554,20 @@ class _Section extends StatelessWidget {
   });
 
   @override
+  State<_Section> createState() => _SectionState();
+}
+
+class _SectionState extends State<_Section> {
+  static const _initialLimit = 5;
+  bool _showAll = false;
+
+  @override
   Widget build(BuildContext context) {
+    final visible = _showAll
+        ? widget.items
+        : widget.items.take(_initialLimit).toList();
+    final hasMore = widget.items.length > _initialLimit;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: RenewdSpacing.xl),
       child: Column(
@@ -398,36 +579,58 @@ class _Section extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: color,
+                  color: widget.color,
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: RenewdSpacing.sm),
-              Text(label,
+              Text(widget.label,
                   style: RenewdTextStyles.sectionHeader.copyWith(
                     color: RenewdColors.slate,
                   )),
               const SizedBox(width: RenewdSpacing.sm),
-              Text('${items.length}',
+              Text('${widget.items.length}',
                   style: RenewdTextStyles.caption.copyWith(
                     color: RenewdColors.slate,
                   )),
             ],
           ),
           const SizedBox(height: RenewdSpacing.md),
-          ...items.asMap().entries.map((entry) => AnimatedListItem(
+          ...visible.asMap().entries.map((entry) => AnimatedListItem(
                 index: entry.key,
                 child: _RenewalRow(
                   renewal: entry.value,
-                  statusColor: color,
+                  statusColor: widget.color,
                   onTap: () async {
                     final result = await Get.toNamed(
                         AppRoutes.renewalDetail,
                         arguments: entry.value);
-                    if (result == true) c.fetchRenewals();
+                    if (result == true) widget.c.fetchRenewals();
                   },
                 ),
               )),
+          if (hasMore && !_showAll)
+            GestureDetector(
+              onTap: () => setState(() => _showAll = true),
+              child: Padding(
+                padding: const EdgeInsets.only(top: RenewdSpacing.xs),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Show ${widget.items.length - _initialLimit} more',
+                      style: RenewdTextStyles.caption.copyWith(
+                        color: RenewdColors.oceanBlue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: RenewdSpacing.xs),
+                    Icon(LucideIcons.chevronDown,
+                        size: 14, color: RenewdColors.oceanBlue),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -500,7 +703,7 @@ class _RenewalRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (renewal.amount != null)
-                  Text('₹${renewal.amount!.toStringAsFixed(0)}',
+                  Text('${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(0)}',
                       style: RenewdTextStyles.subtitle.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,

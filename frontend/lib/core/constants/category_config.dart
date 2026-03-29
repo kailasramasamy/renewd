@@ -8,6 +8,9 @@ enum RenewalCategory {
   government,
   utility,
   membership,
+  finance,
+  digital,
+  education,
   other,
 }
 
@@ -19,46 +22,52 @@ class CategoryConfig {
       label: 'Insurance',
       color: RenewdColors.oceanBlue,
       icon: LucideIcons.shieldCheck,
-      suggestedGroups: [
+      suggestedSubcategories: [
         'Car Insurance',
+        'Bike Insurance',
         'Health Insurance',
         'Life Insurance',
         'Home Insurance',
         'Travel Insurance',
-        'Bike Insurance',
+        'Term Insurance',
+        'Commercial Vehicle',
       ],
     ),
     RenewalCategory.subscription: _CategoryMeta(
       label: 'Subscription',
       color: RenewdColors.lavender,
       icon: LucideIcons.refreshCcw,
-      suggestedGroups: [
+      suggestedSubcategories: [
         'Entertainment',
         'Cloud Storage',
         'Music',
         'News',
         'Software',
         'Fitness',
-        'Learning',
+        'Gaming',
+        'VPN',
       ],
     ),
     RenewalCategory.government: _CategoryMeta(
       label: 'Government',
       color: RenewdColors.teal,
       icon: LucideIcons.building2,
-      suggestedGroups: [
+      suggestedSubcategories: [
         'Driving License',
         'Passport',
         'Vehicle Registration',
+        'PUC Certificate',
         'Trade License',
         'GST Registration',
+        'Aadhaar',
+        'PAN Card',
       ],
     ),
     RenewalCategory.utility: _CategoryMeta(
       label: 'Utility',
       color: RenewdColors.amber,
       icon: LucideIcons.zap,
-      suggestedGroups: [
+      suggestedSubcategories: [
         'Electricity',
         'Water',
         'Gas',
@@ -72,39 +81,86 @@ class CategoryConfig {
       label: 'Membership',
       color: RenewdColors.rose,
       icon: LucideIcons.crown,
-      suggestedGroups: [
+      suggestedSubcategories: [
         'Gym',
         'Club',
-        'Professional',
+        'Professional Body',
         'Co-working',
         'Loyalty Program',
+        'Library',
+        'Association',
+      ],
+    ),
+    RenewalCategory.finance: _CategoryMeta(
+      label: 'Finance',
+      color: RenewdColors.emerald,
+      icon: LucideIcons.wallet,
+      suggestedSubcategories: [
+        'Loan EMI',
+        'Credit Card',
+        'Fixed Deposit',
+        'Recurring Deposit',
+        'SIP',
+        'Mutual Fund',
+        'Insurance Premium',
+        'Tax Payment',
+      ],
+    ),
+    RenewalCategory.digital: _CategoryMeta(
+      label: 'Digital',
+      color: RenewdColors.tangerine,
+      icon: LucideIcons.globe,
+      suggestedSubcategories: [
+        'Domain',
+        'Hosting',
+        'Cloud Service',
+        'SaaS Tool',
+        'SSL Certificate',
+        'Email Service',
+      ],
+    ),
+    RenewalCategory.education: _CategoryMeta(
+      label: 'Education',
+      color: RenewdColors.oceanBlue,
+      icon: LucideIcons.graduationCap,
+      suggestedSubcategories: [
+        'School Fees',
+        'Tuition',
+        'Course Subscription',
+        'Certification',
+        'Library',
       ],
     ),
     RenewalCategory.other: _CategoryMeta(
       label: 'Other',
       color: RenewdColors.slate,
       icon: LucideIcons.layoutGrid,
-      suggestedGroups: [],
+      suggestedSubcategories: [
+        'Warranty',
+        'Service Contract',
+        'Lease',
+        'Rental',
+      ],
     ),
   };
 
   static String label(RenewalCategory cat) => _configs[cat]!.label;
   static Color color(RenewalCategory cat) => _configs[cat]!.color;
   static IconData icon(RenewalCategory cat) => _configs[cat]!.icon;
-  static List<String> suggestedGroups(RenewalCategory cat) =>
-      _configs[cat]!.suggestedGroups;
+  static List<String> suggestedSubcategories(RenewalCategory cat) =>
+      _configs[cat]!.suggestedSubcategories;
 }
 
 class _CategoryMeta {
   final String label;
   final Color color;
   final IconData icon;
-  final List<String> suggestedGroups;
+  final List<String> suggestedSubcategories;
 
   const _CategoryMeta({
     required this.label,
     required this.color,
     required this.icon,
-    this.suggestedGroups = const [],
+    this.suggestedSubcategories = const [],
   });
 }

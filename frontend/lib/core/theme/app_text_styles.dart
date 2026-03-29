@@ -5,19 +5,19 @@ class RenewdTextStyles {
   RenewdTextStyles._();
 
   static TextStyle get h1 => GoogleFonts.dmSans(
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.5,
       );
 
   static TextStyle get h2 => GoogleFonts.dmSans(
-        fontSize: 22,
+        fontSize: 26,
         fontWeight: FontWeight.w600,
         letterSpacing: -0.3,
       );
 
   static TextStyle get h3 => GoogleFonts.dmSans(
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: FontWeight.w600,
         letterSpacing: -0.2,
       );

@@ -53,6 +53,14 @@ const BRAND_DOMAINS: Record<string, string> = {
   gpay: "pay.google.com",
   bescom: "bescom.co.in",
   bwssb: "bwssb.gov.in",
+  godaddy: "godaddy.com",
+  namecheap: "namecheap.com",
+  cloudflare: "cloudflare.com",
+  hostinger: "hostinger.com",
+  aws: "aws.amazon.com",
+  vercel: "vercel.com",
+  railway: "railway.app",
+  netlify: "netlify.com",
 };
 
 function findDomainFromMap(name: string, provider: string | null): string | null {
@@ -96,7 +104,7 @@ async function findDomainWithAI(name: string, provider: string | null): Promise<
 }
 
 function buildLogoUrl(domain: string): string {
-  return `https://logo.clearbit.com/${domain}?size=256`;
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
 }
 
 export function getLogoUrl(name: string, provider: string | null): string | null {

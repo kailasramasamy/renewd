@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../core/network/api_client.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../app/routes/app_routes.dart';
 
@@ -116,18 +117,21 @@ class AuthController extends GetxController {
       final token = await user.getIdToken();
       final storage = Get.find<StorageService>();
       storage.saveToken(token!);
+      final detectedCurrency = RenewdCurrency.detectFromLocale();
       storage.saveUserData({
         'uid': user.uid,
         'phone': user.phoneNumber,
         'email': user.email,
         'name': user.displayName,
         'photo': user.photoURL,
+        'default_currency': detectedCurrency,
       });
 
       // Register on backend (ignore 409 if already exists)
       try {
         final client = Get.find<ApiClient>();
         await client.safePost('/auth/register', {});
+        await client.safePut('/users/me', {'default_currency': detectedCurrency});
       } catch (e) {
         if (e is ApiException && e.statusCode != 409) {
           // Non-conflict error — log but don't block login
@@ -168,18 +172,21 @@ class AuthController extends GetxController {
       final token = await user.getIdToken();
       final storage = Get.find<StorageService>();
       storage.saveToken(token!);
+      final detectedCurrency = RenewdCurrency.detectFromLocale();
       storage.saveUserData({
         'uid': user.uid,
         'phone': user.phoneNumber,
         'email': user.email,
         'name': user.displayName,
         'photo': user.photoURL,
+        'default_currency': detectedCurrency,
       });
 
       // Register on backend (ignore 409 if already exists)
       try {
         final client = Get.find<ApiClient>();
         await client.safePost('/auth/register', {});
+        await client.safePut('/users/me', {'default_currency': detectedCurrency});
       } catch (e) {
         if (e is ApiException && e.statusCode != 409) {
           // Non-conflict error — log but don't block login

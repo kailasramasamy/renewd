@@ -10,6 +10,7 @@ import '../../core/network/api_endpoints.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/premium_service.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/haptics.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../data/providers/renewal_provider.dart';
@@ -26,7 +27,9 @@ class ProfileScreen extends StatelessWidget {
   static const List<_ProfileItem> _items = [
     _ProfileItem(icon: LucideIcons.bell, label: 'Notifications'),
     _ProfileItem(icon: LucideIcons.download, label: 'Data Export'),
+    _ProfileItem(icon: LucideIcons.banknote, label: 'Currency'),
     _ProfileItem(icon: LucideIcons.crown, label: 'Premium', isPremium: true),
+    _ProfileItem(icon: LucideIcons.sparkles, label: 'Features'),
     _ProfileItem(icon: LucideIcons.info, label: 'About'),
   ];
 
@@ -130,13 +133,75 @@ class ProfileScreen extends StatelessWidget {
         Get.toNamed(AppRoutes.notificationSettings);
       case 'Data Export':
         _exportData();
+      case 'Currency':
+        _showCurrencyPicker();
       case 'Premium':
         Get.toNamed(AppRoutes.premium);
+      case 'Features':
+        Get.toNamed(AppRoutes.features);
       case 'About':
         _showAbout();
       default:
         break;
     }
+  }
+
+  void _showCurrencyPicker() {
+    final isDark = Get.isDarkMode;
+    final currentCurrency = RenewdCurrency.userCurrency;
+    Get.bottomSheet(
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: RenewdColors.slate.withValues(alpha: RenewdOpacity.moderate),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              Text('Default Currency',
+                  style: RenewdTextStyles.h3.copyWith(fontWeight: FontWeight.w700)),
+              const SizedBox(height: RenewdSpacing.lg),
+              ...RenewdCurrency.labels.entries.map((entry) => ListTile(
+                    leading: Text(
+                      RenewdCurrency.symbolFor(entry.key),
+                      style: RenewdTextStyles.h3.copyWith(color: RenewdColors.oceanBlue),
+                    ),
+                    title: Text(entry.value, style: RenewdTextStyles.body),
+                    trailing: entry.key == currentCurrency
+                        ? Icon(LucideIcons.check, color: RenewdColors.emerald, size: 20)
+                        : null,
+                    onTap: () async {
+                      Get.back();
+                      try {
+                        final client = Get.find<ApiClient>();
+                        await client.safePut(ApiEndpoints.updateProfile, {
+                          'default_currency': entry.key,
+                        });
+                        final storage = Get.find<StorageService>();
+                        final userData = storage.readUserData() ?? {};
+                        userData['default_currency'] = entry.key;
+                        storage.saveUserData(userData);
+                        showSuccessSnack('Currency set to ${entry.value}');
+                      } catch (_) {
+                        showErrorSnack('Failed to update currency');
+                      }
+                    },
+                  )),
+            ],
+          ),
+        ),
+      ),
+      backgroundColor: isDark ? RenewdColors.darkSlate : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    );
   }
 
   void _showAbout() {

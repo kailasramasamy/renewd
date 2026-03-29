@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "build-plan.md",
+                "file": "test-plan.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "build-plan"
+              "title": "test-plan"
             }
           }
         ]
@@ -185,8 +185,9 @@
   },
   "active": "46c813632a9ba3d7",
   "lastOpenFiles": [
+    "build-plan.md",
+    "test-plan.md",
     "feature-spec.md",
-    "design-system.md",
-    "build-plan.md"
+    "design-system.md"
   ]
 }

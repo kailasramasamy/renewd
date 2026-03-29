@@ -7,6 +7,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_opacity.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/date_utils.dart';
 import '../../widgets/minder_button.dart';
 import 'edit_renewal_controller.dart';
@@ -34,6 +35,7 @@ class EditRenewalScreen extends StatelessWidget {
                 _buildLabel('Name *'),
                 const SizedBox(height: RenewdSpacing.sm),
                 TextFormField(
+                  textCapitalization: TextCapitalization.sentences,
                   initialValue: c.name.value,
                   onChanged: (v) => c.name.value = v,
                   decoration:
@@ -44,13 +46,14 @@ class EditRenewalScreen extends StatelessWidget {
                 const SizedBox(height: RenewdSpacing.sm),
                 _buildCategoryChips(c),
                 const SizedBox(height: RenewdSpacing.xl),
-                _buildLabel('Group'),
+                _buildLabel('Subcategory'),
                 const SizedBox(height: RenewdSpacing.sm),
                 _GroupSection(c: c),
                 const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Provider'),
                 const SizedBox(height: RenewdSpacing.sm),
                 TextFormField(
+                  textCapitalization: TextCapitalization.sentences,
                   initialValue: c.providerName.value,
                   onChanged: (v) => c.providerName.value = v,
                   decoration: const InputDecoration(hintText: 'e.g. Netflix Inc.'),
@@ -64,7 +67,7 @@ class EditRenewalScreen extends StatelessWidget {
                       const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (v) => c.amount.value = double.tryParse(v),
                   decoration:
-                      const InputDecoration(prefixText: '₹ ', hintText: '0.00'),
+                      InputDecoration(prefixText: '${RenewdCurrency.symbol} ', hintText: '0.00'),
                 ),
                 const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Renewal Date *'),
@@ -91,6 +94,7 @@ class EditRenewalScreen extends StatelessWidget {
                 _buildLabel('Notes'),
                 const SizedBox(height: RenewdSpacing.sm),
                 TextFormField(
+                  textCapitalization: TextCapitalization.sentences,
                   initialValue: c.notes.value,
                   onChanged: (v) => c.notes.value = v,
                   maxLines: 3,
@@ -270,7 +274,7 @@ class _GroupSectionState extends State<_GroupSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Obx(() {
-          final suggestions = widget.c.suggestedGroups;
+          final suggestions = widget.c.suggestedSubcategories;
           final catColor = CategoryConfig.color(widget.c.category.value);
           if (suggestions.isEmpty) return const SizedBox.shrink();
           return Padding(
@@ -307,10 +311,11 @@ class _GroupSectionState extends State<_GroupSection> {
           );
         }),
         TextField(
+          textCapitalization: TextCapitalization.sentences,
           controller: _textController,
           onChanged: (v) => widget.c.groupName.value = v,
           decoration: const InputDecoration(
-              hintText: 'Or type a custom group...'),
+              hintText: 'Or type a custom subcategory...'),
         ),
       ],
     );

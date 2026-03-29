@@ -8,6 +8,7 @@ import {
   Bell,
   Settings,
   Crown,
+  Image,
   LogOut,
 } from "lucide-react";
 
@@ -18,6 +19,7 @@ const nav = [
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/config", label: "App Config", icon: Settings },
   { href: "/premium", label: "Premium Config", icon: Crown },
+  { href: "/banners", label: "Banners", icon: Image },
 ];
 
 export function Sidebar() {

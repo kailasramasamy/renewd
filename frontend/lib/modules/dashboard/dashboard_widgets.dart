@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/date_utils.dart';
 import '../../data/models/renewal_model.dart';
 import '../../widgets/minder_card.dart';
@@ -62,7 +63,7 @@ class DueSoonCard extends StatelessWidget {
           Text(days == 0 ? 'Today' : '$days days',
               style: RenewdTextStyles.caption.copyWith(color: statusColor)),
           if (renewal.amount != null)
-            Text('₹${renewal.amount!.toStringAsFixed(0)}',
+            Text('${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(0)}',
                 style: RenewdTextStyles.caption
                     .copyWith(color: RenewdColors.slate)),
         ],
@@ -372,7 +373,7 @@ class RenewalListItem extends StatelessWidget {
                 ],
                 if (renewal.amount != null) ...[
                   const SizedBox(height: RenewdSpacing.xs),
-                  Text('₹${renewal.amount!.toStringAsFixed(0)}',
+                  Text('${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(0)}',
                       style: RenewdTextStyles.caption
                           .copyWith(color: RenewdColors.slate)),
                 ],

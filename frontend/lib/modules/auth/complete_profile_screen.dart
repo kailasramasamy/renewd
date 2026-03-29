@@ -151,7 +151,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
               const SizedBox(height: RenewdSpacing.sm),
               TextField(
                 controller: _nameCtrl,
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   hintText: 'Your full name',
                   prefixIcon: Icon(LucideIcons.user,

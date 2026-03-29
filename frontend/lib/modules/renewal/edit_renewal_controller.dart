@@ -30,8 +30,8 @@ class EditRenewalController extends GetxController {
 
   bool get isCustomFrequency => frequency.value == 'custom';
 
-  List<String> get suggestedGroups =>
-      CategoryConfig.suggestedGroups(category.value);
+  List<String> get suggestedSubcategories =>
+      CategoryConfig.suggestedSubcategories(category.value);
 
   @override
   void onInit() {

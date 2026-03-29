@@ -37,6 +37,7 @@ dependencies:
   crypto: ^3.0.7
   url_launcher: ^6.3.2
   in_app_purchase: ^3.2.3
+  receive_sharing_intent: ^1.8.1
 
 dev_dependencies:
   flutter_test:

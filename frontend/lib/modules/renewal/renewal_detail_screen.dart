@@ -10,6 +10,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_opacity.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/date_utils.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/models/renewal_model.dart';
@@ -315,7 +316,7 @@ class _InfoSection extends StatelessWidget {
                 _InfoRow(
                     icon: LucideIcons.wallet,
                     label: 'Amount',
-                    value: '₹${renewal.amount!.toStringAsFixed(2)}'),
+                    value: '${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(2)}'),
                 _Divider(),
               ],
               _InfoRow(
@@ -630,8 +631,8 @@ class _PaymentPromptState extends State<_PaymentPrompt> {
           TextField(
             controller: _amountCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              prefixText: '₹ ',
+            decoration: InputDecoration(
+              prefixText: '${RenewdCurrency.symbol} ',
               hintText: 'Amount paid',
             ),
           ),
@@ -778,7 +779,7 @@ class _PaymentRow extends StatelessWidget {
               ],
             ),
           ),
-          Text('₹${payment.amount.toStringAsFixed(0)}',
+          Text('${RenewdCurrency.symbol}${payment.amount.toStringAsFixed(0)}',
               style: RenewdTextStyles.body
                   .copyWith(fontWeight: FontWeight.w600)),
         ],

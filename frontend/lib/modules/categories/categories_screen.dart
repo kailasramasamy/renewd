@@ -8,6 +8,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_opacity.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/date_utils.dart';
 import '../../data/models/renewal_model.dart';
 import '../../data/providers/renewal_provider.dart';
@@ -25,9 +26,7 @@ class CategoriesScreen extends StatelessWidget {
         if (c.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        final hasAny = RenewalCategory.values.any(
-            (cat) => c.byCategory(cat).isNotEmpty);
-        if (!hasAny) {
+        if (c.renewals.isEmpty) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(RenewdSpacing.xl),
@@ -53,13 +52,19 @@ class CategoriesScreen extends StatelessWidget {
         }
         return ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          padding: const EdgeInsets.fromLTRB(
+              RenewdSpacing.lg, 0, RenewdSpacing.lg, 100),
           children: [
-            ...RenewalCategory.values.map((cat) {
-              final items = c.byCategory(cat);
-              if (items.isEmpty) return const SizedBox.shrink();
-              return _CategoryTile(cat: cat, items: items, c: c);
-            }),
+            const SizedBox(height: RenewdSpacing.md),
+            _SearchBar(c: c),
+            const SizedBox(height: RenewdSpacing.lg),
+            _CategoryChips(c: c),
+            const SizedBox(height: RenewdSpacing.sm),
+            _SubcategoryChips(c: c),
+            const SizedBox(height: RenewdSpacing.lg),
+            _SummaryBar(c: c),
+            const SizedBox(height: RenewdSpacing.lg),
+            ...c.filtered.map((r) => _RenewalRow(renewal: r, c: c)),
           ],
         );
       }),
@@ -67,11 +72,15 @@ class CategoriesScreen extends StatelessWidget {
   }
 }
 
+// ─── Controller ──────────────────────────────────────
+
 class CategoriesController extends GetxController {
   final _provider = RenewalProvider();
   final RxList<RenewalModel> renewals = <RenewalModel>[].obs;
   final RxBool isLoading = false.obs;
-  final RxSet<String> expandedCategories = <String>{}.obs;
+  final RxString searchQuery = ''.obs;
+  final Rx<RenewalCategory?> selectedCategory = Rx(null);
+  final RxString selectedSubcategory = ''.obs;
 
   @override
   void onInit() {
@@ -88,122 +97,270 @@ class CategoriesController extends GetxController {
     isLoading.value = false;
   }
 
-  List<RenewalModel> byCategory(RenewalCategory cat) =>
-      renewals.where((r) => r.category == cat).toList();
+  List<RenewalModel> get filtered {
+    var result = renewals.toList();
 
-  double spendForCategory(RenewalCategory cat) =>
-      byCategory(cat).fold(0.0, (sum, r) => sum + (r.amount ?? 0));
+    // Filter by category
+    final cat = selectedCategory.value;
+    if (cat != null) {
+      result = result.where((r) => r.category == cat).toList();
+    }
 
-  bool isExpanded(RenewalCategory cat) =>
-      expandedCategories.contains(cat.name);
+    // Filter by subcategory
+    final sub = selectedSubcategory.value;
+    if (sub.isNotEmpty) {
+      result = result.where((r) => (r.groupName ?? '') == sub).toList();
+    }
 
-  void toggle(RenewalCategory cat) {
-    if (expandedCategories.contains(cat.name)) {
-      expandedCategories.remove(cat.name);
+    // Filter by search
+    final q = searchQuery.value.trim().toLowerCase();
+    if (q.isNotEmpty) {
+      result = result.where((r) =>
+          r.name.toLowerCase().contains(q) ||
+          (r.provider?.toLowerCase().contains(q) ?? false) ||
+          (r.groupName?.toLowerCase().contains(q) ?? false)).toList();
+    }
+
+    return result;
+  }
+
+  /// Get subcategories available for current category filter
+  List<String> get availableSubcategories {
+    final cat = selectedCategory.value;
+    if (cat == null) return [];
+    final items = renewals.where((r) => r.category == cat);
+    final subs = <String>{};
+    for (final r in items) {
+      if (r.groupName != null && r.groupName!.isNotEmpty) {
+        subs.add(r.groupName!);
+      }
+    }
+    return subs.toList()..sort();
+  }
+
+  /// Categories that have at least one renewal
+  List<RenewalCategory> get activeCategories =>
+      RenewalCategory.values.where((cat) =>
+          renewals.any((r) => r.category == cat)).toList();
+
+  void selectCategory(RenewalCategory? cat) {
+    if (selectedCategory.value == cat) {
+      selectedCategory.value = null;
     } else {
-      expandedCategories.add(cat.name);
+      selectedCategory.value = cat;
+    }
+    selectedSubcategory.value = '';
+  }
+
+  void selectSubcategory(String sub) {
+    if (selectedSubcategory.value == sub) {
+      selectedSubcategory.value = '';
+    } else {
+      selectedSubcategory.value = sub;
     }
   }
+
+  double get filteredSpend =>
+      filtered.fold(0.0, (sum, r) => sum + (r.amount ?? 0));
 }
 
-class _CategoryTile extends StatelessWidget {
-  final RenewalCategory cat;
-  final List<RenewalModel> items;
-  final CategoriesController c;
+// ─── Search Bar ──────────────────────────────────────
 
-  const _CategoryTile({
-    required this.cat,
-    required this.items,
-    required this.c,
-  });
+class _SearchBar extends StatelessWidget {
+  final CategoriesController c;
+  const _SearchBar({required this.c});
 
   @override
   Widget build(BuildContext context) {
-    final color = CategoryConfig.color(cat);
-    final icon = CategoryConfig.icon(cat);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final spend = c.spendForCategory(cat);
-
-    return Obx(() {
-      final expanded = c.isExpanded(cat);
-      return Container(
-        margin: const EdgeInsets.only(bottom: RenewdSpacing.xl),
-        decoration: BoxDecoration(
-          color: isDark ? RenewdColors.darkSlate : Colors.white,
-          borderRadius: RenewdRadius.lgAll,
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
+        borderRadius: RenewdRadius.pillAll,
+      ),
+      child: TextField(
+        onChanged: (v) => c.searchQuery.value = v,
+        style: RenewdTextStyles.bodySmall,
+        decoration: InputDecoration(
+          hintText: 'Search renewals...',
+          hintStyle:
+              RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate),
+          prefixIcon:
+              Icon(LucideIcons.search, size: 18, color: RenewdColors.slate),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          filled: false,
         ),
-        child: Column(
-          children: [
-            // Header
-            InkWell(
-              onTap: () => c.toggle(cat),
-              borderRadius: RenewdRadius.lgAll,
-              child: Padding(
-                padding: const EdgeInsets.all(RenewdSpacing.lg),
+      ),
+    );
+  }
+}
+
+// ─── Category Chips ──────────────────────────────────
+
+class _CategoryChips extends StatelessWidget {
+  final CategoriesController c;
+  const _CategoryChips({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final active = c.activeCategories;
+      if (active.isEmpty) return const SizedBox.shrink();
+
+      return SizedBox(
+        height: 36,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: active.length,
+          separatorBuilder: (_, _) => const SizedBox(width: RenewdSpacing.sm),
+          itemBuilder: (_, i) {
+            final cat = active[i];
+            final isSelected = c.selectedCategory.value == cat;
+            final color = CategoryConfig.color(cat);
+
+            return GestureDetector(
+              onTap: () => c.selectCategory(cat),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? color.withValues(alpha: RenewdOpacity.medium)
+                      : RenewdColors.steel,
+                  borderRadius: RenewdRadius.pillAll,
+                  border: Border.all(
+                    color: isSelected ? color : RenewdColors.darkBorder,
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: RenewdOpacity.subtle),
-                        borderRadius: RenewdRadius.mdAll,
+                    Icon(CategoryConfig.icon(cat), size: 14, color: isSelected ? color : RenewdColors.slate),
+                    const SizedBox(width: RenewdSpacing.xs),
+                    Text(
+                      CategoryConfig.label(cat),
+                      style: RenewdTextStyles.caption.copyWith(
+                        color: isSelected ? color : RenewdColors.slate,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                       ),
-                      child: Icon(icon, size: 20, color: color),
-                    ),
-                    const SizedBox(width: RenewdSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(CategoryConfig.label(cat),
-                              style: RenewdTextStyles.body
-                                  .copyWith(fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${items.length} item${items.length != 1 ? 's' : ''}${spend > 0 ? ' · ₹${spend.toStringAsFixed(0)}' : ''}',
-                            style: RenewdTextStyles.caption
-                                .copyWith(color: RenewdColors.slate),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      expanded
-                          ? LucideIcons.chevronUp
-                          : LucideIcons.chevronDown,
-                      size: 18,
-                      color: RenewdColors.slate,
                     ),
                   ],
                 ),
               ),
-            ),
-            // Expanded items
-            if (expanded)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                    RenewdSpacing.lg, 0, RenewdSpacing.lg, RenewdSpacing.lg),
-                child: Column(
-                  children: items.map((r) => _RenewalItem(renewal: r, c: c)).toList(),
-                ),
-              ),
-          ],
+            );
+          },
         ),
       );
     });
   }
 }
 
-class _RenewalItem extends StatelessWidget {
+// ─── Subcategory Chips ───────────────────────────────
+
+class _SubcategoryChips extends StatelessWidget {
+  final CategoriesController c;
+  const _SubcategoryChips({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final subs = c.availableSubcategories;
+      if (subs.isEmpty) return const SizedBox.shrink();
+
+      final catColor = c.selectedCategory.value != null
+          ? CategoryConfig.color(c.selectedCategory.value!)
+          : RenewdColors.oceanBlue;
+
+      return SizedBox(
+        height: 32,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: subs.length,
+          separatorBuilder: (_, _) => const SizedBox(width: RenewdSpacing.sm),
+          itemBuilder: (_, i) {
+            final sub = subs[i];
+            final isSelected = c.selectedSubcategory.value == sub;
+
+            return GestureDetector(
+              onTap: () => c.selectSubcategory(sub),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: RenewdSpacing.md, vertical: RenewdSpacing.xs),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? catColor.withValues(alpha: RenewdOpacity.light)
+                      : Colors.transparent,
+                  borderRadius: RenewdRadius.pillAll,
+                  border: Border.all(
+                    color: isSelected ? catColor : RenewdColors.darkBorder,
+                  ),
+                ),
+                child: Text(
+                  sub,
+                  style: RenewdTextStyles.caption.copyWith(
+                    color: isSelected ? catColor : RenewdColors.slate,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+}
+
+// ─── Summary Bar ─────────────────────────────────────
+
+class _SummaryBar extends StatelessWidget {
+  final CategoriesController c;
+  const _SummaryBar({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final items = c.filtered;
+      final spend = c.filteredSpend;
+      return Row(
+        children: [
+          Text(
+            '${items.length} renewal${items.length != 1 ? 's' : ''}',
+            style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate),
+          ),
+          if (spend > 0) ...[
+            Text(' · ', style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),
+            Text(
+              '${RenewdCurrency.symbol}${spend.toStringAsFixed(0)}',
+              style: RenewdTextStyles.caption.copyWith(
+                color: RenewdColors.emerald,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ],
+      );
+    });
+  }
+}
+
+// ─── Renewal Row (same layout as dashboard) ──────────
+
+class _RenewalRow extends StatelessWidget {
   final RenewalModel renewal;
   final CategoriesController c;
 
-  const _RenewalItem({required this.renewal, required this.c});
+  const _RenewalRow({required this.renewal, required this.c});
 
   @override
   Widget build(BuildContext context) {
     final days = renewal.daysRemaining;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = RenewdDateUtils.statusColorFromDays(days);
 
     return GestureDetector(
@@ -213,48 +370,80 @@ class _RenewalItem extends StatelessWidget {
         if (result == true) c.fetchRenewals();
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.sm),
-        decoration: const BoxDecoration(
+        margin: const EdgeInsets.only(bottom: RenewdSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: RenewdSpacing.lg,
+          vertical: RenewdSpacing.md,
+        ),
+        decoration: BoxDecoration(
+          color: isDark ? RenewdColors.darkSlate : Colors.white,
+          borderRadius: RenewdRadius.lgAll,
           border: Border(
-            top: BorderSide(color: RenewdColors.darkBorder, width: 0.5),
+            left: BorderSide(color: statusColor, width: 3),
           ),
         ),
         child: Row(
           children: [
-            BrandLogo(renewal: renewal, size: 32),
+            BrandLogo(renewal: renewal, size: 40),
             const SizedBox(width: RenewdSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(renewal.name,
-                      style: RenewdTextStyles.bodySmall
-                          .copyWith(fontWeight: FontWeight.w500),
+                      style: RenewdTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
-                  if (renewal.provider != null)
-                    Text(renewal.provider!,
-                        style: RenewdTextStyles.caption
-                            .copyWith(color: RenewdColors.slate, fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 2),
+                  Text(
+                    [
+                      renewal.provider ?? CategoryConfig.label(renewal.category),
+                      if (renewal.groupName != null) renewal.groupName!,
+                    ].join(' · '),
+                    style: RenewdTextStyles.caption
+                        .copyWith(color: RenewdColors.slate, fontSize: 13),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
-            if (renewal.amount != null)
-              Text('₹${renewal.amount!.toStringAsFixed(0)}',
-                  style: RenewdTextStyles.bodySmall
-                      .copyWith(fontWeight: FontWeight.w600)),
-            const SizedBox(width: RenewdSpacing.md),
-            Text(
-              _daysLabel(days),
-              style: RenewdTextStyles.caption.copyWith(
-                color: statusColor,
-                fontWeight: FontWeight.w600,
-              ),
+            const SizedBox(width: RenewdSpacing.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (renewal.amount != null)
+                  Text(
+                    '${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(0)}',
+                    style: RenewdTextStyles.subtitle.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: RenewdSpacing.sm,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: RenewdOpacity.medium),
+                    borderRadius: RenewdRadius.pillAll,
+                  ),
+                  child: Text(
+                    _daysLabel(days),
+                    style: RenewdTextStyles.caption.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: RenewdSpacing.xs),
-            Icon(LucideIcons.chevronRight, size: 14, color: RenewdColors.slate),
           ],
         ),
       ),
@@ -262,10 +451,10 @@ class _RenewalItem extends StatelessWidget {
   }
 
   String _daysLabel(int days) {
-    if (days < 0) return '${days.abs()}d late';
+    if (days < 0) return '${days.abs()}d overdue';
     if (days == 0) return 'Today';
-    if (days == 1) return '1d';
-    if (days <= 30) return '${days}d';
+    if (days == 1) return 'Tomorrow';
+    if (days <= 30) return 'in ${days}d';
     return RenewdDateUtils.formatShort(renewal.renewalDate);
   }
 }

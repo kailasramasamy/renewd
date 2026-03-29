@@ -6,6 +6,7 @@ class UserModel {
   final String? avatarUrl;
   final bool isPremium;
   final DateTime? premiumExpiresAt;
+  final String defaultCurrency;
   final DateTime createdAt;
 
   const UserModel({
@@ -16,6 +17,7 @@ class UserModel {
     this.avatarUrl,
     required this.isPremium,
     this.premiumExpiresAt,
+    this.defaultCurrency = 'INR',
     required this.createdAt,
   });
 
@@ -29,6 +31,7 @@ class UserModel {
         premiumExpiresAt: json['premium_expires_at'] != null
             ? DateTime.tryParse(json['premium_expires_at'] as String)
             : null,
+        defaultCurrency: json['default_currency'] as String? ?? 'INR',
         createdAt: DateTime.parse(json['created_at'] as String),
       );
 
@@ -40,6 +43,7 @@ class UserModel {
         'avatar_url': avatarUrl,
         'is_premium': isPremium,
         'premium_expires_at': premiumExpiresAt?.toIso8601String(),
+        'default_currency': defaultCurrency,
         'created_at': createdAt.toIso8601String(),
       };
 
@@ -49,6 +53,7 @@ class UserModel {
     String? avatarUrl,
     bool? isPremium,
     DateTime? premiumExpiresAt,
+    String? defaultCurrency,
   }) =>
       UserModel(
         id: id,
@@ -58,6 +63,7 @@ class UserModel {
         avatarUrl: avatarUrl ?? this.avatarUrl,
         isPremium: isPremium ?? this.isPremium,
         premiumExpiresAt: premiumExpiresAt ?? this.premiumExpiresAt,
+        defaultCurrency: defaultCurrency ?? this.defaultCurrency,
         createdAt: createdAt,
       );
 }
