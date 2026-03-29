@@ -1,5 +1,5 @@
 -- Banner system for home screen promotions and announcements
-CREATE TABLE banners (
+CREATE TABLE IF NOT EXISTS banners (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title VARCHAR(100) NOT NULL,
   subtitle VARCHAR(200),

@@ -211,8 +211,21 @@ class _PhoneSection extends StatelessWidget {
             hintText: 'Enter your phone number',
             hintStyle: RenewdTextStyles.body
                 .copyWith(color: RenewdColors.slate),
-            prefixIcon: Icon(LucideIcons.phone, size: 18,
-                color: RenewdColors.slate),
+            prefixIcon: Padding(
+              padding: const EdgeInsets.only(left: 12, right: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.phone, size: 18,
+                      color: RenewdColors.slate),
+                  const SizedBox(width: 8),
+                  Text(c.dialCode,
+                      style: RenewdTextStyles.body.copyWith(
+                        color: isDark ? Colors.white : RenewdColors.deepNavy,
+                      )),
+                ],
+              ),
+            ),
           ),
           onChanged: (v) => c.phone.value = v,
           onSubmitted: (_) => c.sendOtp(),

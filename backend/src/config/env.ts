@@ -11,7 +11,7 @@ const envSchema = z.object({
   FIREBASE_PRIVATE_KEY: z.string().default(""),
   AWS_ACCESS_KEY_ID: z.string().default(""),
   AWS_SECRET_ACCESS_KEY: z.string().default(""),
-  AWS_REGION: z.string().default("ap-south-1"),
+  AWS_REGION: z.string().default("us-east-1"),
   S3_BUCKET: z.string().default("renewd-documents"),
   CLAUDE_API_KEY: z.string().default(""),
   CLAUDE_MODEL: z.string().default("claude-haiku-4-5-20251001"),

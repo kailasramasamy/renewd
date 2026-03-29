@@ -14,4 +14,5 @@ INSERT INTO app_config (key, value) VALUES
   ('feature_payment_tracking', 'premium'),
   ('feature_csv_export', 'premium'),
   ('feature_spending_analytics', 'premium'),
-  ('feature_custom_reminders', 'premium');
+  ('feature_custom_reminders', 'premium')
+ON CONFLICT (key) DO NOTHING;

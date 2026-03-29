@@ -32,14 +32,14 @@ class RenewdCurrency {
     try {
       final storage = Get.find<StorageService>();
       final userData = storage.readUserData();
-      return userData?['default_currency'] as String? ?? 'INR';
+      return userData?['default_currency'] as String? ?? 'USD';
     } catch (_) {
-      return 'INR';
+      return 'USD';
     }
   }
 
   /// Get currency symbol for the user's default currency
-  static String get symbol => symbols[userCurrency] ?? inr;
+  static String get symbol => symbols[userCurrency] ?? usd;
 
   /// Get symbol for a specific currency code
   static String symbolFor(String code) => symbols[code] ?? code;
@@ -53,13 +53,54 @@ class RenewdCurrency {
     return '$sym${amount.toStringAsFixed(2)}';
   }
 
-  /// Detect currency from device locale
-  static String detectFromLocale() {
+  /// Get the country code from device locale (e.g., "IN", "US")
+  static String get deviceCountry {
     final locale = Platform.localeName; // e.g., "en_IN", "en_US"
-    final country = locale.contains('_')
+    return locale.contains('_')
         ? locale.split('_').last.toUpperCase()
         : locale.toUpperCase();
+  }
 
+  /// Country code to phone dial code mapping
+  static const Map<String, String> _countryToDialCode = {
+    'IN': '+91',
+    'US': '+1',
+    'GB': '+44',
+    'AE': '+971',
+    'DE': '+49',
+    'FR': '+33',
+    'IT': '+39',
+    'ES': '+34',
+    'NL': '+31',
+    'AU': '+61',
+    'CA': '+1',
+    'SG': '+65',
+    'JP': '+81',
+    'BR': '+55',
+    'MX': '+52',
+    'ZA': '+27',
+    'KR': '+82',
+    'CN': '+86',
+    'RU': '+7',
+    'SA': '+966',
+    'NZ': '+64',
+    'PH': '+63',
+    'MY': '+60',
+    'TH': '+66',
+    'ID': '+62',
+    'NG': '+234',
+    'KE': '+254',
+    'EG': '+20',
+    'PK': '+92',
+    'BD': '+880',
+  };
+
+  /// Detect phone dial code from device locale
+  static String detectDialCode() =>
+      _countryToDialCode[deviceCountry] ?? '+1';
+
+  /// Detect currency from device locale
+  static String detectFromLocale() {
     const countryToCurrency = {
       'IN': 'INR',
       'US': 'USD',
@@ -76,7 +117,7 @@ class RenewdCurrency {
       'JP': 'JPY',
     };
 
-    return countryToCurrency[country] ?? 'INR';
+    return countryToCurrency[deviceCountry] ?? 'USD';
   }
 
   /// Indian number system commas: 1,00,000

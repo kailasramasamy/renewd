@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "tsx migrate.ts && node dist/server.js",
     "migrate": "tsx migrate.ts",
     "test": "vitest run",
     "test:watch": "vitest"

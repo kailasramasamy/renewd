@@ -23,6 +23,8 @@ const labels: Record<string, string> = {
   iap_product_monthly: "Monthly Product ID",
   iap_product_yearly: "Yearly Product ID",
   iap_product_lifetime: "Lifetime Product ID",
+  chat_daily_limit: "Daily Message Limit (per user)",
+  chat_max_message_length: "Max Message Length (chars)",
 };
 
 const sections: { title: string; keys: string[] }[] = [
@@ -54,6 +56,10 @@ const sections: { title: string; keys: string[] }[] = [
       "iap_product_yearly",
       "iap_product_lifetime",
     ],
+  },
+  {
+    title: "AI Chat Limits",
+    keys: ["chat_daily_limit", "chat_max_message_length"],
   },
 ];
 

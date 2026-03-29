@@ -13,6 +13,7 @@ class AuthController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString phone = ''.obs;
+  final String dialCode = RenewdCurrency.detectDialCode();
 
   String? _verificationId;
 
@@ -23,7 +24,7 @@ class AuthController extends GetxController {
     if (phoneNumber.isEmpty) return;
 
     final formatted =
-        phoneNumber.startsWith('+') ? phoneNumber : '+91$phoneNumber';
+        phoneNumber.startsWith('+') ? phoneNumber : '$dialCode$phoneNumber';
 
     isLoading.value = true;
     errorMessage.value = '';

@@ -1,5 +1,5 @@
 -- Support ticket system
-CREATE TABLE support_tickets (
+CREATE TABLE IF NOT EXISTS support_tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id),
   type VARCHAR(20) NOT NULL DEFAULT 'feedback',  -- bug, feedback, feature, question
@@ -11,7 +11,7 @@ CREATE TABLE support_tickets (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE ticket_replies (
+CREATE TABLE IF NOT EXISTS ticket_replies (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
   sender VARCHAR(10) NOT NULL,  -- user, admin
@@ -19,6 +19,6 @@ CREATE TABLE ticket_replies (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_tickets_user ON support_tickets(user_id);
-CREATE INDEX idx_tickets_status ON support_tickets(status);
-CREATE INDEX idx_replies_ticket ON ticket_replies(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_user ON support_tickets(user_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_status ON support_tickets(status);
+CREATE INDEX IF NOT EXISTS idx_replies_ticket ON ticket_replies(ticket_id);

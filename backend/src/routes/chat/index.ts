@@ -2,15 +2,33 @@ import type { FastifyInstance } from "fastify";
 import Anthropic from "@anthropic-ai/sdk";
 import { authMiddleware } from "../../middleware/auth.js";
 import { createRequirePremium } from "../../middleware/premium.js";
+import { createRateLimit, createDailyQuota } from "../../middleware/rate-limit.js";
 import { ValidationError } from "../../lib/errors.js";
 import { env } from "../../config/env.js";
 
+const MAX_MESSAGE_LENGTH = 2000;
+
 const client = new Anthropic({ apiKey: env.CLAUDE_API_KEY });
 
-const SYSTEM_PROMPT = `You are Renewd AI — a helpful assistant for the Renewd app, a personal renewal and subscription tracker.
+function buildSystemPrompt(currencyCode: string): string {
+  const currencyNames: Record<string, string> = {
+    INR: "Indian Rupees (₹)",
+    USD: "US Dollars ($)",
+    EUR: "Euros (€)",
+    GBP: "British Pounds (£)",
+    AED: "UAE Dirhams (AED)",
+    AUD: "Australian Dollars (A$)",
+    CAD: "Canadian Dollars (C$)",
+    SGD: "Singapore Dollars (S$)",
+    JPY: "Japanese Yen (¥)",
+  };
+  const label = currencyNames[currencyCode] ?? currencyCode;
+
+  return `You are Renewd AI — a helpful assistant for the Renewd app, a personal renewal and subscription tracker.
 You have access to the user's renewals, payments, and analytics data through tools.
-Be concise, practical, and friendly. Format currency in Indian Rupees (₹).
+Be concise, practical, and friendly. Format currency in ${label}.
 When showing lists, keep them brief. When asked about spending, use the analytics tools.`;
+}
 
 const TOOLS: Anthropic.Tool[] = [
   {
@@ -43,14 +61,41 @@ const TOOLS: Anthropic.Tool[] = [
 
 export default async function chatRoutes(app: FastifyInstance) {
   const requirePremium = createRequirePremium(app, "ai_chat");
+  const rateLimit = createRateLimit(app, {
+    max: 20,
+    windowSeconds: 3600,
+    prefix: "rl:chat",
+    message: "Too many messages. Please wait before sending more.",
+  });
+  const dailyQuota = createDailyQuota(app, {
+    prefix: "dq:chat",
+    configKey: "chat_daily_limit",
+    defaultLimit: 50,
+  });
 
-  app.post("/", { preHandler: [authMiddleware, requirePremium] }, async (request, reply) => {
+  app.post(
+    "/",
+    { preHandler: [authMiddleware, requirePremium, rateLimit, dailyQuota] },
+    async (request, reply) => {
     const body = request.body as { message?: string };
     if (!body.message || typeof body.message !== "string") {
       throw new ValidationError("message is required");
     }
 
+    if (body.message.length > MAX_MESSAGE_LENGTH) {
+      throw new ValidationError(
+        `Message too long (${body.message.length} chars). Maximum is ${MAX_MESSAGE_LENGTH} characters.`
+      );
+    }
+
     const uid = request.user.uid;
+
+    const userResult = await app.db.query(
+      "SELECT default_currency FROM users WHERE firebase_uid = $1", [uid]
+    );
+    const userCurrency = userResult.rows[0]?.default_currency ?? "USD";
+    const systemPrompt = buildSystemPrompt(userCurrency);
+
     const messages: Anthropic.MessageParam[] = [
       { role: "user", content: body.message },
     ];
@@ -58,7 +103,7 @@ export default async function chatRoutes(app: FastifyInstance) {
     let response = await client.messages.create({
       model: env.CLAUDE_MODEL,
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
+      system: systemPrompt,
       tools: TOOLS,
       messages,
     });
@@ -86,7 +131,7 @@ export default async function chatRoutes(app: FastifyInstance) {
       response = await client.messages.create({
         model: env.CLAUDE_MODEL,
         max_tokens: 1024,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         tools: TOOLS,
         messages,
       });
@@ -95,6 +140,11 @@ export default async function chatRoutes(app: FastifyInstance) {
 
     const textBlock = response.content.find(
       (b): b is Anthropic.TextBlock => b.type === "text"
+    );
+
+    // Log token usage for cost tracking
+    logUsage(app, uid, response.usage, env.CLAUDE_MODEL).catch((err) =>
+      app.log.error("Failed to log chat usage: %s", String(err))
     );
 
     return reply.send({
@@ -170,4 +220,23 @@ async function executeTool(
     default:
       return { error: `Unknown tool: ${toolName}` };
   }
+}
+
+async function logUsage(
+  app: FastifyInstance,
+  uid: string,
+  usage: { input_tokens: number; output_tokens: number },
+  model: string
+): Promise<void> {
+  const userResult = await app.db.query(
+    "SELECT id FROM users WHERE firebase_uid = $1",
+    [uid]
+  );
+  if (userResult.rows.length === 0) return;
+
+  await app.db.query(
+    `INSERT INTO chat_usage (user_id, input_tokens, output_tokens, model)
+     VALUES ($1, $2, $3, $4)`,
+    [userResult.rows[0].id, usage.input_tokens, usage.output_tokens, model]
+  );
 }
