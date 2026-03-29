@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
@@ -59,6 +60,12 @@ class NotificationService extends GetxService {
       badge: true,
       sound: true,
     );
+    // Show notifications when app is in foreground on iOS
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
   Future<void> registerToken() => _registerToken();
@@ -89,7 +96,13 @@ class NotificationService extends GetxService {
   }
 
   void _listenForForegroundMessages() {
-    FirebaseMessaging.onMessage.listen(_showLocalNotification);
+    // On iOS, foreground notifications are handled by setForegroundNotificationPresentationOptions
+    // On Android, we still need local notifications for foreground
+    FirebaseMessaging.onMessage.listen((message) {
+      if (Platform.isAndroid) {
+        _showLocalNotification(message);
+      }
+    });
   }
 
   void _listenForMessageTaps() {
@@ -126,6 +139,12 @@ class NotificationService extends GetxService {
   }
 
   void _handleMessageTap(RemoteMessage message) {
+    final type = message.data['type'] as String?;
+    if (type == 'support') {
+      final ticketId = message.data['ticket_id'] as String?;
+      Get.toNamed('/support', arguments: ticketId);
+      return;
+    }
     final renewalId = message.data['renewal_id'];
     if (renewalId != null) {
       Get.toNamed('/renewal-detail', arguments: renewalId);
@@ -138,6 +157,13 @@ class NotificationService extends GetxService {
 
     if (response.actionId == 'snooze') {
       _handleSnooze(data);
+      return;
+    }
+
+    final type = data['type'] as String?;
+    if (type == 'support') {
+      final ticketId = data['ticket_id'] as String?;
+      Get.toNamed('/support', arguments: ticketId);
       return;
     }
 

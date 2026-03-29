@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="bg-[#111] text-gray-100 min-h-screen">
+      <body className="bg-[#111] text-gray-100 min-h-screen" suppressHydrationWarning>
         <LayoutShell>{children}</LayoutShell>
       </body>
     </html>

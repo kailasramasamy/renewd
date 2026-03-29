@@ -18,4 +18,5 @@ abstract class AppRoutes {
   static const completeProfile = '/complete-profile';
   static const features = '/features';
   static const premium = '/premium';
+  static const support = '/support';
 }

@@ -16,6 +16,7 @@ import notificationLogRoutes from "./routes/notifications/index.js";
 import paymentRoutes from "./routes/payments/index.js";
 import userRoutes from "./routes/users/index.js";
 import bannerRoutes from "./routes/banners/index.js";
+import supportRoutes from "./routes/support/index.js";
 import revenueCatWebhookRoutes from "./routes/webhooks/revenuecat.js";
 
 export async function buildApp() {
@@ -66,6 +67,7 @@ export async function buildApp() {
   await app.register(paymentRoutes, { prefix: "/api/v1/payments" });
   await app.register(userRoutes, { prefix: "/api/v1/users" });
   await app.register(bannerRoutes, { prefix: "/api/v1/banners" });
+  await app.register(supportRoutes, { prefix: "/api/v1/support" });
   await app.register(revenueCatWebhookRoutes, { prefix: "/api/v1/webhooks" });
 
   return app;

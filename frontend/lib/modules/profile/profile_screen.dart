@@ -29,6 +29,7 @@ class ProfileScreen extends StatelessWidget {
     _ProfileItem(icon: LucideIcons.download, label: 'Data Export'),
     _ProfileItem(icon: LucideIcons.banknote, label: 'Currency'),
     _ProfileItem(icon: LucideIcons.crown, label: 'Premium', isPremium: true),
+    _ProfileItem(icon: LucideIcons.lifeBuoy, label: 'Support'),
     _ProfileItem(icon: LucideIcons.sparkles, label: 'Features'),
     _ProfileItem(icon: LucideIcons.info, label: 'About'),
   ];
@@ -137,6 +138,8 @@ class ProfileScreen extends StatelessWidget {
         _showCurrencyPicker();
       case 'Premium':
         Get.toNamed(AppRoutes.premium);
+      case 'Support':
+        Get.toNamed(AppRoutes.support);
       case 'Features':
         Get.toNamed(AppRoutes.features);
       case 'About':

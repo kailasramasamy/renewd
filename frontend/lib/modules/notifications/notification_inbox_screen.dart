@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -43,7 +44,8 @@ class NotificationInboxScreen extends StatelessWidget {
           return _EmptyState();
         }
         return ListView.builder(
-          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          padding: const EdgeInsets.fromLTRB(
+              RenewdSpacing.lg, RenewdSpacing.md, RenewdSpacing.lg, 100),
           itemCount: c.notifications.length,
           itemBuilder: (context, i) => _NotificationTile(
             notification: c.notifications[i],
@@ -98,7 +100,23 @@ class _InboxController extends GetxController {
       notifications.refresh();
     }
 
-    // Navigate to renewal if linked
+    // Navigate based on type
+    final type = notification['type'] as String?;
+    if (type == 'support') {
+      String? ticketId;
+      final raw = notification['metadata'];
+      if (raw is Map<String, dynamic>) {
+        ticketId = raw['ticket_id'] as String?;
+      } else if (raw is String) {
+        try {
+          final parsed = Map<String, dynamic>.from(
+              const JsonDecoder().convert(raw) as Map);
+          ticketId = parsed['ticket_id'] as String?;
+        } catch (_) {}
+      }
+      Get.toNamed(AppRoutes.support, arguments: ticketId);
+      return;
+    }
     final renewalId = notification['renewal_id'] as String?;
     if (renewalId != null) {
       Get.toNamed(AppRoutes.renewalDetail, arguments: renewalId);
@@ -137,13 +155,13 @@ class _NotificationTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: _iconColor(type).withValues(alpha: RenewdOpacity.light),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: RenewdRadius.mdAll,
               ),
-              child: Icon(_icon(type), size: 18, color: _iconColor(type)),
+              child: Icon(_icon(type), size: 20, color: _iconColor(type)),
             ),
             const SizedBox(width: RenewdSpacing.md),
             Expanded(
@@ -152,25 +170,25 @@ class _NotificationTile extends StatelessWidget {
                 children: [
                   Text(
                     notification['title'] as String? ?? '',
-                    style: RenewdTextStyles.bodySmall.copyWith(
+                    style: RenewdTextStyles.body.copyWith(
                       fontWeight: isRead ? FontWeight.w400 : FontWeight.w600,
+                      fontSize: 15,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     notification['body'] as String? ?? '',
-                    style: RenewdTextStyles.caption
+                    style: RenewdTextStyles.bodySmall
                         .copyWith(color: RenewdColors.slate),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (createdAt != null) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: RenewdSpacing.xs),
                     Text(
                       RenewdDateUtils.formatDate(createdAt),
                       style: RenewdTextStyles.caption.copyWith(
                         color: RenewdColors.slate,
-                        fontSize: 10,
                       ),
                     ),
                   ],
@@ -198,6 +216,7 @@ class _NotificationTile extends StatelessWidget {
     switch (type) {
       case 'reminder': return LucideIcons.bell;
       case 'digest': return LucideIcons.calendar;
+      case 'support': return LucideIcons.lifeBuoy;
       default: return LucideIcons.bell;
     }
   }
@@ -206,6 +225,7 @@ class _NotificationTile extends StatelessWidget {
     switch (type) {
       case 'reminder': return RenewdColors.tangerine;
       case 'digest': return RenewdColors.oceanBlue;
+      case 'support': return RenewdColors.emerald;
       default: return RenewdColors.slate;
     }
   }
