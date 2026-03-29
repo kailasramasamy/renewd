@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -10,6 +11,10 @@ class NotificationService extends GetxService {
   final _messaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
   final _provider = NotificationProvider();
+
+  StreamSubscription<String>? _tokenRefreshSub;
+  StreamSubscription<RemoteMessage>? _foregroundSub;
+  StreamSubscription<RemoteMessage>? _tapSub;
 
   static const _channel = AndroidNotificationChannel(
     'renewd_reminders',
@@ -90,7 +95,7 @@ class NotificationService extends GetxService {
   }
 
   void _listenForTokenRefresh() {
-    _messaging.onTokenRefresh.listen((token) async {
+    _tokenRefreshSub = _messaging.onTokenRefresh.listen((token) async {
       await _provider.registerFcmToken(token);
     });
   }
@@ -98,7 +103,7 @@ class NotificationService extends GetxService {
   void _listenForForegroundMessages() {
     // On iOS, foreground notifications are handled by setForegroundNotificationPresentationOptions
     // On Android, we still need local notifications for foreground
-    FirebaseMessaging.onMessage.listen((message) {
+    _foregroundSub = FirebaseMessaging.onMessage.listen((message) {
       if (Platform.isAndroid) {
         _showLocalNotification(message);
       }
@@ -106,7 +111,15 @@ class NotificationService extends GetxService {
   }
 
   void _listenForMessageTaps() {
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageTap);
+    _tapSub = FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageTap);
+  }
+
+  @override
+  void onClose() {
+    _tokenRefreshSub?.cancel();
+    _foregroundSub?.cancel();
+    _tapSub?.cancel();
+    super.onClose();
   }
 
   Future<void> _showLocalNotification(RemoteMessage message) async {

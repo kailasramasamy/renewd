@@ -9,8 +9,8 @@
 | C2 | [x] | Admin | API routes have no auth check (middleware only protects pages) | All 10 admin API routes | Add auth helper to every route |
 | C3 | [x] | Race | Renewal limit check not atomic (TOCTOU bypass) | `backend/src/routes/renewals/index.ts:46-54` | Atomic INSERT with subquery |
 | C4 | [x] | Race | Premium status check + auto-expire not atomic | `backend/src/middleware/premium.ts:15-38` | Single UPDATE...RETURNING |
-| C5 | [ ] | Frontend | Auth tokens stored unencrypted (GetStorage) | `frontend/lib/core/services/storage_service.dart:15` | Use flutter_secure_storage |
-| C6 | [ ] | Frontend | No token refresh — expired Firebase token = dead app | API client layer | Add 401 interceptor + refresh |
+| C5 | [x] | Frontend | Auth tokens stored unencrypted (GetStorage) | `frontend/lib/core/services/storage_service.dart:15` | Use flutter_secure_storage |
+| C6 | [x] | Frontend | No token refresh — expired Firebase token = dead app | API client layer | Add 401 interceptor + refresh |
 
 ## High Severity
 
@@ -24,8 +24,8 @@
 | H6 | [x] | DB | Unbounded queries (no LIMIT) on documents and renewals | `documents/index.ts:99`, `renewals/index.ts:13` | Add LIMIT + pagination |
 | H7 | [x] | DB | Sequential deletes not in transaction — orphans on error | `renewals/index.ts:104-110`, `users/index.ts:75-84` | Wrap in BEGIN/COMMIT |
 | H8 | [x] | Webhook | RevenueCat secret skipped if empty; timing attack risk | `webhooks/revenuecat.ts:16-22` | Require secret + timingSafeEqual |
-| H9 | [ ] | Frontend | NotificationService stream subscriptions never cancelled | `notification_service.dart:92-109` | Store + cancel in onClose |
-| H10 | [ ] | Frontend | No retry logic — any network blip = instant failure | `api_client.dart` | Add exponential backoff |
+| H9 | [x] | Frontend | NotificationService stream subscriptions never cancelled | `notification_service.dart:92-109` | Store + cancel in onClose |
+| H10 | [x] | Frontend | No retry logic — any network blip = instant failure | `api_client.dart` | Add exponential backoff |
 | H11 | [x] | Resilience | Redis down = 500 on rate limit (no fallback) | `middleware/rate-limit.ts` | Graceful degradation |
 
 ## Medium Severity

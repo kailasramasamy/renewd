@@ -117,7 +117,7 @@ class AuthController extends GetxController {
 
       final token = await user.getIdToken();
       final storage = Get.find<StorageService>();
-      storage.saveToken(token!);
+      await storage.saveToken(token!);
       final detectedCurrency = RenewdCurrency.detectFromLocale();
       storage.saveUserData({
         'uid': user.uid,
@@ -172,7 +172,7 @@ class AuthController extends GetxController {
 
       final token = await user.getIdToken();
       final storage = Get.find<StorageService>();
-      storage.saveToken(token!);
+      await storage.saveToken(token!);
       final detectedCurrency = RenewdCurrency.detectFromLocale();
       storage.saveUserData({
         'uid': user.uid,

@@ -19,13 +19,13 @@ class AuthService extends GetxService {
   }
 
   Future<void> signIn({required String token, required UserModel user}) async {
-    _storage.saveToken(token);
+    await _storage.saveToken(token);
     _storage.saveUserData(user.toJson());
     _currentUser.value = user;
   }
 
   Future<void> signOut() async {
-    _storage.deleteToken();
+    await _storage.deleteToken();
     _storage.deleteUserData();
     _currentUser.value = null;
     Get.offAllNamed('/login');

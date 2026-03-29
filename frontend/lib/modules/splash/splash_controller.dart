@@ -30,11 +30,11 @@ class SplashController extends GetxController {
       try {
         final token = await firebaseUser.getIdToken();
         if (token != null) {
-          storage.saveToken(token);
+          await storage.saveToken(token);
         }
       } catch (_) {
         // Token refresh failed — clear stale token
-        storage.deleteToken();
+        await storage.deleteToken();
       }
     }
 
