@@ -16,8 +16,14 @@ export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  // Dev/test bypass when Firebase is NOT configured or in test mode
-  if (!env.FIREBASE_PROJECT_ID || env.NODE_ENV === "test") {
+  // Test-only bypass
+  if (env.NODE_ENV === "test") {
+    request.user = { uid: "dev-user", email: "dev@renewd.local" };
+    return;
+  }
+
+  // Dev bypass only when Firebase is NOT configured AND not in production
+  if (!env.FIREBASE_PROJECT_ID && env.NODE_ENV !== "production") {
     request.user = { uid: "dev-user", email: "dev@renewd.local" };
     return;
   }
