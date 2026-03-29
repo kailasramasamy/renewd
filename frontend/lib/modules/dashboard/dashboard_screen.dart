@@ -40,13 +40,13 @@ class DashboardScreen extends StatelessWidget {
           onRefresh: c.fetchRenewals,
           child: ListView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(
-                RenewdSpacing.lg, 0, RenewdSpacing.lg, 100),
+            padding: EdgeInsets.fromLTRB(
+                RenewdSpacing.lg,
+                MediaQuery.of(context).padding.top + RenewdSpacing.sm,
+                RenewdSpacing.lg,
+                100),
             children: [
-              SafeArea(
-                bottom: false,
-                child: _SearchBar(c: c),
-              ),
+              _SearchBar(c: c),
               if (c.banners.isNotEmpty) ...[
                 const SizedBox(height: RenewdSpacing.md),
                 _BannerCarousel(c: c),
