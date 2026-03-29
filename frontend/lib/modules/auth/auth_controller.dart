@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../core/network/api_client.dart';
@@ -14,8 +15,15 @@ class AuthController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxString phone = ''.obs;
   final String dialCode = RenewdCurrency.detectDialCode();
+  final phoneController = TextEditingController();
 
   String? _verificationId;
+
+  @override
+  void onClose() {
+    phoneController.dispose();
+    super.onClose();
+  }
 
   // ─── Phone OTP ──────────────────────────────────────
 

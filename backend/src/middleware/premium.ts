@@ -1,5 +1,6 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import type { FastifyInstance } from "fastify";
+import { getConfigValue } from "../lib/config-cache.js";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -40,14 +41,11 @@ export function createRequirePremium(app: FastifyInstance, featureKey?: string) 
     request: FastifyRequest,
     reply: FastifyReply
   ): Promise<void> {
-    // Check if feature is open to all via app_config
+    // Check if feature is open to all via app_config (cached in Redis)
     if (featureKey) {
-      const configResult = await app.db.query(
-        "SELECT value FROM app_config WHERE key = $1",
-        [`feature_${featureKey}`]
-      );
-      if (configResult.rows[0]?.value === "all") return;
-      if (configResult.rows[0]?.value === "none") {
+      const featureAccess = await getConfigValue(app, `feature_${featureKey}`);
+      if (featureAccess === "all") return;
+      if (featureAccess === "none") {
         reply.status(403).send({
           error: "This feature is currently disabled",
           code: "FEATURE_DISABLED",

@@ -48,7 +48,8 @@ class RenewalDetailController extends GetxController {
     try {
       renewal.value = await _provider.getById(id);
       await _fetchSupplementary();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('fetchRenewal failed: $e');
       showErrorSnack('Failed to load renewal');
     } finally {
       isLoading.value = false;
@@ -60,7 +61,9 @@ class RenewalDetailController extends GetxController {
     if (id == null) return;
     try {
       documents.assignAll(await _docProvider.getByRenewal(id));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('fetchDocuments failed: $e');
+    }
   }
 
   Future<void> fetchPayments() async {
@@ -68,7 +71,9 @@ class RenewalDetailController extends GetxController {
     if (id == null) return;
     try {
       payments.assignAll(await _payProvider.getByRenewal(id));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('fetchPayments failed: $e');
+    }
   }
 
   Future<void> fetchReminders() async {
@@ -88,7 +93,9 @@ class RenewalDetailController extends GetxController {
       } else {
         reminderDays.assignAll(unsent);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('fetchReminders failed: $e');
+    }
   }
 
   Future<void> updateReminders(List<int> days) async {
@@ -98,7 +105,8 @@ class RenewalDetailController extends GetxController {
       await _provider.updateReminders(id, days);
       reminderDays.assignAll(days);
       showSuccessSnack('Reminders updated');
-    } catch (_) {
+    } catch (e) {
+      debugPrint('updateReminders failed: $e');
       showErrorSnack('Failed to update reminders');
     }
   }
@@ -112,7 +120,8 @@ class RenewalDetailController extends GetxController {
       renewal.value = await _provider.markRenewed(id);
       dataChanged = true;
       showPaymentPrompt.value = true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('markRenewed failed: $e');
       showErrorSnack('Failed to mark as renewed');
     } finally {
       isLoading.value = false;
@@ -139,7 +148,8 @@ class RenewalDetailController extends GetxController {
       payments.insert(0, payment);
       showPaymentPrompt.value = false;
       showSuccessSnack('${RenewdCurrency.symbol}${amount.toStringAsFixed(0)} payment recorded');
-    } catch (_) {
+    } catch (e) {
+      debugPrint('logPayment failed: $e');
       showErrorSnack('Failed to log payment');
     }
   }
@@ -155,7 +165,8 @@ class RenewalDetailController extends GetxController {
     try {
       await _provider.delete(id);
       Get.back(result: true);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('deleteRenewal failed: $e');
       showErrorSnack('Failed to delete renewal');
       isLoading.value = false;
     }
@@ -172,7 +183,8 @@ class RenewalDetailController extends GetxController {
         renewalId: id,
       );
       await _parseAndCheck(doc.id);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('uploadDocument failed: $e');
       showErrorSnack('Upload failed');
     } finally {
       isUploading.value = false;
@@ -195,7 +207,8 @@ class RenewalDetailController extends GetxController {
         isParsing.value = false;
         showSuccessSnack(summary);
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('_parseAndCheck failed: $e');
       await fetchDocuments();
       isParsing.value = false;
       showErrorSnack('AI analysis failed');
@@ -207,7 +220,8 @@ class RenewalDetailController extends GetxController {
     try {
       await _docProvider.parseDocument(docId);
       await fetchDocuments();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('parseDocument failed: $e');
       showErrorSnack('AI analysis failed');
     } finally {
       isParsing.value = false;

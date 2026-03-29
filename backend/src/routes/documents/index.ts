@@ -19,11 +19,29 @@ const auth = { preHandler: authMiddleware };
 async function registerUpload(app: FastifyInstance) {
   const requirePremium = createRequirePremium(app, "document_vault");
 
+  const ALLOWED_MIMES = new Set([
+    "image/jpeg", "image/png", "image/gif", "image/webp",
+    "application/pdf",
+  ]);
+  const MAX_DOC_SIZE = 5 * 1024 * 1024; // 5MB
+
   app.post("/upload", { preHandler: [authMiddleware, requirePremium] }, async (request, reply) => {
     const data = await request.file();
     if (!data) throw new AppError("No file provided", 400, "MISSING_FILE");
 
+    if (!ALLOWED_MIMES.has(data.mimetype)) {
+      throw new ValidationError(
+        `File type '${data.mimetype}' not supported. Allowed: JPEG, PNG, GIF, WebP, PDF`
+      );
+    }
+
     const buffer = await data.toBuffer();
+
+    if (buffer.length > MAX_DOC_SIZE) {
+      throw new ValidationError(
+        `File too large (${(buffer.length / 1024 / 1024).toFixed(1)}MB). Maximum is 5MB`
+      );
+    }
     const hash = computeHash(buffer);
 
     const duplicate = await findDuplicateDocument(app, request.user.uid, hash);

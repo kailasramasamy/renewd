@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import '../../data/providers/notification_provider.dart';
@@ -87,8 +88,8 @@ class NotificationService extends GetxService {
             return;
           }
         }
-      } catch (_) {
-        // Retry after delay
+      } catch (e) {
+        debugPrint('_registerToken attempt $attempt failed: $e');
       }
       await Future.delayed(const Duration(seconds: 2));
     }
@@ -151,15 +152,26 @@ class NotificationService extends GetxService {
     );
   }
 
+  static final _validIdPattern = RegExp(r'^[a-zA-Z0-9\-]+$');
+
+  bool _isValidId(String? id) {
+    if (id == null || id.isEmpty) return false;
+    return id.length >= 20 && _validIdPattern.hasMatch(id);
+  }
+
   void _handleMessageTap(RemoteMessage message) {
     final type = message.data['type'] as String?;
     if (type == 'support') {
       final ticketId = message.data['ticket_id'] as String?;
+      if (!_isValidId(ticketId)) {
+        debugPrint('_handleMessageTap: invalid ticketId: $ticketId');
+        return;
+      }
       Get.toNamed('/support', arguments: ticketId);
       return;
     }
-    final renewalId = message.data['renewal_id'];
-    if (renewalId != null) {
+    final renewalId = message.data['renewal_id'] as String?;
+    if (_isValidId(renewalId)) {
       Get.toNamed('/renewal-detail', arguments: renewalId);
     }
   }
@@ -176,12 +188,16 @@ class NotificationService extends GetxService {
     final type = data['type'] as String?;
     if (type == 'support') {
       final ticketId = data['ticket_id'] as String?;
+      if (!_isValidId(ticketId)) {
+        debugPrint('_onNotificationTap: invalid ticketId: $ticketId');
+        return;
+      }
       Get.toNamed('/support', arguments: ticketId);
       return;
     }
 
-    final renewalId = data['renewal_id'];
-    if (renewalId != null) {
+    final renewalId = data['renewal_id'] as String?;
+    if (_isValidId(renewalId)) {
       Get.toNamed('/renewal-detail', arguments: renewalId);
     }
   }

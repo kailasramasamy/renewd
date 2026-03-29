@@ -198,11 +198,10 @@ class _PhoneSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final phoneCtrl = TextEditingController();
     return Column(
       children: [
         TextField(
-          controller: phoneCtrl,
+          controller: c.phoneController,
           keyboardType: TextInputType.phone,
           style: RenewdTextStyles.body.copyWith(
             color: isDark ? Colors.white : RenewdColors.deepNavy,

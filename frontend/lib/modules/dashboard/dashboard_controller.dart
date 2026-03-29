@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/network/api_client.dart';
@@ -18,6 +19,9 @@ class DashboardController extends GetxController {
   final RxInt unreadNotificationCount = 0.obs;
   final RxMap<String, bool> expandedCategories = <String, bool>{}.obs;
   final RxMap<String, bool> expandedSubGroups = <String, bool>{}.obs;
+
+  Map<RenewalCategory, Map<String, List<RenewalModel>>>? _cachedGrouped;
+  bool _groupedDirty = true;
 
   int get dueThisMonth {
     final now = DateTime.now();
@@ -56,8 +60,11 @@ class DashboardController extends GetxController {
   List<RenewalModel> get dueSoon =>
       renewals.where((r) => r.daysRemaining >= 0 && r.daysRemaining <= 7).toList();
 
-  /// Two-level grouping: Category → Group → Items
+  void _invalidateGroupedCache() => _groupedDirty = true;
+
+  /// Two-level grouping: Category → Group → Items (cached)
   Map<RenewalCategory, Map<String, List<RenewalModel>>> get categoryGrouped {
+    if (!_groupedDirty && _cachedGrouped != null) return _cachedGrouped!;
     final map = <RenewalCategory, Map<String, List<RenewalModel>>>{};
     for (final r in renewals) {
       final cat = r.category;
@@ -70,6 +77,8 @@ class DashboardController extends GetxController {
         list.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
       }
     }
+    _cachedGrouped = map;
+    _groupedDirty = false;
     return map;
   }
 
@@ -111,6 +120,8 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    ever(renewals, (_) => _invalidateGroupedCache());
+    ever(searchQuery, (_) => _invalidateGroupedCache());
     fetchRenewals();
     fetchUnreadCount();
     fetchBanners();
@@ -123,7 +134,9 @@ class DashboardController extends GetxController {
       final list = body['banners'] as List<dynamic>? ?? [];
       banners.assignAll(
           list.map((e) => BannerModel.fromJson(e as Map<String, dynamic>)));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('fetchBanners failed: $e');
+    }
   }
 
   Future<void> fetchUnreadCount() async {
@@ -132,7 +145,9 @@ class DashboardController extends GetxController {
           await _client.safeGet(ApiEndpoints.notificationUnreadCount);
       final body = response.body as Map<String, dynamic>;
       unreadNotificationCount.value = body['count'] as int? ?? 0;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('fetchUnreadCount failed: $e');
+    }
   }
 
   Future<void> fetchRenewals() async {

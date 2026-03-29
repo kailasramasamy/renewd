@@ -1,4 +1,5 @@
 import type { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
+import { getConfigValue } from "../lib/config-cache.js";
 
 interface RateLimitOptions {
   /** Max requests allowed in the window */
@@ -93,14 +94,9 @@ export function createDailyQuota(
     const uid = request.user?.uid;
     if (!uid) return;
 
-    // Get configurable limit from app_config
-    const configResult = await app.db.query(
-      "SELECT value FROM app_config WHERE key = $1",
-      [configKey]
-    );
-    const limit = configResult.rows[0]
-      ? parseInt(configResult.rows[0].value, 10)
-      : defaultLimit;
+    // Get configurable limit from app_config (cached in Redis)
+    const configValue = await getConfigValue(app, configKey);
+    const limit = configValue ? parseInt(configValue, 10) : defaultLimit;
 
     // Key includes today's date so it auto-resets
     const today = new Date().toISOString().slice(0, 10);

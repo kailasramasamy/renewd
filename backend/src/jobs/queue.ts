@@ -16,7 +16,12 @@ let jobPool: Pool;
 
 export function getJobPool(): Pool {
   if (!jobPool) {
-    jobPool = new Pool({ connectionString: env.DATABASE_URL });
+    jobPool = new Pool({
+      connectionString: env.DATABASE_URL,
+      max: 5,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    });
   }
   return jobPool;
 }
@@ -35,7 +40,7 @@ export const renewdWorker = new Worker(
         throw new Error(`Unknown job type: ${job.name}`);
     }
   },
-  { connection }
+  { connection, concurrency: 5 }
 );
 
 renewdWorker.on("completed", (job) => {
@@ -45,3 +50,10 @@ renewdWorker.on("completed", (job) => {
 renewdWorker.on("failed", (job, err) => {
   console.error(`Job ${job?.id} (${job?.name}) failed:`, err.message);
 });
+
+/** Graceful shutdown — call from server close hook */
+export async function closeJobs(): Promise<void> {
+  await renewdWorker.close();
+  await renewdQueue.close();
+  if (jobPool) await jobPool.end();
+}

@@ -4,6 +4,7 @@ import { authMiddleware } from "../../middleware/auth.js";
 import { createRequirePremium } from "../../middleware/premium.js";
 import { createRateLimit, createDailyQuota } from "../../middleware/rate-limit.js";
 import { ValidationError } from "../../lib/errors.js";
+import { getUserId } from "../../lib/user-context.js";
 import { env } from "../../config/env.js";
 
 const MAX_MESSAGE_LENGTH = 2000;
@@ -160,11 +161,8 @@ async function executeTool(
   toolName: string,
   input: Record<string, unknown>
 ): Promise<unknown> {
-  const userResult = await app.db.query(
-    "SELECT id FROM users WHERE firebase_uid = $1", [uid]
-  );
-  if (userResult.rows.length === 0) return { error: "User not found" };
-  const userId = userResult.rows[0].id;
+  const userId = await getUserId(app, uid).catch(() => null);
+  if (!userId) return { error: "User not found" };
 
   switch (toolName) {
     case "get_renewals": {
@@ -228,15 +226,12 @@ async function logUsage(
   usage: { input_tokens: number; output_tokens: number },
   model: string
 ): Promise<void> {
-  const userResult = await app.db.query(
-    "SELECT id FROM users WHERE firebase_uid = $1",
-    [uid]
-  );
-  if (userResult.rows.length === 0) return;
+  const userId = await getUserId(app, uid).catch(() => null);
+  if (!userId) return;
 
   await app.db.query(
     `INSERT INTO chat_usage (user_id, input_tokens, output_tokens, model)
      VALUES ($1, $2, $3, $4)`,
-    [userResult.rows[0].id, usage.input_tokens, usage.output_tokens, model]
+    [userId, usage.input_tokens, usage.output_tokens, model]
   );
 }

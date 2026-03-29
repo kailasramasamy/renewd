@@ -93,7 +93,9 @@ class CategoriesController extends GetxController {
     try {
       renewals.assignAll(await _provider.getAll());
       renewals.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('fetchRenewals failed: $e');
+    }
     isLoading.value = false;
   }
 

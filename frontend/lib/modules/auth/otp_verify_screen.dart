@@ -7,13 +7,25 @@ import '../../core/theme/app_text_styles.dart';
 import '../../widgets/minder_button.dart';
 import 'auth_controller.dart';
 
-class OtpVerifyScreen extends StatelessWidget {
+class OtpVerifyScreen extends StatefulWidget {
   const OtpVerifyScreen({super.key});
+
+  @override
+  State<OtpVerifyScreen> createState() => _OtpVerifyScreenState();
+}
+
+class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
+  final otpController = TextEditingController();
+
+  @override
+  void dispose() {
+    otpController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = Get.find<AuthController>();
-    final otpController = TextEditingController();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

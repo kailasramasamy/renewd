@@ -15,18 +15,17 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(ChatController());
-    final textCtrl = TextEditingController();
-    final scrollCtrl = ScrollController();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     void send() {
-      final text = textCtrl.text;
+      final text = c.textController.text;
       if (text.trim().isEmpty) return;
-      textCtrl.clear();
+      c.textController.clear();
       c.sendMessage(text);
       Future.delayed(const Duration(milliseconds: 100), () {
-        if (scrollCtrl.hasClients) {
-          scrollCtrl.animateTo(scrollCtrl.position.maxScrollExtent + 100,
+        if (c.scrollController.hasClients) {
+          c.scrollController.animateTo(
+              c.scrollController.position.maxScrollExtent + 100,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut);
         }
@@ -50,7 +49,7 @@ class ChatScreen extends StatelessWidget {
               if (c.messages.isEmpty) return _EmptyChat();
               return ListView.builder(
                 keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                controller: scrollCtrl,
+                controller: c.scrollController,
                 padding: const EdgeInsets.all(RenewdSpacing.lg),
                 itemCount: c.messages.length + (c.isLoading.value ? 1 : 0),
                 itemBuilder: (context, i) {
@@ -64,7 +63,7 @@ class ChatScreen extends StatelessWidget {
             }),
           ),
           _InputBar(
-            controller: textCtrl,
+            controller: c.textController,
             isDark: isDark,
             onSend: send,
             isLoading: c.isLoading,

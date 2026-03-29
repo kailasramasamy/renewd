@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../middleware/auth.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
+import { validateString, validateNumber } from "../../lib/validation.js";
+import { getUserId } from "../../lib/user-context.js";
 import { createDefaultReminders, deleteUnsentReminders } from "./helpers.js";
 import { registerReminderRoutes } from "./reminders.js";
 import { updateRenewalLogo } from "../../services/logo.js";
@@ -33,15 +35,17 @@ async function registerCreate(app: FastifyInstance) {
 
   app.post("/", { preHandler: [authMiddleware, premiumMiddleware] }, async (request, reply) => {
     const body = request.body as Record<string, unknown>;
-    const userResult = await app.db.query(
-      "SELECT id FROM users WHERE firebase_uid = $1",
-      [request.user.uid]
-    );
-    if (userResult.rows.length === 0) throw new AppError("User not found", 404, "NOT_FOUND");
+    const userId = await getUserId(app, request.user.uid);
 
-    const userId = userResult.rows[0].id;
-
-    const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name } = body;
+    const name = validateString(body.name, "name", { required: true, maxLen: 100 });
+    const category = validateString(body.category, "category", { required: true, maxLen: 50 });
+    const provider = validateString(body.provider, "provider", { maxLen: 100 });
+    const amount = validateNumber(body.amount, "amount", { min: 0 });
+    const { renewal_date, frequency, frequency_days, auto_renew, notes: rawNotes, group_name: rawGroup } = body;
+    validateString(renewal_date, "renewal_date", { required: true });
+    validateString(frequency, "frequency", { required: true, maxLen: 20 });
+    const notes = validateString(rawNotes, "notes", { maxLen: 1000 });
+    const group_name = validateString(rawGroup, "group_name", { maxLen: 50 });
 
     // Atomic insert with limit check to prevent TOCTOU race condition
     if (!request.premium.isPremium) {

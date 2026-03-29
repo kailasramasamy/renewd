@@ -35,8 +35,12 @@ export async function buildApp() {
   });
 
   await app.register(cors, {
-    origin: env.NODE_ENV === "production" ? false : true,
+    origin: env.NODE_ENV === "production"
+      ? (process.env.CORS_ORIGIN || false)
+      : "http://localhost:3000",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   });
 
   await app.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });

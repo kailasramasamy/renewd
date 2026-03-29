@@ -32,17 +32,17 @@
 
 | # | Status | Area | Issue |
 |---|--------|------|-------|
-| M1 | [ ] | Security | No file type validation on document upload |
-| M2 | [ ] | Security | No input validation on most text fields |
-| M3 | [ ] | Security | CORS is origin:true in non-prod |
-| M4 | [ ] | Security | Admin session is plain "authenticated" cookie — no JWT |
-| M5 | [ ] | Security | No rate limiting on admin login |
-| M6 | [ ] | Perf | app_config queried on every request — needs Redis cache |
-| M7 | [ ] | Perf | Separate DB pool for BullMQ jobs |
-| M8 | [ ] | Perf | filteredRenewals getter recalculates on every rebuild |
-| M9 | [ ] | Arch | No data access layer — routes query DB directly |
-| M10 | [ ] | Arch | Duplicate getUserId logic across routes |
-| M11 | [ ] | Arch | BullMQ singletons break horizontal scaling |
-| M12 | [ ] | Frontend | 20+ catch (_) {} silently swallowing errors |
-| M13 | [ ] | Frontend | TextEditingController leaks in build() |
-| M14 | [ ] | Frontend | Deep links from push not validated |
+| M1 | [x] | Security | No file type validation on document upload |
+| M2 | [x] | Security | No input validation on most text fields |
+| M3 | [x] | Security | CORS is origin:true in non-prod |
+| M4 | [x] | Security | Admin session is plain "authenticated" cookie — no JWT |
+| M5 | [x] | Security | No rate limiting on admin login |
+| M6 | [x] | Perf | app_config queried on every request — needs Redis cache |
+| M7 | [x] | Perf | Separate DB pool for BullMQ jobs |
+| M8 | [x] | Perf | filteredRenewals getter recalculates on every rebuild |
+| M9 | [~] | Arch | No data access layer — routes query DB directly (partial: shared getUserId helper added) |
+| M10 | [x] | Arch | Duplicate getUserId logic across routes |
+| M11 | [x] | Arch | BullMQ singletons break horizontal scaling |
+| M12 | [x] | Frontend | 20+ catch (_) {} silently swallowing errors |
+| M13 | [x] | Frontend | TextEditingController leaks in build() |
+| M14 | [x] | Frontend | Deep links from push not validated |

@@ -77,7 +77,9 @@ class _InboxController extends GetxController {
       final body = response.body as Map<String, dynamic>;
       final list = body['notifications'] as List<dynamic>? ?? [];
       notifications.assignAll(list.cast<Map<String, dynamic>>());
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('fetchNotifications failed: $e');
+    }
     isLoading.value = false;
   }
 
@@ -88,7 +90,9 @@ class _InboxController extends GetxController {
         n['is_read'] = true;
       }
       notifications.refresh();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('markAllRead failed: $e');
+    }
   }
 
   Future<void> onTap(Map<String, dynamic> notification) async {
@@ -112,7 +116,9 @@ class _InboxController extends GetxController {
           final parsed = Map<String, dynamic>.from(
               const JsonDecoder().convert(raw) as Map);
           ticketId = parsed['ticket_id'] as String?;
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('onTap metadata parse failed: $e');
+        }
       }
       Get.toNamed(AppRoutes.support, arguments: ticketId);
       return;

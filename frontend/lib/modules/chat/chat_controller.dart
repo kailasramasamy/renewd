@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/network/api_client.dart';
 
@@ -16,6 +17,16 @@ class ChatController extends GetxController {
   final RxList<ChatMessage> messages = <ChatMessage>[].obs;
   final RxBool isLoading = false.obs;
   final RxString inputText = ''.obs;
+
+  final textController = TextEditingController();
+  final scrollController = ScrollController();
+
+  @override
+  void onClose() {
+    textController.dispose();
+    scrollController.dispose();
+    super.onClose();
+  }
 
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
