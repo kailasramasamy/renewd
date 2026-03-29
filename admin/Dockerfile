@@ -8,4 +8,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-CMD ["sh", "-c", "npx next start -p ${PORT:-3500}"]
+ENV PORT=3500
+EXPOSE 3500
+
+CMD ["sh", "-c", "npx next start -H 0.0.0.0 -p ${PORT}"]
