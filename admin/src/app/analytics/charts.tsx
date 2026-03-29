@@ -79,7 +79,7 @@ export function Charts({
                 borderRadius: 8,
                 color: "#fff",
               }}
-              formatter={(value: number) => [`₹${value.toLocaleString()}`, "Spent"]}
+              formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Spent"]}
             />
             <Bar dataKey="total" fill="#3B82F6" radius={[6, 6, 0, 0]} />
           </BarChart>
