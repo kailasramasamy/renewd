@@ -1,11 +1,14 @@
 import type { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../middleware/auth.js";
+import { createPremiumMiddleware } from "../../middleware/premium.js";
 import { NotFoundError } from "../../lib/errors.js";
 import { createRemindersForDays, deleteUnsentReminders } from "./helpers.js";
 
 const auth = { preHandler: authMiddleware };
 
 export async function registerReminderRoutes(app: FastifyInstance) {
+  const premiumMiddleware = createPremiumMiddleware(app);
+
   app.get("/:id/reminders", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
 
@@ -21,9 +24,25 @@ export async function registerReminderRoutes(app: FastifyInstance) {
     return reply.send({ reminders: result.rows });
   });
 
-  app.put("/:id/reminders", auth, async (request, reply) => {
+  app.put("/:id/reminders", { preHandler: [authMiddleware, premiumMiddleware] }, async (request, reply) => {
     const { id } = request.params as { id: string };
     const { days_before } = request.body as { days_before: number[] };
+
+    // Free users can only use free_reminder_days config
+    if (!request.premium.isPremium) {
+      const configResult = await app.db.query(
+        "SELECT value FROM app_config WHERE key = 'free_reminder_days'"
+      );
+      const allowedDays: number[] = JSON.parse(configResult.rows[0]?.value ?? "[1]");
+      const hasDisallowed = days_before.some((d) => !allowedDays.includes(d));
+      if (hasDisallowed) {
+        return reply.status(403).send({
+          error: "Custom reminders require Premium",
+          code: "PREMIUM_REQUIRED",
+          allowed_days: allowedDays,
+        });
+      }
+    }
 
     const renewal = await app.db.query(
       `SELECT r.id, r.renewal_date, r.user_id FROM renewals r

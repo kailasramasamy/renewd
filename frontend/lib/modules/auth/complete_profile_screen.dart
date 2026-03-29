@@ -77,6 +77,14 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
     try {
       final client = Get.find<ApiClient>();
+
+      // Ensure user is registered on backend (ignore 409 if already exists)
+      try {
+        await client.safePost('/auth/register', {});
+      } catch (e) {
+        if (e is ApiException && e.statusCode != 409) rethrow;
+      }
+
       await client.safePut(ApiEndpoints.updateProfile, {
         'name': name,
         'email': _emailCtrl.text.trim().isNotEmpty
@@ -176,7 +184,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    hintText: '+91 9876543210',
+                    hintText: 'Enter your phone number',
                     prefixIcon: Icon(LucideIcons.phone,
                         size: 18, color: RenewdColors.slate),
                   ),
@@ -186,7 +194,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
               const SizedBox(height: RenewdSpacing.xxl),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _save,
                   child: _isLoading

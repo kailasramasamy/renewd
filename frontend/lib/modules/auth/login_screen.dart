@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'auth_controller.dart';
@@ -135,10 +136,10 @@ class _SocialButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 52,
+        height: 50,
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: RenewdRadius.lgAll,
           border: borderColor != null
               ? Border.all(color: borderColor!)
               : null,
@@ -207,7 +208,7 @@ class _PhoneSection extends StatelessWidget {
             color: isDark ? Colors.white : RenewdColors.deepNavy,
           ),
           decoration: InputDecoration(
-            hintText: '+91 9876543210',
+            hintText: 'Enter your phone number',
             hintStyle: RenewdTextStyles.body
                 .copyWith(color: RenewdColors.slate),
             prefixIcon: Icon(LucideIcons.phone, size: 18,
@@ -230,7 +231,7 @@ class _PhoneSection extends StatelessWidget {
         const SizedBox(height: RenewdSpacing.md),
         Obx(() => SizedBox(
               width: double.infinity,
-              height: 52,
+              height: 50,
               child: ElevatedButton(
                 onPressed: c.isLoading.value ? null : c.sendOtp,
                 child: c.isLoading.value

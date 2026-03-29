@@ -6,6 +6,8 @@ import '../../widgets/brand_logo.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../core/utils/date_utils.dart';
 import '../../data/models/renewal_model.dart';
 import '../../data/providers/renewal_provider.dart';
@@ -23,9 +25,35 @@ class CategoriesScreen extends StatelessWidget {
         if (c.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
+        final hasAny = RenewalCategory.values.any(
+            (cat) => c.byCategory(cat).isNotEmpty);
+        if (!hasAny) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(RenewdSpacing.xl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.layers, size: 48, color: RenewdColors.slate),
+                  const SizedBox(height: RenewdSpacing.lg),
+                  Text('No categories yet',
+                      style: RenewdTextStyles.body
+                          .copyWith(color: RenewdColors.slate)),
+                  const SizedBox(height: RenewdSpacing.xs),
+                  Text(
+                    'Your renewals will be grouped here by category — insurance, subscriptions, utilities, and more.',
+                    textAlign: TextAlign.center,
+                    style: RenewdTextStyles.caption
+                        .copyWith(color: RenewdColors.slate, height: 1.5),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
         return ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.all(RenewdSpacing.lg),
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
           children: [
             ...RenewalCategory.values.map((cat) {
               final items = c.byCategory(cat);
@@ -99,17 +127,17 @@ class _CategoryTile extends StatelessWidget {
     return Obx(() {
       final expanded = c.isExpanded(cat);
       return Container(
-        margin: const EdgeInsets.only(bottom: RenewdSpacing.md),
+        margin: const EdgeInsets.only(bottom: RenewdSpacing.xl),
         decoration: BoxDecoration(
           color: isDark ? RenewdColors.darkSlate : Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: RenewdRadius.lgAll,
         ),
         child: Column(
           children: [
             // Header
             InkWell(
               onTap: () => c.toggle(cat),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: RenewdRadius.lgAll,
               child: Padding(
                 padding: const EdgeInsets.all(RenewdSpacing.lg),
                 child: Row(
@@ -118,8 +146,8 @@ class _CategoryTile extends StatelessWidget {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        color: color.withValues(alpha: RenewdOpacity.subtle),
+                        borderRadius: RenewdRadius.mdAll,
                       ),
                       child: Icon(icon, size: 20, color: color),
                     ),
@@ -155,7 +183,7 @@ class _CategoryTile extends StatelessWidget {
             if (expanded)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                    RenewdSpacing.lg, 0, RenewdSpacing.lg, RenewdSpacing.md),
+                    RenewdSpacing.lg, 0, RenewdSpacing.lg, RenewdSpacing.lg),
                 child: Column(
                   children: items.map((r) => _RenewalItem(renewal: r, c: c)).toList(),
                 ),

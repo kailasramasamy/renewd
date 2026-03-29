@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_utils.dart';
@@ -110,7 +111,7 @@ class _ScanCategorySection extends StatelessWidget {
                       color: isSelected
                           ? color.withValues(alpha: 0.2)
                           : RenewdColors.darkSlate,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
                         color: isSelected ? color : RenewdColors.steel,
                         width: isSelected ? 1.5 : 1,
@@ -203,7 +204,7 @@ class _ScanGroupSectionState extends State<_ScanGroupSection> {
                       color: isSelected
                           ? catColor.withValues(alpha: 0.2)
                           : RenewdColors.darkSlate,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
                         color: isSelected ? catColor : RenewdColors.steel,
                         width: isSelected ? 1.5 : 1,
@@ -360,7 +361,7 @@ class _ScanDateField extends StatelessWidget {
                     vertical: RenewdSpacing.md),
                 decoration: BoxDecoration(
                   color: RenewdColors.darkSlate,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: RenewdRadius.mdAll,
                   border: Border.all(color: RenewdColors.steel),
                 ),
                 child: Row(

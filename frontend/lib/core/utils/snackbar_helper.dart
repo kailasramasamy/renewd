@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
+import 'haptics.dart';
 
 void showRenewdSnack({
   required String message,
@@ -57,11 +58,15 @@ void showRenewdSnack({
   );
 }
 
-void showSuccessSnack(String message) =>
-    showRenewdSnack(message: message, icon: LucideIcons.checkCircle, color: RenewdColors.emerald);
+void showSuccessSnack(String message) {
+  RenewdHaptics.success();
+  showRenewdSnack(message: message, icon: LucideIcons.checkCircle, color: RenewdColors.emerald);
+}
 
-void showErrorSnack(String message) =>
-    showRenewdSnack(message: message, icon: LucideIcons.alertTriangle, color: RenewdColors.coralRed);
+void showErrorSnack(String message) {
+  RenewdHaptics.error();
+  showRenewdSnack(message: message, icon: LucideIcons.alertTriangle, color: RenewdColors.coralRed);
+}
 
 void showInfoSnack(String message) =>
     showRenewdSnack(message: message, icon: LucideIcons.info, color: RenewdColors.oceanBlue);

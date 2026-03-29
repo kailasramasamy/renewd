@@ -8,9 +8,12 @@ import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../core/utils/date_utils.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/models/renewal_model.dart';
+import '../../core/utils/haptics.dart';
 import '../../widgets/minder_button.dart';
 import '../../widgets/minder_card.dart';
 import '../../widgets/status_badge.dart';
@@ -26,7 +29,7 @@ void _showSnack(BuildContext context,
         Container(
           width: 28, height: 28,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
+            color: color.withValues(alpha: RenewdOpacity.light),
             borderRadius: BorderRadius.circular(7),
           ),
           child: Icon(icon, size: 14, color: color),
@@ -37,7 +40,7 @@ void _showSnack(BuildContext context,
     ),
     backgroundColor: isDark ? RenewdColors.steel : Colors.white,
     behavior: SnackBarBehavior.floating,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    shape: RoundedRectangleBorder(borderRadius: RenewdRadius.mdAll),
     elevation: 4,
   ));
 }
@@ -54,6 +57,7 @@ class RenewalDetailScreen extends StatelessWidget {
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(LucideIcons.arrowLeft),
+            tooltip: 'Go back',
             onPressed: () => Get.back(result: c.dataChanged),
           ),
           title: Text(renewal?.name ?? 'Detail'),
@@ -61,10 +65,12 @@ class RenewalDetailScreen extends StatelessWidget {
             if (renewal != null) ...[
               IconButton(
                 icon: Icon(LucideIcons.bell),
+                tooltip: 'Reminders',
                 onPressed: () => _showRemindersSheet(context, c),
               ),
               IconButton(
                 icon: Icon(LucideIcons.edit),
+                tooltip: 'Edit renewal',
                 onPressed: () async {
                   final result = await Get.toNamed(
                     AppRoutes.editRenewal,
@@ -79,6 +85,7 @@ class RenewalDetailScreen extends StatelessWidget {
               IconButton(
                 icon: Icon(LucideIcons.trash2,
                     color: RenewdColors.coralRed),
+                tooltip: 'Delete renewal',
                 onPressed: () => _confirmDelete(context, c),
               ),
             ],
@@ -121,7 +128,7 @@ class RenewalDetailScreen extends StatelessWidget {
                   color: Theme.of(context).brightness == Brightness.dark
                       ? RenewdColors.darkSlate
                       : RenewdColors.cloudGray,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: RenewdRadius.mdAll,
                 ),
                 child: Center(
                   child: Text('Renews in $days days',
@@ -134,7 +141,10 @@ class RenewalDetailScreen extends StatelessWidget {
               label: days < 0 ? 'Overdue — Mark Renewed' : 'Mark Renewed',
               icon: LucideIcons.checkCircle,
               isLoading: c.isLoading.value,
-              onPressed: c.markRenewed,
+              onPressed: () {
+                RenewdHaptics.success();
+                c.markRenewed();
+              },
             );
           }),
           const SizedBox(height: RenewdSpacing.xl),
@@ -186,7 +196,7 @@ class RenewalDetailScreen extends StatelessWidget {
                         updated.sort((a, b) => b.compareTo(a));
                         c.updateReminders(updated);
                       },
-                      selectedColor: RenewdColors.oceanBlue.withValues(alpha: 0.2),
+                      selectedColor: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.medium),
                       checkmarkColor: RenewdColors.oceanBlue,
                       labelStyle: RenewdTextStyles.caption.copyWith(
                         color: selected ? RenewdColors.oceanBlue : RenewdColors.slate,
@@ -215,6 +225,7 @@ class RenewalDetailScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
+              RenewdHaptics.error();
               Navigator.of(ctx).pop();
               c.deleteRenewal();
             },
@@ -584,9 +595,9 @@ class _PaymentPromptState extends State<_PaymentPrompt> {
       padding: const EdgeInsets.all(RenewdSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? RenewdColors.darkSlate : Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: RenewdRadius.lgAll,
         border: Border.all(
-          color: RenewdColors.emerald.withValues(alpha: 0.3),
+          color: RenewdColors.emerald.withValues(alpha: RenewdOpacity.moderate),
         ),
       ),
       child: Column(
@@ -634,7 +645,7 @@ class _PaymentPromptState extends State<_PaymentPrompt> {
                 horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
               decoration: BoxDecoration(
                 color: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: RenewdRadius.mdAll,
               ),
               child: Row(
                 children: [
@@ -661,7 +672,7 @@ class _PaymentPromptState extends State<_PaymentPrompt> {
                 label: Text(m, style: RenewdTextStyles.caption),
                 selected: selected,
                 onSelected: (_) => setState(() => _method = selected ? null : m),
-                selectedColor: RenewdColors.oceanBlue.withValues(alpha: 0.15),
+                selectedColor: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.medium),
               );
             }).toList(),
           ),

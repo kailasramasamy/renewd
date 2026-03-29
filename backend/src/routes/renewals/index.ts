@@ -4,6 +4,7 @@ import { AppError, NotFoundError } from "../../lib/errors.js";
 import { createDefaultReminders, deleteUnsentReminders } from "./helpers.js";
 import { registerReminderRoutes } from "./reminders.js";
 import { updateRenewalLogo } from "../../services/logo.js";
+import { createPremiumMiddleware } from "../../middleware/premium.js";
 
 const auth = { preHandler: authMiddleware };
 
@@ -28,7 +29,9 @@ async function registerListAndGet(app: FastifyInstance) {
 }
 
 async function registerCreate(app: FastifyInstance) {
-  app.post("/", auth, async (request, reply) => {
+  const premiumMiddleware = createPremiumMiddleware(app);
+
+  app.post("/", { preHandler: [authMiddleware, premiumMiddleware] }, async (request, reply) => {
     const body = request.body as Record<string, unknown>;
     const userResult = await app.db.query(
       "SELECT id FROM users WHERE firebase_uid = $1",
@@ -37,6 +40,26 @@ async function registerCreate(app: FastifyInstance) {
     if (userResult.rows.length === 0) throw new AppError("User not found", 404, "NOT_FOUND");
 
     const userId = userResult.rows[0].id;
+
+    // Enforce free plan renewal limit
+    if (!request.premium.isPremium) {
+      const countResult = await app.db.query(
+        "SELECT COUNT(*)::int AS count FROM renewals WHERE user_id = $1",
+        [userId]
+      );
+      const limitResult = await app.db.query(
+        "SELECT value FROM app_config WHERE key = 'free_renewal_limit'"
+      );
+      const limit = parseInt(limitResult.rows[0]?.value ?? "5", 10);
+      if (countResult.rows[0].count >= limit) {
+        return reply.status(403).send({
+          error: "Free plan renewal limit reached",
+          code: "RENEWAL_LIMIT",
+          limit,
+        });
+      }
+    }
+
     const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name } = body;
     const result = await app.db.query(
       `INSERT INTO renewals (user_id, name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name)

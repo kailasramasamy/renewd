@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../core/services/storage_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -37,7 +38,11 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
 
   Future<void> _downloadPdf() async {
     try {
-      final response = await http.get(Uri.parse(widget.url));
+      final token = Get.find<StorageService>().readToken();
+      final response = await http.get(
+        Uri.parse(widget.url),
+        headers: token != null ? {'Authorization': 'Bearer $token'} : null,
+      );
       if (response.statusCode != 200) {
         setState(() {
           _error = 'Failed to load document';

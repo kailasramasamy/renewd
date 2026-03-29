@@ -7,7 +7,10 @@ import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../core/utils/date_utils.dart';
+import '../../core/widgets/animated_list_item.dart';
 import '../../widgets/brand_logo.dart';
 import '../../widgets/skeleton_loader.dart';
 import '../../data/models/renewal_model.dart';
@@ -93,13 +96,23 @@ class _SearchBar extends StatelessWidget {
           padding: const EdgeInsets.only(top: RenewdSpacing.sm),
           child: Row(
             children: [
-              GestureDetector(
-                onTap: () => Get.toNamed(AppRoutes.profile),
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
-                  child: Icon(LucideIcons.user, size: 18,
-                      color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
+              Semantics(
+                label: 'Profile',
+                button: true,
+                child: GestureDetector(
+                  onTap: () => Get.toNamed(AppRoutes.profile),
+                  child: SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Center(
+                      child: CircleAvatar(
+                        radius: 18,
+                        backgroundColor: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
+                        child: Icon(LucideIcons.user, size: 18,
+                            color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: RenewdSpacing.md),
@@ -110,6 +123,7 @@ class _SearchBar extends StatelessWidget {
               Obx(() {
                 final count = c.unreadNotificationCount.value;
                 return IconButton(
+                  tooltip: 'Notifications',
                   icon: Badge(
                     isLabelVisible: count > 0,
                     label: Text('$count',
@@ -133,7 +147,7 @@ class _SearchBar extends StatelessWidget {
           height: 44,
           decoration: BoxDecoration(
             color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: RenewdRadius.pillAll,
           ),
           child: TextField(
             onChanged: (v) => c.searchQuery.value = v,
@@ -177,7 +191,7 @@ class _FeatureBanner extends StatelessWidget {
               Color(0xFF3B82F6),
             ],
           ),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: RenewdRadius.lgAll,
         ),
         padding: const EdgeInsets.symmetric(horizontal: RenewdSpacing.lg),
         child: Row(
@@ -186,7 +200,7 @@ class _FeatureBanner extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: Colors.white.withValues(alpha: RenewdOpacity.medium),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(LucideIcons.sparkles,
@@ -228,24 +242,27 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? RenewdColors.darkSlate : Colors.white;
     return Row(
       children: [
         _StatCard(
           value: '${c.dueThisMonth}',
           label: 'Due',
+          icon: LucideIcons.clock,
           color: c.dueThisMonth > 0 ? RenewdColors.tangerine : RenewdColors.slate,
-          bg: bg,
         ),
         const SizedBox(width: RenewdSpacing.sm),
-        _StatCard(value: '${c.totalActive}', label: 'Active', color: RenewdColors.oceanBlue, bg: bg),
+        _StatCard(
+          value: '${c.totalActive}',
+          label: 'Active',
+          icon: LucideIcons.checkCircle,
+          color: RenewdColors.oceanBlue,
+        ),
         const SizedBox(width: RenewdSpacing.sm),
         _StatCard(
           value: '₹${c.monthlySpend.toStringAsFixed(0)}',
           label: 'Monthly',
+          icon: LucideIcons.indianRupee,
           color: RenewdColors.emerald,
-          bg: bg,
         ),
       ],
     );
@@ -255,41 +272,45 @@ class _StatsRow extends StatelessWidget {
 class _StatCard extends StatelessWidget {
   final String value;
   final String label;
+  final IconData icon;
   final Color color;
-  final Color bg;
 
   const _StatCard({
     required this.value,
     required this.label,
+    required this.icon,
     required this.color,
-    required this.bg,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        height: 80,
+        height: 88,
         padding: const EdgeInsets.all(RenewdSpacing.md),
         decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(14),
+          color: color.withValues(alpha: RenewdOpacity.subtle),
+          borderRadius: RenewdRadius.lgAll,
+          border: Border.all(
+            color: color.withValues(alpha: RenewdOpacity.light),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            Icon(icon, size: 16, color: color),
             Text(value,
-                style: RenewdTextStyles.h2.copyWith(
+                style: RenewdTextStyles.h3.copyWith(
                   color: color,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis),
             Text(label.toUpperCase(),
                 style: RenewdTextStyles.caption.copyWith(
-                  color: RenewdColors.slate,
+                  color: color.withValues(alpha: RenewdOpacity.strong),
                   letterSpacing: 0.8,
                   fontSize: 10,
                 )),
@@ -383,10 +404,8 @@ class _Section extends StatelessWidget {
               ),
               const SizedBox(width: RenewdSpacing.sm),
               Text(label,
-                  style: RenewdTextStyles.caption.copyWith(
+                  style: RenewdTextStyles.sectionHeader.copyWith(
                     color: RenewdColors.slate,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w600,
                   )),
               const SizedBox(width: RenewdSpacing.sm),
               Text('${items.length}',
@@ -396,15 +415,18 @@ class _Section extends StatelessWidget {
             ],
           ),
           const SizedBox(height: RenewdSpacing.md),
-          ...items.map((r) => _RenewalRow(
-                renewal: r,
-                statusColor: color,
-                onTap: () async {
-                  final result = await Get.toNamed(
-                      AppRoutes.renewalDetail,
-                      arguments: r);
-                  if (result == true) c.fetchRenewals();
-                },
+          ...items.asMap().entries.map((entry) => AnimatedListItem(
+                index: entry.key,
+                child: _RenewalRow(
+                  renewal: entry.value,
+                  statusColor: color,
+                  onTap: () async {
+                    final result = await Get.toNamed(
+                        AppRoutes.renewalDetail,
+                        arguments: entry.value);
+                    if (result == true) c.fetchRenewals();
+                  },
+                ),
               )),
         ],
       ),
@@ -438,7 +460,7 @@ class _RenewalRow extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isDark ? RenewdColors.darkSlate : Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: RenewdRadius.lgAll,
           border: Border(
             left: BorderSide(color: statusColor, width: 3),
           ),
@@ -473,23 +495,33 @@ class _RenewalRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: RenewdSpacing.sm),
-            // Amount + days
+            // Amount + status pill
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (renewal.amount != null)
                   Text('₹${renewal.amount!.toStringAsFixed(0)}',
-                      style: RenewdTextStyles.body.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                      style: RenewdTextStyles.subtitle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
                       )),
-                const SizedBox(height: 2),
-                Text(
-                  _daysLabel(days),
-                  style: RenewdTextStyles.caption.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: RenewdSpacing.sm,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: RenewdOpacity.medium),
+                    borderRadius: RenewdRadius.pillAll,
+                  ),
+                  child: Text(
+                    _daysLabel(days),
+                    style: RenewdTextStyles.caption.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ],
@@ -516,7 +548,7 @@ Future<void> _showAddOptions(
   await showModalBottomSheet(
     context: context,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(RenewdRadius.xl)),
     ),
     builder: (_) => _AddOptionsSheet(c: c),
   );
@@ -538,7 +570,7 @@ class _AddOptionsSheet extends StatelessWidget {
             Container(
               width: 36, height: 4,
               decoration: BoxDecoration(
-                color: RenewdColors.slate.withValues(alpha: 0.3),
+                color: RenewdColors.slate.withValues(alpha: RenewdOpacity.moderate),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -600,14 +632,14 @@ class _SheetOption extends StatelessWidget {
         padding: const EdgeInsets.all(RenewdSpacing.lg),
         decoration: BoxDecoration(
           color: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: RenewdRadius.lgAll,
         ),
         child: Row(
           children: [
             Container(
               width: 40, height: 40,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
+                color: color.withValues(alpha: RenewdOpacity.light),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 20),
@@ -677,19 +709,146 @@ class _NoResults extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? RenewdColors.darkSlate : Colors.white;
+
     return Column(
       children: [
-        const SizedBox(height: RenewdSpacing.xxxl),
-        Icon(LucideIcons.fileText, size: 48, color: RenewdColors.slate),
         const SizedBox(height: RenewdSpacing.lg),
-        Text('No renewals yet',
-            style: RenewdTextStyles.body
-                .copyWith(color: RenewdColors.slate)),
-        const SizedBox(height: RenewdSpacing.xs),
-        Text('Tap + to add your first renewal',
-            style: RenewdTextStyles.caption
-                .copyWith(color: RenewdColors.slate)),
+        // Welcome message
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: RenewdRadius.lgAll,
+          ),
+          child: Column(
+            children: [
+              Icon(LucideIcons.sparkles,
+                  size: 36, color: RenewdColors.oceanBlue),
+              const SizedBox(height: RenewdSpacing.md),
+              Text('Welcome to Renewd!',
+                  style: RenewdTextStyles.h3
+                      .copyWith(fontWeight: FontWeight.w700)),
+              const SizedBox(height: RenewdSpacing.sm),
+              Text(
+                'Track insurance, subscriptions, government docs and never miss a renewal again.',
+                textAlign: TextAlign.center,
+                style: RenewdTextStyles.bodySmall
+                    .copyWith(color: RenewdColors.slate, height: 1.5),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: RenewdSpacing.lg),
+        // Quick-start suggestions
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text('GET STARTED',
+              style: RenewdTextStyles.sectionHeader.copyWith(
+                color: RenewdColors.slate,
+              )),
+        ),
+        const SizedBox(height: RenewdSpacing.md),
+        AnimatedListItem(
+          index: 0,
+          child: _QuickStartTile(
+            icon: LucideIcons.scanLine,
+            title: 'Scan a document',
+            subtitle: 'Point your camera at any policy or bill',
+            color: RenewdColors.lavender,
+            isDark: isDark,
+            onTap: () => Get.toNamed(AppRoutes.scanAdd),
+          ),
+        ),
+        const SizedBox(height: RenewdSpacing.sm),
+        AnimatedListItem(
+          index: 1,
+          child: _QuickStartTile(
+            icon: LucideIcons.plus,
+            title: 'Add a renewal manually',
+            subtitle: 'Insurance, SIM, passport, subscription...',
+            color: RenewdColors.oceanBlue,
+            isDark: isDark,
+            onTap: () => Get.toNamed(AppRoutes.addRenewal),
+          ),
+        ),
+        const SizedBox(height: RenewdSpacing.sm),
+        AnimatedListItem(
+          index: 2,
+          child: _QuickStartTile(
+            icon: LucideIcons.messageSquare,
+            title: 'Ask AI Chat',
+            subtitle: 'Get help organizing your renewals',
+            color: RenewdColors.emerald,
+            isDark: isDark,
+            onTap: () => Get.toNamed(AppRoutes.chat),
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _QuickStartTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _QuickStartTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        decoration: BoxDecoration(
+          color: isDark ? RenewdColors.darkSlate : Colors.white,
+          borderRadius: RenewdRadius.lgAll,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: RenewdOpacity.light),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: RenewdSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: RenewdTextStyles.body
+                          .copyWith(fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: RenewdTextStyles.caption
+                          .copyWith(color: RenewdColors.slate)),
+                ],
+              ),
+            ),
+            Icon(LucideIcons.chevronRight,
+                color: RenewdColors.slate, size: 16),
+          ],
+        ),
+      ),
     );
   }
 }

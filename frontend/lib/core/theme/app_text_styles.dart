@@ -33,10 +33,23 @@ class RenewdTextStyles {
         letterSpacing: 0.1,
       );
 
+  static TextStyle get subtitle => GoogleFonts.dmSans(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
+      );
+
   static TextStyle get caption => GoogleFonts.dmSans(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.3,
+      );
+
+  /// Uppercase section headers (e.g., "OVERDUE", "THIS WEEK", "GET STARTED")
+  static TextStyle get sectionHeader => GoogleFonts.dmSans(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1.2,
       );
 
   static TextStyle get numberLarge => GoogleFonts.dmSans(

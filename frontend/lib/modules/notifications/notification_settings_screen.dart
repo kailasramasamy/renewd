@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'notification_settings_controller.dart';
@@ -41,7 +42,7 @@ class NotificationSettingsScreen extends StatelessWidget {
         ),
         value: c.enabled.value,
         onChanged: c.toggleEnabled,
-        activeTrackColor: RenewdColors.oceanBlue.withValues(alpha: 0.3),
+        activeTrackColor: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.moderate),
         thumbColor: WidgetStatePropertyAll(RenewdColors.oceanBlue),
       ),
     );
@@ -74,7 +75,7 @@ class NotificationSettingsScreen extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => c.toggleDay(day),
-      selectedColor: RenewdColors.oceanBlue.withValues(alpha: 0.2),
+      selectedColor: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.medium),
       checkmarkColor: RenewdColors.oceanBlue,
       labelStyle: RenewdTextStyles.caption.copyWith(
         color: selected ? RenewdColors.oceanBlue : RenewdColors.slate,
@@ -92,7 +93,7 @@ class NotificationSettingsScreen extends StatelessWidget {
         ),
         value: c.dailyDigestEnabled.value,
         onChanged: c.toggleDigest,
-        activeTrackColor: RenewdColors.oceanBlue.withValues(alpha: 0.3),
+        activeTrackColor: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.moderate),
         thumbColor: WidgetStatePropertyAll(RenewdColors.oceanBlue),
       ),
     );

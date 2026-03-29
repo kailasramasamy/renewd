@@ -5,6 +5,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import 'chat_controller.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -135,10 +137,10 @@ class _SuggestionChip extends StatelessWidget {
           vertical: RenewdSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: RenewdColors.oceanBlue.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
+          color: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.light),
+          borderRadius: RenewdRadius.pillAll,
           border: Border.all(
-            color: RenewdColors.oceanBlue.withValues(alpha: 0.2),
+            color: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.medium),
           ),
         ),
         child: Text(label,
@@ -170,7 +172,7 @@ class _MessageBubble extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isUser
-              ? RenewdColors.oceanBlue
+              ? const Color(0xFF2563EB) // Darker blue for WCAG AA contrast
               : isDark
                   ? RenewdColors.darkSlate
                   : RenewdColors.cloudGray,
@@ -307,6 +309,7 @@ class _InputBar extends StatelessWidget {
             Obx(() => IconButton(
                   onPressed: isLoading.value ? null : onSend,
                   icon: Icon(LucideIcons.send, size: 20),
+                  tooltip: 'Send message',
                   color: RenewdColors.oceanBlue,
                 )),
           ],

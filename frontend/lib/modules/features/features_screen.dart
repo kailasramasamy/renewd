@@ -4,6 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 
 class FeaturesScreen extends StatelessWidget {
   const FeaturesScreen({super.key});
@@ -75,8 +77,8 @@ class _HeroBanner extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(14),
+                      color: Colors.white.withValues(alpha: RenewdOpacity.medium),
+                      borderRadius: RenewdRadius.lgAll,
                     ),
                     child: Icon(LucideIcons.refreshCcw,
                         size: 24, color: Colors.white),
@@ -171,7 +173,7 @@ class _FeatureCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: RenewdSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? RenewdColors.darkSlate : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: RenewdRadius.xlAll,
       ),
       child: Column(
         children: [
@@ -180,7 +182,7 @@ class _FeatureCard extends StatelessWidget {
             height: 140,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: feature.color.withValues(alpha: 0.08),
+              color: feature.color.withValues(alpha: RenewdOpacity.subtle),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16)),
             ),
@@ -196,7 +198,7 @@ class _FeatureCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: feature.color.withValues(alpha: 0.12),
+                    color: feature.color.withValues(alpha: RenewdOpacity.light),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(feature.icon, size: 20, color: feature.color),
@@ -263,10 +265,10 @@ class _CardsGraphic extends StatelessWidget {
                 height: 100,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: i == 1 ? 0.3 : 0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  color: color.withValues(alpha: i == 1 ? RenewdOpacity.moderate : RenewdOpacity.medium),
+                  borderRadius: RenewdRadius.mdAll,
                   border: Border.all(
-                    color: color.withValues(alpha: i == 1 ? 0.5 : 0.2),
+                    color: color.withValues(alpha: i == 1 ? RenewdOpacity.half : RenewdOpacity.medium),
                   ),
                 ),
                 padding: const EdgeInsets.all(10),
@@ -276,7 +278,7 @@ class _CardsGraphic extends StatelessWidget {
                     Container(
                       width: 24, height: 24,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.3),
+                        color: color.withValues(alpha: RenewdOpacity.moderate),
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
@@ -284,7 +286,7 @@ class _CardsGraphic extends StatelessWidget {
                     Container(
                       width: 50, height: 6,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.3),
+                        color: color.withValues(alpha: RenewdOpacity.moderate),
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
@@ -292,7 +294,7 @@ class _CardsGraphic extends StatelessWidget {
                     Container(
                       width: 30, height: 6,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.2),
+                        color: color.withValues(alpha: RenewdOpacity.medium),
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
@@ -337,7 +339,7 @@ class _TimelineGraphic extends StatelessWidget {
           width: active ? 20 : 14,
           height: active ? 20 : 14,
           decoration: BoxDecoration(
-            color: active ? c : c.withValues(alpha: 0.2),
+            color: active ? c : c.withValues(alpha: RenewdOpacity.medium),
             shape: BoxShape.circle,
             border: Border.all(color: c, width: 2),
           ),
@@ -346,7 +348,7 @@ class _TimelineGraphic extends StatelessWidget {
         Text(label,
             style: TextStyle(
               fontSize: 10,
-              color: c.withValues(alpha: 0.8),
+              color: c.withValues(alpha: RenewdOpacity.heavy),
               fontWeight: active ? FontWeight.w700 : FontWeight.w500,
             )),
       ],
@@ -358,7 +360,7 @@ class _TimelineGraphic extends StatelessWidget {
       width: 32,
       height: 2,
       margin: const EdgeInsets.only(bottom: 16),
-      color: c.withValues(alpha: 0.3),
+      color: c.withValues(alpha: RenewdOpacity.moderate),
     );
   }
 }
@@ -378,9 +380,9 @@ class _ScanGraphic extends StatelessWidget {
             width: 90,
             height: 110,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
+              color: color.withValues(alpha: RenewdOpacity.medium),
+              borderRadius: RenewdRadius.smAll,
+              border: Border.all(color: color.withValues(alpha: RenewdOpacity.moderate)),
             ),
             padding: const EdgeInsets.all(10),
             child: Column(
@@ -391,7 +393,7 @@ class _ScanGraphic extends StatelessWidget {
                   width: i == 0 ? 50 : (i == 4 ? 30 : 60),
                   height: 4,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.2),
+                    color: color.withValues(alpha: RenewdOpacity.medium),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -490,8 +492,8 @@ class _CategoriesGraphic extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: colors[i].withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(14),
+              color: colors[i].withValues(alpha: RenewdOpacity.medium),
+              borderRadius: RenewdRadius.lgAll,
             ),
             child: Icon(icons[i], size: 24, color: colors[i]),
           );
@@ -513,9 +515,9 @@ class _SecuritySection extends StatelessWidget {
       padding: const EdgeInsets.all(RenewdSpacing.xl),
       decoration: BoxDecoration(
         color: isDark ? RenewdColors.darkSlate : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: RenewdRadius.xlAll,
         border: Border.all(
-          color: RenewdColors.emerald.withValues(alpha: 0.2),
+          color: RenewdColors.emerald.withValues(alpha: RenewdOpacity.medium),
         ),
       ),
       child: Column(
@@ -523,8 +525,8 @@ class _SecuritySection extends StatelessWidget {
           Container(
             width: 48, height: 48,
             decoration: BoxDecoration(
-              color: RenewdColors.emerald.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
+              color: RenewdColors.emerald.withValues(alpha: RenewdOpacity.light),
+              borderRadius: RenewdRadius.lgAll,
             ),
             child: Icon(LucideIcons.shieldCheck,
                 size: 24, color: RenewdColors.emerald),

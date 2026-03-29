@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'pdf_viewer_screen.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_opacity.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../widgets/minder_card.dart';
@@ -55,7 +57,7 @@ class DocumentDetailScreen extends StatelessWidget {
               Container(
                 width: 36, height: 4,
                 decoration: BoxDecoration(
-                  color: RenewdColors.slate.withValues(alpha: 0.3),
+                  color: RenewdColors.slate.withValues(alpha: RenewdOpacity.moderate),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -63,7 +65,7 @@ class DocumentDetailScreen extends StatelessWidget {
               ListTile(
                 leading: Icon(LucideIcons.edit, color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
                 title: const Text('Rename'),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: RenewdRadius.mdAll),
                 onTap: () {
                   Navigator.pop(context);
                   _showRenameDialog(context, c);
@@ -75,7 +77,7 @@ class DocumentDetailScreen extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2))
                     : Icon(LucideIcons.share, color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy)),
                 title: const Text('Share'),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: RenewdRadius.mdAll),
                 onTap: () {
                   Navigator.pop(context);
                   c.shareDocument();
@@ -84,7 +86,7 @@ class DocumentDetailScreen extends StatelessWidget {
               ListTile(
                 leading: Icon(LucideIcons.trash2, color: RenewdColors.coralRed),
                 title: Text('Delete', style: TextStyle(color: RenewdColors.coralRed)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: RenewdRadius.mdAll),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDelete(context, c);
@@ -374,7 +376,7 @@ class _AnalyzeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => SizedBox(
-          height: 52,
+          height: 50,
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: c.isParsing.value ? null : c.triggerParse,
@@ -382,7 +384,7 @@ class _AnalyzeButton extends StatelessWidget {
               backgroundColor: RenewdColors.lavender,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: RenewdRadius.mdAll),
               elevation: 0,
             ),
             icon: c.isParsing.value

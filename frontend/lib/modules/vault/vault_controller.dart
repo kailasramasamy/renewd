@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../core/network/api_client.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../data/providers/document_provider.dart';
@@ -29,6 +30,7 @@ class VaultController extends GetxController {
     try {
       allDocuments.assignAll(await _provider.getAll());
     } catch (e) {
+      if (e is ApiException && e.statusCode == 401) return;
       showErrorSnack('Failed to load documents');
     } finally {
       isLoading.value = false;

@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_utils.dart';
@@ -24,7 +25,7 @@ class CountBadge extends StatelessWidget {
           horizontal: RenewdSpacing.sm, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: RenewdRadius.pillAll,
       ),
       child: Text('$count',
           style: RenewdTextStyles.caption.copyWith(color: color)),
@@ -44,7 +45,7 @@ class DueSoonCard extends StatelessWidget {
       width: 160,
       decoration: BoxDecoration(
         color: RenewdColors.darkSlate,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: RenewdRadius.mdAll,
         border: Border(left: BorderSide(color: statusColor, width: 3)),
       ),
       padding: const EdgeInsets.symmetric(
@@ -95,7 +96,7 @@ class CategoryCard extends StatelessWidget {
       return Container(
         decoration: BoxDecoration(
           color: RenewdColors.darkSlate,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: RenewdRadius.xlAll,
           border: Border.all(color: RenewdColors.steel),
         ),
         child: Column(

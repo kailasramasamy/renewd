@@ -1,7 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/routes/app_routes.dart';
 import '../../core/constants/category_config.dart';
+import '../../core/network/api_client.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/haptics.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../data/models/document_model.dart';
 import '../../data/providers/document_provider.dart';
@@ -67,13 +74,86 @@ class ScanAddController extends GetxController {
       }
 
       _prefillFromExtraction(ext);
+      RenewdHaptics.success();
       extraction.value = ext;
     } catch (e) {
-      showErrorSnack('Failed to analyze document');
+      if (e is ApiException && e.statusCode == 403) {
+        _showPremiumRequired();
+      } else {
+        RenewdHaptics.error();
+        showErrorSnack('Failed to analyze document');
+      }
     } finally {
       isUploading.value = false;
       isParsing.value = false;
     }
+  }
+
+  void _showPremiumRequired() {
+    Get.bottomSheet(
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: RenewdColors.slate.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              Icon(Icons.lock_outline,
+                  size: 48, color: RenewdColors.amber),
+              const SizedBox(height: RenewdSpacing.lg),
+              Text('Premium Feature',
+                  style: RenewdTextStyles.h3
+                      .copyWith(fontWeight: FontWeight.w700)),
+              const SizedBox(height: RenewdSpacing.sm),
+              Text(
+                'AI document scanning is available for Premium users. Upgrade to scan documents and auto-extract renewal details.',
+                textAlign: TextAlign.center,
+                style: RenewdTextStyles.bodySmall
+                    .copyWith(color: RenewdColors.slate, height: 1.5),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.back();
+                    Get.toNamed(AppRoutes.premium);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: RenewdColors.amber,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: RenewdRadius.mdAll),
+                  ),
+                  child: Text('View Premium Plans',
+                      style: RenewdTextStyles.body.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.md),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text('Maybe Later',
+                    style: RenewdTextStyles.bodySmall
+                        .copyWith(color: RenewdColors.slate)),
+              ),
+            ],
+          ),
+        ),
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    );
   }
 
   Future<void> _handleIrrelevantDoc(String docId, String summary) async {

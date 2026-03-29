@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/theme/app_opacity.dart';
+import '../core/theme/app_radius.dart';
 import '../core/theme/app_text_styles.dart';
 
 enum StatusType { safe, warning, urgent, critical }
@@ -20,8 +22,8 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
+        color: color.withValues(alpha: RenewdOpacity.medium),
+        borderRadius: RenewdRadius.pillAll,
       ),
       child: Text(
         label,

@@ -5,7 +5,7 @@ class AppConstants {
 
   static const String apiBaseUrl = _isProduction
       ? 'https://api.renewd.app/api/v1'  // Production URL (update when deployed)
-      : 'http://localhost:6000/api/v1';   // Development
+      : 'http://192.168.1.5:6000/api/v1'; // Development (local IP)
 
   static const int maxFileSizeBytes = 10 * 1024 * 1024; // 10MB
 

@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const { password } = await request.json();
-  const adminKey = process.env.ADMIN_KEY || "renewd-admin-2026";
+  const adminKey = process.env.ADMIN_KEY;
+  if (!adminKey) {
+    return NextResponse.json({ error: "ADMIN_KEY not configured" }, { status: 500 });
+  }
 
   if (password !== adminKey) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 });

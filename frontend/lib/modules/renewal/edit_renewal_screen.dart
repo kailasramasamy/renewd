@@ -5,6 +5,8 @@ import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../core/utils/date_utils.dart';
 import '../../widgets/minder_button.dart';
 import 'edit_renewal_controller.dart';
@@ -129,9 +131,9 @@ class EditRenewalScreen extends StatelessWidget {
                 horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
             decoration: BoxDecoration(
               color: isSelected
-                  ? color.withValues(alpha: 0.2)
+                  ? color.withValues(alpha: RenewdOpacity.medium)
                   : RenewdColors.darkSlate,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: RenewdRadius.pillAll,
               border: Border.all(
                 color: isSelected ? color : RenewdColors.steel,
                 width: isSelected ? 1.5 : 1,
@@ -164,7 +166,7 @@ class EditRenewalScreen extends StatelessWidget {
             horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
         decoration: BoxDecoration(
           color: RenewdColors.darkSlate,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: RenewdRadius.mdAll,
           border: Border.all(color: RenewdColors.steel),
         ),
         child: Row(
@@ -287,9 +289,9 @@ class _GroupSectionState extends State<_GroupSection> {
                         vertical: RenewdSpacing.sm),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? catColor.withValues(alpha: 0.2)
+                          ? catColor.withValues(alpha: RenewdOpacity.medium)
                           : RenewdColors.darkSlate,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
                         color: isSelected ? catColor : RenewdColors.steel,
                         width: isSelected ? 1.5 : 1,

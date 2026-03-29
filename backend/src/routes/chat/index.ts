@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import Anthropic from "@anthropic-ai/sdk";
 import { authMiddleware } from "../../middleware/auth.js";
+import { createRequirePremium } from "../../middleware/premium.js";
 import { ValidationError } from "../../lib/errors.js";
 import { env } from "../../config/env.js";
 
@@ -41,7 +42,9 @@ const TOOLS: Anthropic.Tool[] = [
 ];
 
 export default async function chatRoutes(app: FastifyInstance) {
-  app.post("/", { preHandler: authMiddleware }, async (request, reply) => {
+  const requirePremium = createRequirePremium(app, "ai_chat");
+
+  app.post("/", { preHandler: [authMiddleware, requirePremium] }, async (request, reply) => {
     const body = request.body as { message?: string };
     if (!body.message || typeof body.message !== "string") {
       throw new ValidationError("message is required");

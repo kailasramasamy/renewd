@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/theme/app_radius.dart';
 import '../core/theme/app_text_styles.dart';
 
 enum RenewdButtonVariant { primary, secondary, danger }
@@ -24,7 +25,7 @@ class RenewdButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = _resolveColors();
     return SizedBox(
-      height: 52,
+      height: 50,
       width: double.infinity,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
@@ -32,7 +33,7 @@ class RenewdButton extends StatelessWidget {
           backgroundColor: colors.$1,
           foregroundColor: colors.$2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: RenewdRadius.mdAll,
           ),
           elevation: 0,
         ),

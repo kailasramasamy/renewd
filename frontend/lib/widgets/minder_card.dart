@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/theme/app_radius.dart';
 import '../core/theme/app_spacing.dart';
 
 class RenewdCard extends StatelessWidget {
@@ -22,13 +23,13 @@ class RenewdCard extends StatelessWidget {
 
     return Material(
       color: bgColor,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: RenewdRadius.xlAll,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: RenewdRadius.xlAll,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: RenewdRadius.xlAll,
             border: isDark
                 ? Border.all(color: RenewdColors.steel, width: 1)
                 : null,

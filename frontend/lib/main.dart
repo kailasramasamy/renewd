@@ -7,6 +7,8 @@ import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'core/network/api_client.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/premium_service.dart';
+import 'core/services/purchase_service.dart';
 import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
@@ -22,6 +24,8 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await Get.putAsync(() => StorageService().init());
   Get.put(ApiClient());
+  await Get.putAsync(() => PremiumService().init());
+  await Get.putAsync(() => PurchaseService().init());
   await Get.putAsync(() => NotificationService().init());
   runApp(const RenewdApp());
 }

@@ -7,6 +7,7 @@ import {
   BarChart3,
   Bell,
   Settings,
+  Crown,
   LogOut,
 } from "lucide-react";
 
@@ -16,6 +17,7 @@ const nav = [
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/config", label: "App Config", icon: Settings },
+  { href: "/premium", label: "Premium Config", icon: Crown },
 ];
 
 export function Sidebar() {

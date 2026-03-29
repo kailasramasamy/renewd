@@ -4,6 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_opacity.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -144,7 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: _pages[_currentPage].color,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: RenewdRadius.lgAll,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -209,7 +211,7 @@ class _OnboardingPage extends StatelessWidget {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: data.color.withValues(alpha: 0.12),
+              color: data.color.withValues(alpha: RenewdOpacity.light),
               shape: BoxShape.circle,
             ),
             child: Icon(data.icon, size: 52, color: data.color),

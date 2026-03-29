@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'splash_controller.dart';
@@ -47,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: RenewdColors.charcoal,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnim,
@@ -61,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 80,
                   decoration: BoxDecoration(
                     color: RenewdColors.oceanBlue,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: RenewdRadius.pillAll,
                   ),
                   child: Icon(LucideIcons.refreshCcw,
                       size: 40, color: Colors.white),

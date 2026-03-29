@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../middleware/auth.js";
-import { NotFoundError, AppError } from "../../lib/errors.js";
+import { createRequirePremium } from "../../middleware/premium.js";
+import { NotFoundError, AppError, ValidationError } from "../../lib/errors.js";
 import { extractDocumentData } from "../../services/ai.js";
 import { maskExtractionJson } from "../../services/masking.js";
 import { getFileFromS3, deleteFromS3, s3KeyFromUrl } from "../../services/storage.js";
@@ -16,7 +17,9 @@ import {
 const auth = { preHandler: authMiddleware };
 
 async function registerUpload(app: FastifyInstance) {
-  app.post("/upload", auth, async (request, reply) => {
+  const requirePremium = createRequirePremium(app, "document_vault");
+
+  app.post("/upload", { preHandler: [authMiddleware, requirePremium] }, async (request, reply) => {
     const data = await request.file();
     if (!data) throw new AppError("No file provided", 400, "MISSING_FILE");
 
@@ -58,7 +61,9 @@ async function registerUpload(app: FastifyInstance) {
 }
 
 async function registerParse(app: FastifyInstance) {
-  app.post("/:id/parse", auth, async (request, reply) => {
+  const requirePremium = createRequirePremium(app, "ai_scan");
+
+  app.post("/:id/parse", { preHandler: [authMiddleware, requirePremium] }, async (request, reply) => {
     const { id } = request.params as { id: string };
     const docResult = await app.db.query(
       "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE d.id = $1 AND u.firebase_uid = $2",

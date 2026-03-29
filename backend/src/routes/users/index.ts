@@ -11,7 +11,35 @@ export default async function userRoutes(app: FastifyInstance) {
       [request.user.uid]
     );
     if (result.rows.length === 0) throw new NotFoundError("User");
-    return reply.send({ user: result.rows[0] });
+
+    const user = result.rows[0];
+
+    // Auto-expire premium if past expiry
+    if (user.is_premium && user.premium_expires_at && new Date(user.premium_expires_at) < new Date()) {
+      await app.db.query("UPDATE users SET is_premium = FALSE WHERE id = $1", [user.id]);
+      user.is_premium = false;
+    }
+
+    const countResult = await app.db.query(
+      "SELECT COUNT(*)::int AS count FROM renewals WHERE user_id = $1",
+      [user.id]
+    );
+    const limitResult = await app.db.query(
+      "SELECT value FROM app_config WHERE key = 'free_renewal_limit'"
+    );
+    const renewalLimit = user.is_premium
+      ? null
+      : parseInt(limitResult.rows[0]?.value ?? "5", 10);
+
+    return reply.send({
+      user,
+      plan: {
+        is_premium: user.is_premium,
+        expires_at: user.premium_expires_at,
+        renewal_limit: renewalLimit,
+        renewal_count: countResult.rows[0].count,
+      },
+    });
   });
 
   const updateUser = async (request: any, reply: any) => {
@@ -34,6 +62,28 @@ export default async function userRoutes(app: FastifyInstance) {
 
   app.patch("/me", auth, updateUser);
   app.put("/me", auth, updateUser);
+
+  app.delete("/me", auth, async (request, reply) => {
+    const userResult = await app.db.query(
+      "SELECT id FROM users WHERE firebase_uid = $1",
+      [request.user.uid]
+    );
+    if (userResult.rows.length === 0) throw new NotFoundError("User");
+    const userId = userResult.rows[0].id;
+
+    await app.db.query("DELETE FROM payments WHERE user_id = $1", [userId]);
+    await app.db.query("DELETE FROM documents WHERE user_id = $1", [userId]);
+    await app.db.query(
+      "DELETE FROM reminders WHERE renewal_id IN (SELECT id FROM renewals WHERE user_id = $1)",
+      [userId]
+    );
+    await app.db.query("DELETE FROM renewals WHERE user_id = $1", [userId]);
+    await app.db.query("DELETE FROM notification_log WHERE user_id = $1", [userId]);
+    await app.db.query("DELETE FROM notification_preferences WHERE user_id = $1", [userId]);
+    await app.db.query("DELETE FROM users WHERE id = $1", [userId]);
+
+    return reply.send({ deleted: true });
+  });
 
   await registerFcmToken(app);
   await registerNotificationPreferences(app);

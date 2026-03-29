@@ -17,4 +17,5 @@ abstract class AppRoutes {
   static const onboarding = '/onboarding';
   static const completeProfile = '/complete-profile';
   static const features = '/features';
+  static const premium = '/premium';
 }

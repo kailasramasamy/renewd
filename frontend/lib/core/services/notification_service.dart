@@ -24,7 +24,19 @@ class NotificationService extends GetxService {
     _listenForTokenRefresh();
     _listenForForegroundMessages();
     _listenForMessageTaps();
+    await _handleInitialMessage();
     return this;
+  }
+
+  /// Handle notification tap when app was completely killed
+  Future<void> _handleInitialMessage() async {
+    final message = await _messaging.getInitialMessage();
+    if (message != null) {
+      // Delay to let the app finish navigating to home first
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _handleMessageTap(message);
+      });
+    }
   }
 
   Future<void> _initLocalNotifications() async {
@@ -48,6 +60,8 @@ class NotificationService extends GetxService {
       sound: true,
     );
   }
+
+  Future<void> registerToken() => _registerToken();
 
   Future<void> _registerToken() async {
     // Wait for APNS token to be ready (iOS requires this before FCM token)

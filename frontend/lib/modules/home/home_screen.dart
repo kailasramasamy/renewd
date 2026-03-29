@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_opacity.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../categories/categories_screen.dart';
@@ -47,54 +50,36 @@ class HomeScreen extends StatelessWidget {
                 RenewdTextStyles.caption.copyWith(fontSize: 11),
             selectedItemColor: RenewdColors.oceanBlue,
             items: [
-              BottomNavigationBarItem(
-                icon: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.home),
-                ),
-                activeIcon: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.home, color: RenewdColors.oceanBlue),
-                ),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.layers),
-                ),
-                activeIcon: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.layers, color: RenewdColors.oceanBlue),
-                ),
-                label: 'Categories',
-              ),
-              BottomNavigationBarItem(
-                icon: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.fileText),
-                ),
-                activeIcon: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.fileText, color: RenewdColors.oceanBlue),
-                ),
-                label: 'Vault',
-              ),
-              BottomNavigationBarItem(
-                icon: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.sparkles),
-                ),
-                activeIcon: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Icon(LucideIcons.sparkles, color: RenewdColors.oceanBlue),
-                ),
-                label: 'AI Chat',
-              ),
+              _navItem(LucideIcons.home, 'Home'),
+              _navItem(LucideIcons.layers, 'Categories'),
+              _navItem(LucideIcons.fileText, 'Vault'),
+              _navItem(LucideIcons.sparkles, 'AI Chat'),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  static BottomNavigationBarItem _navItem(IconData icon, String label) {
+    return BottomNavigationBarItem(
+      icon: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Icon(icon),
+      ),
+      activeIcon: Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: RenewdSpacing.lg,
+          vertical: RenewdSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.light),
+          borderRadius: RenewdRadius.pillAll,
+        ),
+        child: Icon(icon, color: RenewdColors.oceanBlue),
+      ),
+      label: label,
     );
   }
 }

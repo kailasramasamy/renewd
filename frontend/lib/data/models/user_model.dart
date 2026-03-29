@@ -5,6 +5,7 @@ class UserModel {
   final String? phone;
   final String? avatarUrl;
   final bool isPremium;
+  final DateTime? premiumExpiresAt;
   final DateTime createdAt;
 
   const UserModel({
@@ -14,6 +15,7 @@ class UserModel {
     this.phone,
     this.avatarUrl,
     required this.isPremium,
+    this.premiumExpiresAt,
     required this.createdAt,
   });
 
@@ -24,6 +26,9 @@ class UserModel {
         phone: json['phone'] as String?,
         avatarUrl: json['avatar_url'] as String?,
         isPremium: json['is_premium'] as bool? ?? false,
+        premiumExpiresAt: json['premium_expires_at'] != null
+            ? DateTime.tryParse(json['premium_expires_at'] as String)
+            : null,
         createdAt: DateTime.parse(json['created_at'] as String),
       );
 
@@ -34,6 +39,7 @@ class UserModel {
         'phone': phone,
         'avatar_url': avatarUrl,
         'is_premium': isPremium,
+        'premium_expires_at': premiumExpiresAt?.toIso8601String(),
         'created_at': createdAt.toIso8601String(),
       };
 
@@ -42,6 +48,7 @@ class UserModel {
     String? phone,
     String? avatarUrl,
     bool? isPremium,
+    DateTime? premiumExpiresAt,
   }) =>
       UserModel(
         id: id,
@@ -50,6 +57,7 @@ class UserModel {
         phone: phone ?? this.phone,
         avatarUrl: avatarUrl ?? this.avatarUrl,
         isPremium: isPremium ?? this.isPremium,
+        premiumExpiresAt: premiumExpiresAt ?? this.premiumExpiresAt,
         createdAt: createdAt,
       );
 }

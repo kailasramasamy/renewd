@@ -56,7 +56,8 @@ class ApiClient extends GetConnect {
 
   void _throwIfError(Response response) {
     if (response.hasError) {
-      final message = response.body?['message'] as String? ?? 'Request failed';
+      final body = response.body as Map<String, dynamic>?;
+      final message = body?['error'] as String? ?? body?['message'] as String? ?? 'Request failed';
       throw ApiException(message, response.statusCode);
     }
   }

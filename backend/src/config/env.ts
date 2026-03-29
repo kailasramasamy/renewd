@@ -12,10 +12,11 @@ const envSchema = z.object({
   AWS_ACCESS_KEY_ID: z.string().default(""),
   AWS_SECRET_ACCESS_KEY: z.string().default(""),
   AWS_REGION: z.string().default("ap-south-1"),
-  S3_BUCKET: z.string().default("minder-documents"),
+  S3_BUCKET: z.string().default("renewd-documents"),
   CLAUDE_API_KEY: z.string().default(""),
   CLAUDE_MODEL: z.string().default("claude-haiku-4-5-20251001"),
   GOOGLE_VISION_KEY: z.string().default(""),
+  REVENUECAT_WEBHOOK_SECRET: z.string().default(""),
 });
 
 const parsed = envSchema.safeParse(process.env);

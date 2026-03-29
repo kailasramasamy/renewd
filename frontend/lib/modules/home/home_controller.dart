@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../core/utils/haptics.dart';
 import '../categories/categories_screen.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../vault/vault_controller.dart';
@@ -7,6 +8,7 @@ class HomeController extends GetxController {
   final RxInt currentTab = 0.obs;
 
   void changeTab(int index) {
+    RenewdHaptics.light();
     currentTab.value = index;
 
     // Refresh data when switching tabs

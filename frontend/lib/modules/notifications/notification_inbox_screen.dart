@@ -7,6 +7,8 @@ import '../../core/network/api_endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../core/utils/date_utils.dart';
 
 class NotificationInboxScreen extends StatelessWidget {
@@ -41,7 +43,7 @@ class NotificationInboxScreen extends StatelessWidget {
           return _EmptyState();
         }
         return ListView.builder(
-          padding: const EdgeInsets.all(RenewdSpacing.lg),
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
           itemCount: c.notifications.length,
           itemBuilder: (context, i) => _NotificationTile(
             notification: c.notifications[i],
@@ -118,16 +120,18 @@ class _NotificationTile extends StatelessWidget {
     final createdAt = DateTime.tryParse(
         notification['created_at'] as String? ?? '');
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return Semantics(
+      label: '${isRead ? "" : "Unread "}notification: ${notification['title'] ?? ''}',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
         margin: const EdgeInsets.only(bottom: RenewdSpacing.sm),
         padding: const EdgeInsets.all(RenewdSpacing.lg),
         decoration: BoxDecoration(
           color: isDark
               ? (isRead ? RenewdColors.charcoal : RenewdColors.darkSlate)
               : (isRead ? Colors.white : RenewdColors.cloudGray),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: RenewdRadius.lgAll,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,7 +140,7 @@ class _NotificationTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: _iconColor(type).withValues(alpha: 0.12),
+                color: _iconColor(type).withValues(alpha: RenewdOpacity.light),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(_icon(type), size: 18, color: _iconColor(type)),
@@ -186,6 +190,7 @@ class _NotificationTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 

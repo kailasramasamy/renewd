@@ -1,4 +1,6 @@
 import { query } from "@/lib/db";
+import { DeleteUser } from "./delete-user";
+import { PremiumToggle } from "./premium-toggle";
 
 interface User {
   id: string;
@@ -8,6 +10,8 @@ interface User {
   device_os: string | null;
   device_model: string | null;
   app_version: string | null;
+  is_premium: boolean;
+  premium_expires_at: string | null;
   created_at: string;
   renewal_count: number;
 }
@@ -15,7 +19,8 @@ interface User {
 async function getUsers(): Promise<User[]> {
   return query<User>(`
     SELECT u.id, u.name, u.email, u.phone, u.device_os, u.device_model,
-           u.app_version, u.created_at,
+           u.app_version, u.is_premium, u.premium_expires_at::text,
+           u.created_at,
            (SELECT COUNT(*)::int FROM renewals r WHERE r.user_id = u.id) AS renewal_count
     FROM users u ORDER BY u.created_at DESC
   `);
@@ -29,7 +34,7 @@ export default async function UsersPage() {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Users ({users.length})</h2>
-      <div className="bg-[#1C1C1E] rounded-2xl border border-[#38383A] overflow-hidden">
+      <div className="bg-[#1C1C1E] rounded-2xl border border-[#38383A] overflow-visible">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[#38383A] text-gray-500 text-left">
@@ -39,7 +44,9 @@ export default async function UsersPage() {
               <th className="px-5 py-3">Device</th>
               <th className="px-5 py-3">App Version</th>
               <th className="px-5 py-3">Renewals</th>
+              <th className="px-5 py-3">Premium</th>
               <th className="px-5 py-3">Joined</th>
+              <th className="px-5 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -72,8 +79,18 @@ export default async function UsersPage() {
                     {u.renewal_count}
                   </span>
                 </td>
+                <td className="px-5 py-3">
+                  <PremiumToggle
+                    userId={u.id}
+                    isPremium={u.is_premium}
+                    expiresAt={u.premium_expires_at}
+                  />
+                </td>
                 <td className="px-5 py-3 text-gray-500">
                   {new Date(u.created_at).toLocaleDateString()}
+                </td>
+                <td className="px-5 py-3">
+                  <DeleteUser userId={u.id} userName={u.name} />
                 </td>
               </tr>
             ))}

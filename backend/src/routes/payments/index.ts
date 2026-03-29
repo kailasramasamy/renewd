@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../middleware/auth.js";
+import { createRequirePremium } from "../../middleware/premium.js";
 import { NotFoundError, ValidationError } from "../../lib/errors.js";
 
 const auth = { preHandler: authMiddleware };
@@ -70,7 +71,9 @@ async function registerDelete(app: FastifyInstance) {
 }
 
 async function registerAnalytics(app: FastifyInstance) {
-  app.get("/analytics/by-category", auth, async (request, reply) => {
+  const requirePremium = createRequirePremium(app, "spending_analytics");
+
+  app.get("/analytics/by-category", { preHandler: [authMiddleware, requirePremium] }, async (request, reply) => {
     const result = await app.db.query(
       `SELECT r.category, COUNT(p.id)::int AS payment_count,
               SUM(p.amount)::numeric AS total_spent
@@ -84,7 +87,7 @@ async function registerAnalytics(app: FastifyInstance) {
     return reply.send({ analytics: result.rows });
   });
 
-  app.get("/analytics/by-month", auth, async (request, reply) => {
+  app.get("/analytics/by-month", { preHandler: [authMiddleware, requirePremium] }, async (request, reply) => {
     const result = await app.db.query(
       `SELECT TO_CHAR(p.paid_date, 'YYYY-MM') AS month,
               COUNT(p.id)::int AS payment_count,

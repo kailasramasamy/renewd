@@ -16,7 +16,9 @@ const BRAND_DOMAINS: Record<string, string> = {
   airtel: "airtel.in",
   vodafone: "vodafone.in",
   vi: "myvi.in",
-  tata: "tataplay.com",
+  "tata aig": "tataaig.com",
+  "tata aia": "tataaia.com",
+  "tata play": "tataplay.com",
   "zee tv": "zee5.com",
   zee5: "zee5.com",
   z5: "zee5.com",
@@ -94,7 +96,7 @@ async function findDomainWithAI(name: string, provider: string | null): Promise<
 }
 
 function buildLogoUrl(domain: string): string {
-  return `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${domain}&size=128`;
+  return `https://logo.clearbit.com/${domain}?size=256`;
 }
 
 export function getLogoUrl(name: string, provider: string | null): string | null {

@@ -74,7 +74,7 @@ export function ConfigForm({ config }: Props) {
                 className="w-full bg-[#2C2C2E] border border-[#38383A] rounded-lg px-4 py-2.5 text-white text-sm"
               />
             )}
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-gray-600 mt-1" suppressHydrationWarning>
               Last updated: {new Date(updated_at).toLocaleString()}
             </p>
           </div>

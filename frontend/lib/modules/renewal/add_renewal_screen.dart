@@ -5,7 +5,10 @@ import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../core/utils/date_utils.dart';
+import '../../core/utils/haptics.dart';
 import '../../widgets/minder_button.dart';
 import 'add_renewal_controller.dart';
 
@@ -19,6 +22,7 @@ class AddRenewalScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(LucideIcons.arrowLeft),
+          tooltip: 'Go back',
           onPressed: () => Get.back(),
         ),
         title: const Text('Add Renewal'),
@@ -49,7 +53,10 @@ class AddRenewalScreen extends StatelessWidget {
                   label: 'Save Renewal',
                   icon: LucideIcons.checkCircle,
                   isLoading: c.isLoading.value,
-                  onPressed: c.save,
+                  onPressed: () {
+                    RenewdHaptics.success();
+                    c.save();
+                  },
                 )),
             const SizedBox(height: RenewdSpacing.xl),
           ],
@@ -99,16 +106,19 @@ class _CategorySection extends StatelessWidget {
                 final isSelected = c.category.value == cat;
                 final color = CategoryConfig.color(cat);
                 return GestureDetector(
-                  onTap: () => c.category.value = cat,
+                  onTap: () {
+                    RenewdHaptics.selection();
+                    c.category.value = cat;
+                  },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     padding: const EdgeInsets.symmetric(
                         horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? color.withValues(alpha: 0.2)
+                          ? color.withValues(alpha: RenewdOpacity.medium)
                           : RenewdColors.darkSlate,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
                         color: isSelected ? color : RenewdColors.steel,
                         width: isSelected ? 1.5 : 1,
@@ -199,7 +209,7 @@ class _DateField extends StatelessWidget {
                     horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
                 decoration: BoxDecoration(
                   color: RenewdColors.darkSlate,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: RenewdRadius.mdAll,
                   border: Border.all(color: RenewdColors.steel),
                 ),
                 child: Row(
@@ -364,9 +374,9 @@ class _GroupSectionState extends State<_GroupSection> {
                         vertical: RenewdSpacing.sm),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? catColor.withValues(alpha: 0.2)
+                          ? catColor.withValues(alpha: RenewdOpacity.medium)
                           : RenewdColors.darkSlate,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
                         color: isSelected ? catColor : RenewdColors.steel,
                         width: isSelected ? 1.5 : 1,

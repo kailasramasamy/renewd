@@ -9,6 +9,8 @@ import '../../core/utils/document_picker.dart' show imagesToPdf;
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../widgets/minder_button.dart';
 import 'scan_add_controller.dart';
 import 'scan_add_form.dart';
@@ -85,21 +87,30 @@ class _PickerScreen extends StatelessWidget {
 
   Future<void> _pickFile(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
+      type: FileType.any,
     );
     if (result == null || result.files.isEmpty) return;
     final file = result.files.first;
     if (file.path == null) return;
+
+    final ext = file.extension?.toLowerCase() ?? '';
+    const allowed = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+    if (!allowed.contains(ext)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a PDF or image file')),
+        );
+      }
+      return;
+    }
+
     await c.uploadAndParse(file.path!, file.name);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: RenewdColors.charcoal,
       appBar: AppBar(
-        backgroundColor: RenewdColors.charcoal,
         leading: IconButton(
           icon: Icon(LucideIcons.arrowLeft),
           onPressed: () => Get.back(),
@@ -171,7 +182,7 @@ class _PickerOption extends StatelessWidget {
         padding: const EdgeInsets.all(RenewdSpacing.lg),
         decoration: BoxDecoration(
           color: RenewdColors.darkSlate,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: RenewdRadius.xlAll,
           border: Border.all(color: RenewdColors.steel),
         ),
         child: Row(
@@ -197,7 +208,6 @@ class _AnalyzingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: RenewdColors.charcoal,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -210,7 +220,7 @@ class _AnalyzingScreen extends StatelessWidget {
                   height: 80,
                   decoration: BoxDecoration(
                     color: RenewdColors.darkSlate,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: RenewdRadius.xlAll,
                     border: Border.all(color: RenewdColors.steel),
                   ),
                   child: Icon(LucideIcons.fileText,
@@ -294,9 +304,9 @@ class _AiBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(RenewdSpacing.md),
       decoration: BoxDecoration(
-        color: RenewdColors.lavender.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: RenewdColors.lavender.withValues(alpha: 0.3)),
+        color: RenewdColors.lavender.withValues(alpha: RenewdOpacity.light),
+        borderRadius: RenewdRadius.mdAll,
+        border: Border.all(color: RenewdColors.lavender.withValues(alpha: RenewdOpacity.moderate)),
       ),
       child: Row(
         children: [
@@ -359,7 +369,7 @@ class _DetailChip extends StatelessWidget {
           horizontal: RenewdSpacing.md, vertical: RenewdSpacing.xs),
       decoration: BoxDecoration(
         color: RenewdColors.darkSlate,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: RenewdRadius.pillAll,
         border: Border.all(color: RenewdColors.steel),
       ),
       child: Text(label,

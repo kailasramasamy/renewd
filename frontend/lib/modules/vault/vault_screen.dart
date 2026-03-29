@@ -8,6 +8,8 @@ import '../../app/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_opacity.dart';
 import '../../data/models/document_model.dart';
 import '../../widgets/minder_card.dart';
 import 'vault_controller.dart';
@@ -24,6 +26,7 @@ class VaultScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(LucideIcons.refreshCw),
+            tooltip: 'Refresh',
             onPressed: c.fetchAll,
           ),
         ],
@@ -38,6 +41,7 @@ class VaultScreen extends StatelessWidget {
       ),
       floatingActionButton: Obx(() => FloatingActionButton(
             heroTag: 'vault_fab',
+            tooltip: 'Upload document',
             onPressed: c.isUploading.value ? null : () => _pickAndUpload(c),
             backgroundColor: RenewdColors.oceanBlue,
             foregroundColor: Colors.white,
@@ -66,12 +70,12 @@ class _SecurityBadge extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.fromLTRB(
-          RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, 0),
+          RenewdSpacing.xl, RenewdSpacing.sm, RenewdSpacing.xl, 0),
       padding: const EdgeInsets.symmetric(
           horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
       decoration: BoxDecoration(
         color: isDark
-            ? RenewdColors.emerald.withValues(alpha: 0.08)
+            ? RenewdColors.emerald.withValues(alpha: RenewdOpacity.subtle)
             : RenewdColors.emerald.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -95,7 +99,7 @@ class _SecurityBadge extends StatelessWidget {
                   TextSpan(
                     text: '  ·  Your documents are stored securely',
                     style: RenewdTextStyles.caption.copyWith(
-                      color: RenewdColors.emerald.withValues(alpha: 0.7),
+                      color: RenewdColors.emerald.withValues(alpha: RenewdOpacity.strong),
                       fontSize: 11,
                     ),
                   ),
@@ -117,14 +121,14 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          RenewdSpacing.lg, RenewdSpacing.md, RenewdSpacing.lg, 0),
+          RenewdSpacing.xl, RenewdSpacing.md, RenewdSpacing.xl, 0),
       child: TextField(
         onChanged: (v) => c.searchQuery.value = v,
         decoration: InputDecoration(
           hintText: 'Search documents...',
           prefixIcon: Icon(LucideIcons.search, size: 18),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: RenewdRadius.mdAll,
             borderSide: const BorderSide(color: RenewdColors.steel),
           ),
           contentPadding: const EdgeInsets.symmetric(
@@ -143,7 +147,7 @@ class _TabRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() => Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
+              horizontal: RenewdSpacing.xl, vertical: RenewdSpacing.md),
           child: Row(
             children: VaultTab.values.map((tab) {
               final active = c.activeTab.value == tab;
@@ -205,7 +209,7 @@ class _GroupedList extends StatelessWidget {
     if (grouped.isEmpty) return _Empty();
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.all(RenewdSpacing.lg),
+      padding: const EdgeInsets.all(RenewdSpacing.xl),
       children: grouped.entries.map((entry) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,7 +224,7 @@ class _GroupedList extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: RenewdSpacing.md),
                   child: DocumentCard(doc: doc),
                 )),
-            const SizedBox(height: RenewdSpacing.md),
+            const SizedBox(height: RenewdSpacing.xl),
           ],
         );
       }).toList(),
@@ -235,7 +239,7 @@ class _DocumentList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.all(RenewdSpacing.lg),
+      padding: const EdgeInsets.all(RenewdSpacing.xl),
       itemCount: docs.length,
       separatorBuilder: (context2, index) => const SizedBox(height: RenewdSpacing.md),
       itemBuilder: (context2, i) => DocumentCard(doc: docs[i]),
@@ -247,14 +251,25 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(LucideIcons.file, size: 48, color: RenewdColors.steel),
-          const SizedBox(height: RenewdSpacing.md),
-          Text('No documents yet',
-              style: RenewdTextStyles.body.copyWith(color: RenewdColors.slate)),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(RenewdSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.fileText, size: 48, color: RenewdColors.slate),
+            const SizedBox(height: RenewdSpacing.lg),
+            Text('No documents yet',
+                style: RenewdTextStyles.body
+                    .copyWith(color: RenewdColors.slate)),
+            const SizedBox(height: RenewdSpacing.xs),
+            Text(
+              'Your insurance policies, bills, and certificates will appear here. Tap + to upload or scan a document.',
+              textAlign: TextAlign.center,
+              style: RenewdTextStyles.caption
+                  .copyWith(color: RenewdColors.slate, height: 1.5),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -278,7 +293,7 @@ class DocumentCard extends StatelessWidget {
           }
         }
       },
-      padding: const EdgeInsets.all(RenewdSpacing.md),
+      padding: const EdgeInsets.all(RenewdSpacing.lg),
       child: Row(
         children: [
           _Thumbnail(doc: doc),
@@ -302,7 +317,7 @@ class DocumentCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: RenewdColors.emerald.withValues(alpha: 0.15),
+                          color: RenewdColors.emerald.withValues(alpha: RenewdOpacity.medium),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text('Current',
@@ -357,7 +372,7 @@ class _Thumbnail extends StatelessWidget {
     if (doc.isImage) {
       final c = Get.find<VaultController>();
       return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: RenewdRadius.smAll,
         child: Image.network(
           c.fileUrl(doc.id),
           width: 48, height: 48, fit: BoxFit.cover,
@@ -376,7 +391,7 @@ class _PdfIcon extends StatelessWidget {
       width: 48, height: 48,
       decoration: BoxDecoration(
         color: RenewdColors.coralRed.withAlpha(26),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: RenewdRadius.smAll,
       ),
       child: Icon(LucideIcons.fileText, size: 24,
           color: RenewdColors.coralRed),

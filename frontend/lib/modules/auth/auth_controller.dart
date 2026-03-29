@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../core/network/api_client.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../app/routes/app_routes.dart';
@@ -123,6 +124,16 @@ class AuthController extends GetxController {
         'photo': user.photoURL,
       });
 
+      // Register on backend (ignore 409 if already exists)
+      try {
+        final client = Get.find<ApiClient>();
+        await client.safePost('/auth/register', {});
+      } catch (e) {
+        if (e is ApiException && e.statusCode != 409) {
+          // Non-conflict error — log but don't block login
+        }
+      }
+
       isLoading.value = false;
 
       final needsName = (user.displayName ?? '').isEmpty;
@@ -164,6 +175,16 @@ class AuthController extends GetxController {
         'name': user.displayName,
         'photo': user.photoURL,
       });
+
+      // Register on backend (ignore 409 if already exists)
+      try {
+        final client = Get.find<ApiClient>();
+        await client.safePost('/auth/register', {});
+      } catch (e) {
+        if (e is ApiException && e.statusCode != 409) {
+          // Non-conflict error — log but don't block login
+        }
+      }
 
       isLoading.value = false;
 

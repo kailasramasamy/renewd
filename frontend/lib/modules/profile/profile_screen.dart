@@ -5,11 +5,17 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../app/routes/app_routes.dart';
+import '../../core/network/api_client.dart';
+import '../../core/network/api_endpoints.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/premium_service.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/utils/haptics.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../data/providers/renewal_provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_opacity.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'profile_controller.dart';
@@ -31,6 +37,7 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(LucideIcons.arrowLeft),
+          tooltip: 'Go back',
           onPressed: () => Get.back(),
         ),
         title: const Text('Profile'),
@@ -45,6 +52,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 ..._items.map(_buildItem),
                 _buildSignOut(),
+                _buildDeleteAccount(),
               ],
             ),
           ),
@@ -63,7 +71,7 @@ class ProfileScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 36,
-            backgroundColor: RenewdColors.oceanBlue.withValues(alpha: 0.12),
+            backgroundColor: RenewdColors.oceanBlue.withValues(alpha: RenewdOpacity.light),
             child: Text(
               name.isNotEmpty ? name[0].toUpperCase() : '?',
               style: RenewdTextStyles.h1.copyWith(
@@ -83,26 +91,38 @@ class ProfileScreen extends StatelessWidget {
       );
   }
 
-  Widget _buildItem(_ProfileItem item) => ListTile(
-        leading: Icon(item.icon, color: RenewdColors.slate),
-        title: Text(item.label, style: RenewdTextStyles.body),
-        trailing: item.isPremium
-            ? Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: RenewdSpacing.sm,
-                  vertical: RenewdSpacing.xs,
+  Widget _buildItem(_ProfileItem item) {
+    final premiumService = Get.find<PremiumService>();
+    final isUserPremium = item.isPremium && premiumService.isPremium;
+    final allOpen = item.isPremium && !(premiumService.config?.iapEnabled ?? false);
+    final showActive = isUserPremium || allOpen;
+
+    return ListTile(
+      leading: Icon(item.icon, color: RenewdColors.slate),
+      title: Text(item.label, style: RenewdTextStyles.body),
+      trailing: item.isPremium
+          ? Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: RenewdSpacing.sm,
+                vertical: RenewdSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: showActive
+                    ? RenewdColors.emerald.withValues(alpha: RenewdOpacity.medium)
+                    : RenewdColors.slate.withValues(alpha: RenewdOpacity.medium),
+                borderRadius: RenewdRadius.pillAll,
+              ),
+              child: Text(
+                showActive ? 'ACTIVE' : 'FREE',
+                style: RenewdTextStyles.caption.copyWith(
+                  color: showActive ? RenewdColors.emerald : RenewdColors.slate,
                 ),
-                decoration: BoxDecoration(
-                  color: RenewdColors.amber.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text('PRO',
-                    style: RenewdTextStyles.caption
-                        .copyWith(color: RenewdColors.amber)),
-              )
-            : Icon(LucideIcons.chevronRight, color: RenewdColors.slate),
-        onTap: () => _onItemTap(item.label),
-      );
+              ),
+            )
+          : Icon(LucideIcons.chevronRight, color: RenewdColors.slate),
+      onTap: () => _onItemTap(item.label),
+    );
+  }
 
   void _onItemTap(String label) {
     switch (label) {
@@ -111,7 +131,7 @@ class ProfileScreen extends StatelessWidget {
       case 'Data Export':
         _exportData();
       case 'Premium':
-        showInfoSnack('Premium features coming soon');
+        Get.toNamed(AppRoutes.premium);
       case 'About':
         _showAbout();
       default:
@@ -130,7 +150,7 @@ class ProfileScreen extends StatelessWidget {
               Container(
                 width: 36, height: 4,
                 decoration: BoxDecoration(
-                  color: RenewdColors.slate.withValues(alpha: 0.3),
+                  color: RenewdColors.slate.withValues(alpha: RenewdOpacity.moderate),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -139,7 +159,7 @@ class ProfileScreen extends StatelessWidget {
                 width: 64, height: 64,
                 decoration: BoxDecoration(
                   color: RenewdColors.oceanBlue,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: RenewdRadius.xlAll,
                 ),
                 child: Icon(LucideIcons.refreshCcw, size: 32, color: Colors.white),
               ),
@@ -206,6 +226,57 @@ class ProfileScreen extends StatelessWidget {
             style: RenewdTextStyles.body.copyWith(color: RenewdColors.coralRed)),
         onTap: () => Get.find<AuthService>().signOut(),
       );
+
+  Widget _buildDeleteAccount() => ListTile(
+        leading: Icon(LucideIcons.trash2, color: RenewdColors.slate),
+        title: Text('Delete Account',
+            style: RenewdTextStyles.body.copyWith(color: RenewdColors.slate)),
+        onTap: () => _confirmDeleteAccount(),
+      );
+
+  void _confirmDeleteAccount() {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: RenewdColors.darkSlate,
+        shape: RoundedRectangleBorder(borderRadius: RenewdRadius.xlAll),
+        title: Text('Delete Account?',
+            style: RenewdTextStyles.h3.copyWith(fontWeight: FontWeight.w700)),
+        content: Text(
+          'This will permanently delete your account and all data — renewals, documents, payments, and settings. This cannot be undone.',
+          style: RenewdTextStyles.bodySmall
+              .copyWith(color: RenewdColors.slate, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancel',
+                style: RenewdTextStyles.body.copyWith(color: RenewdColors.slate)),
+          ),
+          TextButton(
+            onPressed: () {
+              RenewdHaptics.error();
+              _deleteAccount();
+            },
+            child: Text('Delete',
+                style: RenewdTextStyles.body
+                    .copyWith(color: RenewdColors.coralRed, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    try {
+      final client = Get.find<ApiClient>();
+      await client.safeDelete(ApiEndpoints.me);
+      Get.find<StorageService>().clearAll();
+      Get.offAllNamed(AppRoutes.login);
+      showSuccessSnack('Account deleted');
+    } catch (_) {
+      showErrorSnack('Failed to delete account');
+    }
+  }
 }
 
 class _ProfileItem {

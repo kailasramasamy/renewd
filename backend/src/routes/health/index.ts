@@ -8,6 +8,44 @@ export default async function healthRoutes(app: FastifyInstance) {
     });
   });
 
+  app.get("/premium-config", async (_request, reply) => {
+    const result = await app.db.query(
+      "SELECT key, value FROM app_config WHERE key LIKE 'free_%' OR key LIKE 'premium_%' OR key LIKE 'feature_%' OR key LIKE 'iap_%'"
+    );
+
+    const raw: Record<string, string> = {};
+    for (const row of result.rows) {
+      raw[row.key] = row.value;
+    }
+
+    const features: Record<string, string> = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (k.startsWith("feature_")) {
+        features[k.replace("feature_", "")] = v;
+      }
+    }
+
+    return reply.send({
+      free_renewal_limit: parseInt(raw.free_renewal_limit ?? "5", 10),
+      free_reminder_days: JSON.parse(raw.free_reminder_days ?? "[1]"),
+      premium_reminder_days: JSON.parse(raw.premium_reminder_days ?? "[7,1]"),
+      pricing: {
+        monthly: parseInt(raw.premium_monthly_price ?? "99", 10),
+        yearly: parseInt(raw.premium_yearly_price ?? "799", 10),
+        currency: raw.premium_currency ?? "INR",
+      },
+      features,
+      iap: {
+        enabled: raw.iap_enabled === "true",
+        products: {
+          monthly: raw.iap_product_monthly ?? "renewd_monthly",
+          yearly: raw.iap_product_yearly ?? "renewd_yearly",
+          lifetime: raw.iap_product_lifetime ?? "renewd_lifetime",
+        },
+      },
+    });
+  });
+
   app.get("/version-check", async (request, reply) => {
     const { version } = request.query as { version?: string };
 

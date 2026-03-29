@@ -39,6 +39,9 @@ class ApiEndpoints {
   static const String notificationMarkAllRead = '/notifications/mark-all-read';
   static String notificationMarkRead(String id) => '/notifications/$id/read';
 
+  // Premium
+  static const String premiumConfig = '/premium-config';
+
   // Payments
   static const String payments = '/payments';
   static String paymentsByRenewal(String renewalId) =>

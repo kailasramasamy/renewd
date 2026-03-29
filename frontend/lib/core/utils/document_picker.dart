@@ -168,15 +168,25 @@ class _PickerSheet extends StatelessWidget {
 
   Future<void> _pickFromFiles(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
+      type: FileType.any,
     );
     if (result == null || result.files.isEmpty || !context.mounted) return;
     final file = result.files.first;
     if (file.path == null) return;
 
+    final ext = file.extension?.toLowerCase() ?? '';
+    const allowed = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+    if (!allowed.contains(ext)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a PDF or image file')),
+        );
+      }
+      return;
+    }
+
     // If already PDF, use directly
-    if (file.extension?.toLowerCase() == 'pdf') {
+    if (ext == 'pdf') {
       Navigator.of(context).pop(PickedDocument(
         path: file.path!,
         name: file.name,
