@@ -90,6 +90,7 @@ class _ScanCategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -113,10 +114,10 @@ class _ScanCategorySection extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? color.withValues(alpha: 0.2)
-                          : RenewdColors.darkSlate,
+                          : isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
                       borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
-                        color: isSelected ? color : RenewdColors.steel,
+                        color: isSelected ? color : isDark ? RenewdColors.steel : RenewdColors.silver,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -178,6 +179,7 @@ class _ScanGroupSectionState extends State<_ScanGroupSection> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -206,10 +208,10 @@ class _ScanGroupSectionState extends State<_ScanGroupSection> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? catColor.withValues(alpha: 0.2)
-                          : RenewdColors.darkSlate,
+                          : isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
                       borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
-                        color: isSelected ? catColor : RenewdColors.steel,
+                        color: isSelected ? catColor : isDark ? RenewdColors.steel : RenewdColors.silver,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -351,6 +353,7 @@ class _ScanDateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -366,9 +369,9 @@ class _ScanDateField extends StatelessWidget {
                     horizontal: RenewdSpacing.lg,
                     vertical: RenewdSpacing.md),
                 decoration: BoxDecoration(
-                  color: RenewdColors.darkSlate,
+                  color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
                   borderRadius: RenewdRadius.mdAll,
-                  border: Border.all(color: RenewdColors.steel),
+                  border: Border.all(color: isDark ? RenewdColors.steel : RenewdColors.silver),
                 ),
                 child: Row(
                   children: [

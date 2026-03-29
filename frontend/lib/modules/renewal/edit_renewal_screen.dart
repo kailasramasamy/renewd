@@ -44,7 +44,7 @@ class EditRenewalScreen extends StatelessWidget {
                 const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Category'),
                 const SizedBox(height: RenewdSpacing.sm),
-                _buildCategoryChips(c),
+                _buildCategoryChips(context, c),
                 const SizedBox(height: RenewdSpacing.xl),
                 _buildLabel('Subcategory'),
                 const SizedBox(height: RenewdSpacing.sm),
@@ -120,7 +120,8 @@ class EditRenewalScreen extends StatelessWidget {
         style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate));
   }
 
-  Widget _buildCategoryChips(EditRenewalController c) {
+  Widget _buildCategoryChips(BuildContext context, EditRenewalController c) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Wrap(
       spacing: RenewdSpacing.sm,
       runSpacing: RenewdSpacing.sm,
@@ -136,10 +137,10 @@ class EditRenewalScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: isSelected
                   ? color.withValues(alpha: RenewdOpacity.medium)
-                  : RenewdColors.darkSlate,
+                  : isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
               borderRadius: RenewdRadius.pillAll,
               border: Border.all(
-                color: isSelected ? color : RenewdColors.steel,
+                color: isSelected ? color : isDark ? RenewdColors.steel : RenewdColors.silver,
                 width: isSelected ? 1.5 : 1,
               ),
             ),
@@ -162,6 +163,7 @@ class EditRenewalScreen extends StatelessWidget {
   }
 
   Widget _buildDateField(BuildContext context, EditRenewalController c) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => _pickDate(context, c),
       child: Container(
@@ -169,9 +171,9 @@ class EditRenewalScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
         decoration: BoxDecoration(
-          color: RenewdColors.darkSlate,
+          color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
           borderRadius: RenewdRadius.mdAll,
-          border: Border.all(color: RenewdColors.steel),
+          border: Border.all(color: isDark ? RenewdColors.steel : RenewdColors.silver),
         ),
         child: Row(
           children: [
@@ -270,6 +272,7 @@ class _GroupSectionState extends State<_GroupSection> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -294,10 +297,10 @@ class _GroupSectionState extends State<_GroupSection> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? catColor.withValues(alpha: RenewdOpacity.medium)
-                          : RenewdColors.darkSlate,
+                          : isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
                       borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
-                        color: isSelected ? catColor : RenewdColors.steel,
+                        color: isSelected ? catColor : isDark ? RenewdColors.steel : RenewdColors.silver,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),

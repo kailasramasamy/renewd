@@ -98,6 +98,7 @@ class _CategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -122,10 +123,10 @@ class _CategorySection extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? color.withValues(alpha: RenewdOpacity.medium)
-                          : RenewdColors.darkSlate,
+                          : isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
                       borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
-                        color: isSelected ? color : RenewdColors.steel,
+                        color: isSelected ? color : isDark ? RenewdColors.steel : RenewdColors.silver,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -223,6 +224,7 @@ class _DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -236,9 +238,11 @@ class _DateField extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: RenewdSpacing.lg, vertical: RenewdSpacing.md),
                 decoration: BoxDecoration(
-                  color: RenewdColors.darkSlate,
+                  color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
                   borderRadius: RenewdRadius.mdAll,
-                  border: Border.all(color: RenewdColors.steel),
+                  border: Border.all(
+                    color: isDark ? RenewdColors.steel : RenewdColors.silver,
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -376,6 +380,7 @@ class _GroupSectionState extends State<_GroupSection> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -403,10 +408,10 @@ class _GroupSectionState extends State<_GroupSection> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? catColor.withValues(alpha: RenewdOpacity.medium)
-                          : RenewdColors.darkSlate,
+                          : isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
                       borderRadius: RenewdRadius.pillAll,
                       border: Border.all(
-                        color: isSelected ? catColor : RenewdColors.steel,
+                        color: isSelected ? catColor : isDark ? RenewdColors.steel : RenewdColors.silver,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),

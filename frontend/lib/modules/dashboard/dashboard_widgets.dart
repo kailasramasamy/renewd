@@ -40,12 +40,13 @@ class DueSoonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final days = renewal.daysRemaining;
     final statusColor = RenewdDateUtils.statusColorFromDays(days);
     return Container(
       width: 160,
       decoration: BoxDecoration(
-        color: RenewdColors.darkSlate,
+        color: isDark ? RenewdColors.darkSlate : Colors.white,
         borderRadius: RenewdRadius.mdAll,
         border: Border(left: BorderSide(color: statusColor, width: 3)),
       ),
@@ -87,6 +88,7 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Obx(() {
       final isExpanded = c.isCategoryExpanded(cat);
       final totalItems = groups.values.fold<int>(0, (s, l) => s + l.length);
@@ -96,9 +98,9 @@ class CategoryCard extends StatelessWidget {
 
       return Container(
         decoration: BoxDecoration(
-          color: RenewdColors.darkSlate,
+          color: isDark ? RenewdColors.darkSlate : Colors.white,
           borderRadius: RenewdRadius.xlAll,
-          border: Border.all(color: RenewdColors.steel),
+          border: Border.all(color: isDark ? RenewdColors.steel : RenewdColors.silver),
         ),
         child: Column(
           children: [

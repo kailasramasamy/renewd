@@ -305,9 +305,10 @@ class ProfileScreen extends StatelessWidget {
       );
 
   void _confirmDeleteAccount() {
+    final isDark = Get.isDarkMode;
     Get.dialog(
       AlertDialog(
-        backgroundColor: RenewdColors.darkSlate,
+        backgroundColor: isDark ? RenewdColors.darkSlate : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: RenewdRadius.xlAll),
         title: Text('Delete Account?',
             style: RenewdTextStyles.h3.copyWith(fontWeight: FontWeight.w700)),
