@@ -29,7 +29,9 @@ class DashboardScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-      body: Obx(() {
+      body: SafeArea(
+        bottom: false,
+        child: Obx(() {
         if (c.isLoading.value && c.renewals.isEmpty) {
           return const SkeletonLoader();
         }
@@ -40,11 +42,8 @@ class DashboardScreen extends StatelessWidget {
           onRefresh: c.fetchRenewals,
           child: ListView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: EdgeInsets.fromLTRB(
-                RenewdSpacing.lg,
-                MediaQuery.of(context).padding.top + RenewdSpacing.sm,
-                RenewdSpacing.lg,
-                100),
+            padding: const EdgeInsets.fromLTRB(
+                RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, 100),
             children: [
               _SearchBar(c: c),
               if (c.banners.isNotEmpty) ...[
@@ -63,7 +62,7 @@ class DashboardScreen extends StatelessWidget {
             ],
           ),
         );
-      }),
+      })),
       floatingActionButton: FloatingActionButton(
         heroTag: 'dashboard_fab',
         onPressed: () => _showAddOptions(context, c),
