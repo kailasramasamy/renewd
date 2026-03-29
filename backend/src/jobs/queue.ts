@@ -4,9 +4,12 @@ import { env } from "../config/env.js";
 import { processDailyReminderCheck } from "./processors/daily-reminder-check.js";
 import { processDailyDigest } from "./processors/daily-digest.js";
 
+const redisUrl = new URL(env.REDIS_URL);
 const connection = {
-  host: new URL(env.REDIS_URL).hostname,
-  port: Number(new URL(env.REDIS_URL).port) || 6379,
+  host: redisUrl.hostname,
+  port: Number(redisUrl.port) || 6379,
+  password: redisUrl.password || undefined,
+  username: redisUrl.username || undefined,
 };
 
 let jobPool: Pool;
