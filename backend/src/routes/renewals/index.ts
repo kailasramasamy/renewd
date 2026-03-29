@@ -12,18 +12,20 @@ const auth = { preHandler: authMiddleware };
 
 async function registerListAndGet(app: FastifyInstance) {
   app.get("/", auth, async (request, reply) => {
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
-      "SELECT * FROM renewals WHERE user_id = (SELECT id FROM users WHERE firebase_uid = $1) ORDER BY renewal_date ASC LIMIT 500",
-      [request.user.uid]
+      "SELECT * FROM renewals WHERE user_id = $1 ORDER BY renewal_date ASC LIMIT 500",
+      [userId]
     );
     return reply.send({ renewals: result.rows, total: result.rowCount });
   });
 
   app.get("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
-      "SELECT r.* FROM renewals r JOIN users u ON u.id = r.user_id WHERE r.id = $1 AND u.firebase_uid = $2",
-      [id, request.user.uid]
+      "SELECT * FROM renewals WHERE id = $1 AND user_id = $2",
+      [id, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError("Renewal");
     return reply.send({ renewal: result.rows[0] });
@@ -97,12 +99,13 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
     const { id } = request.params as { id: string };
     const body = request.body as Record<string, unknown>;
     const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, status, group_name } = body;
+    const userId = await getUserId(app, request.user.uid);
 
     const result = await app.db.query(
       `UPDATE renewals SET name=$1, category=$2, provider=$3, amount=$4, renewal_date=$5,
        frequency=$6, frequency_days=$7, auto_renew=$8, notes=$9, status=$10, group_name=$11, updated_at=NOW()
-       WHERE id=$12 AND user_id=(SELECT id FROM users WHERE firebase_uid=$13) RETURNING *`,
-      [name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, status ?? "active", group_name ?? null, id, request.user.uid]
+       WHERE id=$12 AND user_id=$13 RETURNING *`,
+      [name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, status ?? "active", group_name ?? null, id, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError("Renewal");
 
@@ -116,6 +119,7 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
 
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
     const client = await app.db.connect();
     try {
       await client.query("BEGIN");
@@ -123,8 +127,8 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
       await client.query("DELETE FROM documents WHERE renewal_id = $1", [id]);
       await client.query("DELETE FROM reminders WHERE renewal_id = $1", [id]);
       const result = await client.query(
-        "DELETE FROM renewals WHERE id=$1 AND user_id=(SELECT id FROM users WHERE firebase_uid=$2) RETURNING id",
-        [id, request.user.uid]
+        "DELETE FROM renewals WHERE id=$1 AND user_id=$2 RETURNING id",
+        [id, userId]
       );
       if (result.rows.length === 0) {
         await client.query("ROLLBACK");
@@ -144,10 +148,11 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
 async function registerMarkRenewed(app: FastifyInstance) {
   app.post("/:id/renew", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
 
     const renewal = await app.db.query(
-      "SELECT * FROM renewals WHERE id=$1 AND user_id=(SELECT id FROM users WHERE firebase_uid=$2)",
-      [id, request.user.uid]
+      "SELECT * FROM renewals WHERE id=$1 AND user_id=$2",
+      [id, userId]
     );
     if (renewal.rows.length === 0) throw new NotFoundError("Renewal");
 
@@ -183,10 +188,11 @@ function calculateNextDate(current: string, frequency: string, customDays: numbe
 async function registerPriceCheck(app: FastifyInstance) {
   app.get("/:id/price-check", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
 
     const renewal = await app.db.query(
-      "SELECT r.amount, r.previous_amount FROM renewals r JOIN users u ON u.id = r.user_id WHERE r.id = $1 AND u.firebase_uid = $2",
-      [id, request.user.uid]
+      "SELECT amount, previous_amount FROM renewals WHERE id = $1 AND user_id = $2",
+      [id, userId]
     );
     if (renewal.rows.length === 0) throw new NotFoundError("Renewal");
 

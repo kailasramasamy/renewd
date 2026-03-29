@@ -46,3 +46,14 @@
 | M12 | [x] | Frontend | 20+ catch (_) {} silently swallowing errors |
 | M13 | [x] | Frontend | TextEditingController leaks in build() |
 | M14 | [x] | Frontend | Deep links from push not validated |
+
+## Performance & Scaling
+
+| # | Status | Area | Issue |
+|---|--------|------|-------|
+| P1 | [x] | Perf | DB pool unconfigured (default max 10, no timeout) |
+| P2 | [x] | Perf | No request timeout on Fastify |
+| P3 | [x] | Perf | Nested SELECT anti-pattern in ~15 route handlers |
+| P4 | [x] | Ops | No connection pool monitoring |
+| P5 | [x] | Perf | Full-text search on documents has no index |
+| P6 | [x] | Scale | Scheduler not safe for horizontal scaling |

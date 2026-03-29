@@ -23,6 +23,7 @@ export async function buildApp() {
   const app = Fastify({
     logger: env.NODE_ENV !== "test",
     bodyLimit: 10 * 1024 * 1024,
+    requestTimeout: 30000,
   });
 
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {

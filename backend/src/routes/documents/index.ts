@@ -5,6 +5,7 @@ import { NotFoundError, AppError, ValidationError } from "../../lib/errors.js";
 import { extractDocumentData } from "../../services/ai.js";
 import { maskExtractionJson } from "../../services/masking.js";
 import { getFileFromS3, deleteFromS3, s3KeyFromUrl } from "../../services/storage.js";
+import { getUserId } from "../../lib/user-context.js";
 import {
   saveFileToS3,
   computeHash,
@@ -54,10 +55,11 @@ async function registerUpload(app: FastifyInstance) {
     const renewalId = (data.fields.renewal_id as { value: string } | undefined)?.value ?? null;
     const docType = (data.fields.doc_type as { value: string } | undefined)?.value ?? "other";
 
+    const userId = await getUserId(app, request.user.uid);
     const fileUrl = await saveFileToS3(app, buffer, data.filename, data.mimetype, request.user.uid);
 
     const doc = await insertDocument(app, {
-      userId: request.user.uid,
+      userId,
       renewalId,
       fileUrl,
       fileName: data.filename,
@@ -83,9 +85,10 @@ async function registerParse(app: FastifyInstance) {
 
   app.post("/:id/parse", { preHandler: [authMiddleware, requirePremium] }, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
     const docResult = await app.db.query(
-      "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE d.id = $1 AND u.firebase_uid = $2",
-      [id, request.user.uid]
+      "SELECT * FROM documents WHERE id = $1 AND user_id = $2",
+      [id, userId]
     );
     if (docResult.rows.length === 0) throw new NotFoundError("Document");
 
@@ -114,9 +117,10 @@ async function registerParse(app: FastifyInstance) {
 
 async function registerQueries(app: FastifyInstance) {
   app.get("/", auth, async (request, reply) => {
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
-      "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE u.firebase_uid = $1 ORDER BY d.created_at DESC LIMIT 200",
-      [request.user.uid]
+      "SELECT * FROM documents WHERE user_id = $1 ORDER BY created_at DESC LIMIT 200",
+      [userId]
     );
     return reply.send({ documents: result.rows, total: result.rowCount });
   });
@@ -127,33 +131,35 @@ async function registerQueries(app: FastifyInstance) {
       return reply.send({ documents: [], total: 0 });
     }
 
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
-      `SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id
-       WHERE u.firebase_uid = $1
-         AND (d.file_name ILIKE $2
-           OR d.doc_type ILIKE $2
-           OR to_tsvector('english', COALESCE(d.ocr_text, '')) @@ plainto_tsquery('english', $3))
-       ORDER BY d.created_at DESC`,
-      [request.user.uid, `%${q}%`, q]
+      `SELECT * FROM documents
+       WHERE user_id = $1
+         AND (file_name ILIKE $2
+           OR doc_type ILIKE $2
+           OR to_tsvector('english', COALESCE(ocr_text, '')) @@ plainto_tsquery('english', $3))
+       ORDER BY created_at DESC`,
+      [userId, `%${q}%`, q]
     );
     return reply.send({ documents: result.rows, total: result.rowCount });
   });
 
   app.get("/by-renewal/:renewalId", auth, async (request, reply) => {
     const { renewalId } = request.params as { renewalId: string };
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
-      `SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id
-       WHERE u.firebase_uid = $1 AND d.renewal_id = $2 ORDER BY d.created_at DESC`,
-      [request.user.uid, renewalId]
+      "SELECT * FROM documents WHERE user_id = $1 AND renewal_id = $2 ORDER BY created_at DESC",
+      [userId, renewalId]
     );
     return reply.send({ documents: result.rows, total: result.rowCount });
   });
 
   app.get("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
-      "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE d.id = $1 AND u.firebase_uid = $2",
-      [id, request.user.uid]
+      "SELECT * FROM documents WHERE id = $1 AND user_id = $2",
+      [id, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError("Document");
     return reply.send({ document: result.rows[0] });
@@ -163,9 +169,10 @@ async function registerQueries(app: FastifyInstance) {
 async function registerFileServe(app: FastifyInstance) {
   app.get("/:id/file", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
-      "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE d.id = $1 AND u.firebase_uid = $2",
-      [id, request.user.uid]
+      "SELECT * FROM documents WHERE id = $1 AND user_id = $2",
+      [id, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError("Document");
 
@@ -180,10 +187,11 @@ async function registerLink(app: FastifyInstance) {
   app.post("/:id/link", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
     const { renewal_id } = request.body as { renewal_id: string };
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
       `UPDATE documents SET renewal_id = $1, is_current = true
-       WHERE id = $2 AND user_id = (SELECT id FROM users WHERE firebase_uid = $3) RETURNING *`,
-      [renewal_id, id, request.user.uid]
+       WHERE id = $2 AND user_id = $3 RETURNING *`,
+      [renewal_id, id, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError("Document");
     return reply.send({ document: result.rows[0] });
@@ -193,9 +201,10 @@ async function registerLink(app: FastifyInstance) {
 async function registerSuggestLink(app: FastifyInstance) {
   app.get("/:id/suggest-link", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
     const docResult = await app.db.query(
-      "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE d.id = $1 AND u.firebase_uid = $2",
-      [id, request.user.uid]
+      "SELECT * FROM documents WHERE id = $1 AND user_id = $2",
+      [id, userId]
     );
     if (docResult.rows.length === 0) throw new NotFoundError("Document");
 
@@ -210,7 +219,7 @@ async function registerSuggestLink(app: FastifyInstance) {
     }
 
     const conditions: string[] = [];
-    const params: unknown[] = [request.user.uid];
+    const params: unknown[] = [userId];
 
     if (provider) {
       params.push(`%${provider}%`);
@@ -227,8 +236,7 @@ async function registerSuggestLink(app: FastifyInstance) {
 
     const result = await app.db.query(
       `SELECT r.id, r.name, r.provider, r.category FROM renewals r
-       JOIN users u ON u.id = r.user_id
-       WHERE u.firebase_uid = $1 AND (${conditions.join(" OR ")})
+       WHERE r.user_id = $1 AND (${conditions.join(" OR ")})
        ORDER BY r.name ASC LIMIT 5`,
       params
     );
@@ -243,9 +251,10 @@ async function registerRename(app: FastifyInstance) {
     const { file_name } = request.body as { file_name: string };
     if (!file_name) throw new ValidationError("file_name is required");
 
+    const userId = await getUserId(app, request.user.uid);
     const result = await app.db.query(
-      "UPDATE documents SET file_name = $1 WHERE id = $2 AND user_id = (SELECT id FROM users WHERE firebase_uid = $3) RETURNING *",
-      [file_name, id, request.user.uid]
+      "UPDATE documents SET file_name = $1 WHERE id = $2 AND user_id = $3 RETURNING *",
+      [file_name, id, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError("Document");
     return reply.send({ document: result.rows[0] });
@@ -255,14 +264,15 @@ async function registerRename(app: FastifyInstance) {
 async function registerDelete(app: FastifyInstance) {
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
+    const userId = await getUserId(app, request.user.uid);
     // Clear any payment references to this document
     await app.db.query(
       "UPDATE payments SET receipt_document_id = NULL WHERE receipt_document_id = $1",
       [id]
     );
     const result = await app.db.query(
-      "DELETE FROM documents WHERE id = $1 AND user_id = (SELECT id FROM users WHERE firebase_uid = $2) RETURNING id, file_url",
-      [id, request.user.uid]
+      "DELETE FROM documents WHERE id = $1 AND user_id = $2 RETURNING id, file_url",
+      [id, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError("Document");
 

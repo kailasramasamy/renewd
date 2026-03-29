@@ -51,7 +51,7 @@ export async function insertDocument(
 ): Promise<Record<string, unknown>> {
   const result = await app.db.query(
     `INSERT INTO documents (user_id, renewal_id, file_url, file_name, file_size, file_hash, mime_type, doc_type, is_current)
-     VALUES ((SELECT id FROM users WHERE firebase_uid = $1), $2, $3, $4, $5, $6, $7, $8, true)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
      RETURNING *`,
     [
       params.userId, params.renewalId ?? null, params.fileUrl,
