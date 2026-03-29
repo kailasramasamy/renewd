@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth";
 
 export async function POST(request: Request) {
+  const authError = await requireAdminAuth();
+  if (authError) return authError;
   const body = await request.json();
   const {
     title, subtitle, type, bg_color, bg_gradient_start, bg_gradient_end,

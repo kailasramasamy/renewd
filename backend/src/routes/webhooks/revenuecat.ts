@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { AppError } from "../../lib/errors.js";
 import { env } from "../../config/env.js";
@@ -14,11 +15,21 @@ interface WebhookEvent {
 export default async function revenueCatWebhookRoutes(app: FastifyInstance) {
   app.post("/revenuecat", async (request, reply) => {
     // Verify webhook secret
+    const secret = env.REVENUECAT_WEBHOOK_SECRET;
+    if (!secret) {
+      app.log.error("REVENUECAT_WEBHOOK_SECRET is not configured");
+      throw new AppError("Webhook not configured", 500, "WEBHOOK_NOT_CONFIGURED");
+    }
+
     const authHeader = request.headers.authorization;
-    if (env.REVENUECAT_WEBHOOK_SECRET) {
-      if (authHeader !== `Bearer ${env.REVENUECAT_WEBHOOK_SECRET}`) {
-        throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
-      }
+    if (!authHeader) {
+      throw new AppError("Missing Authorization header", 401, "UNAUTHORIZED");
+    }
+
+    const expected = Buffer.from(`Bearer ${secret}`);
+    const actual = Buffer.from(authHeader);
+    if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
+      throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     }
 
     const body = request.body as WebhookEvent;

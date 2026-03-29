@@ -11,7 +11,7 @@ const auth = { preHandler: authMiddleware };
 async function registerListAndGet(app: FastifyInstance) {
   app.get("/", auth, async (request, reply) => {
     const result = await app.db.query(
-      "SELECT * FROM renewals WHERE user_id = (SELECT id FROM users WHERE firebase_uid = $1) ORDER BY renewal_date ASC",
+      "SELECT * FROM renewals WHERE user_id = (SELECT id FROM users WHERE firebase_uid = $1) ORDER BY renewal_date ASC LIMIT 500",
       [request.user.uid]
     );
     return reply.send({ renewals: result.rows, total: result.rowCount });
@@ -41,26 +41,37 @@ async function registerCreate(app: FastifyInstance) {
 
     const userId = userResult.rows[0].id;
 
-    // Enforce free plan renewal limit
+    const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name } = body;
+
+    // Atomic insert with limit check to prevent TOCTOU race condition
     if (!request.premium.isPremium) {
-      const countResult = await app.db.query(
-        "SELECT COUNT(*)::int AS count FROM renewals WHERE user_id = $1",
-        [userId]
-      );
       const limitResult = await app.db.query(
         "SELECT value FROM app_config WHERE key = 'free_renewal_limit'"
       );
       const limit = parseInt(limitResult.rows[0]?.value ?? "5", 10);
-      if (countResult.rows[0].count >= limit) {
+
+      const result = await app.db.query(
+        `INSERT INTO renewals (user_id, name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name)
+         SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+         WHERE (SELECT COUNT(*) FROM renewals WHERE user_id = $1) < $12
+         RETURNING *`,
+        [userId, name, category, provider ?? null, amount ?? null, renewal_date, frequency, frequency_days ?? null, auto_renew ?? false, notes ?? null, group_name ?? null, limit]
+      );
+
+      if (result.rows.length === 0) {
         return reply.status(403).send({
           error: "Free plan renewal limit reached",
           code: "RENEWAL_LIMIT",
           limit,
         });
       }
+
+      const renewal = result.rows[0];
+      await createDefaultReminders(app.db, userId, renewal.id, renewal.renewal_date);
+      updateRenewalLogo(app.db, renewal.id, renewal.name, renewal.provider).catch(() => {});
+      return reply.status(201).send({ renewal });
     }
 
-    const { name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name } = body;
     const result = await app.db.query(
       `INSERT INTO renewals (user_id, name, category, provider, amount, renewal_date, frequency, frequency_days, auto_renew, notes, group_name)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
@@ -101,15 +112,28 @@ async function registerUpdateAndDelete(app: FastifyInstance) {
 
   app.delete("/:id", auth, async (request, reply) => {
     const { id } = request.params as { id: string };
-    await app.db.query("DELETE FROM payments WHERE renewal_id = $1", [id]);
-    await app.db.query("DELETE FROM documents WHERE renewal_id = $1", [id]);
-    await app.db.query("DELETE FROM reminders WHERE renewal_id = $1", [id]);
-    const result = await app.db.query(
-      "DELETE FROM renewals WHERE id=$1 AND user_id=(SELECT id FROM users WHERE firebase_uid=$2) RETURNING id",
-      [id, request.user.uid]
-    );
-    if (result.rows.length === 0) throw new NotFoundError("Renewal");
-    return reply.send({ deleted: true, id: result.rows[0].id });
+    const client = await app.db.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("DELETE FROM payments WHERE renewal_id = $1", [id]);
+      await client.query("DELETE FROM documents WHERE renewal_id = $1", [id]);
+      await client.query("DELETE FROM reminders WHERE renewal_id = $1", [id]);
+      const result = await client.query(
+        "DELETE FROM renewals WHERE id=$1 AND user_id=(SELECT id FROM users WHERE firebase_uid=$2) RETURNING id",
+        [id, request.user.uid]
+      );
+      if (result.rows.length === 0) {
+        await client.query("ROLLBACK");
+        throw new NotFoundError("Renewal");
+      }
+      await client.query("COMMIT");
+      return reply.send({ deleted: true, id: result.rows[0].id });
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
   });
 }
 

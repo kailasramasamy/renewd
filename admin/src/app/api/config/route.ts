@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth";
 
 export async function PUT(request: Request) {
+  const authError = await requireAdminAuth();
+  if (authError) return authError;
   const body = await request.json();
 
   for (const [key, value] of Object.entries(body)) {

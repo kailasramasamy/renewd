@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth";
 
 export async function GET() {
+  const authError = await requireAdminAuth();
+  if (authError) return authError;
   // Count tickets where the latest reply is from a user (needs admin response)
   // or tickets with no replies yet (new tickets)
   const result = await query<{ count: number }>(`

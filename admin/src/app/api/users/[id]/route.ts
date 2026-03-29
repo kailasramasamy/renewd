@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAdminAuth } from "@/lib/auth";
 
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminAuth();
+  if (authError) return authError;
+
   const { id } = await params;
 
   // Recursive delete: payments → documents → reminders → renewals → notifications → preferences → user

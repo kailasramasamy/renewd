@@ -72,16 +72,28 @@ export default async function userRoutes(app: FastifyInstance) {
     if (userResult.rows.length === 0) throw new NotFoundError("User");
     const userId = userResult.rows[0].id;
 
-    await app.db.query("DELETE FROM payments WHERE user_id = $1", [userId]);
-    await app.db.query("DELETE FROM documents WHERE user_id = $1", [userId]);
-    await app.db.query(
-      "DELETE FROM reminders WHERE renewal_id IN (SELECT id FROM renewals WHERE user_id = $1)",
-      [userId]
-    );
-    await app.db.query("DELETE FROM renewals WHERE user_id = $1", [userId]);
-    await app.db.query("DELETE FROM notification_log WHERE user_id = $1", [userId]);
-    await app.db.query("DELETE FROM notification_preferences WHERE user_id = $1", [userId]);
-    await app.db.query("DELETE FROM users WHERE id = $1", [userId]);
+    const client = await app.db.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("DELETE FROM chat_usage WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM payments WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM documents WHERE user_id = $1", [userId]);
+      await client.query(
+        "DELETE FROM reminders WHERE renewal_id IN (SELECT id FROM renewals WHERE user_id = $1)",
+        [userId]
+      );
+      await client.query("DELETE FROM renewals WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM notification_log WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM notification_preferences WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM support_tickets WHERE user_id = $1", [userId]);
+      await client.query("DELETE FROM users WHERE id = $1", [userId]);
+      await client.query("COMMIT");
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
 
     return reply.send({ deleted: true });
   });

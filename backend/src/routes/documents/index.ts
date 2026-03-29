@@ -97,7 +97,7 @@ async function registerParse(app: FastifyInstance) {
 async function registerQueries(app: FastifyInstance) {
   app.get("/", auth, async (request, reply) => {
     const result = await app.db.query(
-      "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE u.firebase_uid = $1 ORDER BY d.created_at DESC",
+      "SELECT d.* FROM documents d JOIN users u ON u.id = d.user_id WHERE u.firebase_uid = $1 ORDER BY d.created_at DESC LIMIT 200",
       [request.user.uid]
     );
     return reply.send({ documents: result.rows, total: result.rowCount });

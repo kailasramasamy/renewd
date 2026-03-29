@@ -12,8 +12,15 @@ export function createPremiumMiddleware(app: FastifyInstance) {
     request: FastifyRequest,
     _reply: FastifyReply
   ): Promise<void> {
+    // Atomic: expire and return status in a single query
     const result = await app.db.query(
-      "SELECT is_premium, premium_expires_at FROM users WHERE firebase_uid = $1",
+      `UPDATE users
+       SET is_premium = CASE
+         WHEN premium_expires_at IS NOT NULL AND premium_expires_at < NOW() THEN FALSE
+         ELSE is_premium
+       END
+       WHERE firebase_uid = $1
+       RETURNING is_premium`,
       [request.user.uid]
     );
 
@@ -22,19 +29,7 @@ export function createPremiumMiddleware(app: FastifyInstance) {
       return;
     }
 
-    const { is_premium, premium_expires_at } = result.rows[0];
-
-    // Auto-expire if past expiry date
-    if (is_premium && premium_expires_at && new Date(premium_expires_at) < new Date()) {
-      await app.db.query(
-        "UPDATE users SET is_premium = FALSE WHERE firebase_uid = $1",
-        [request.user.uid]
-      );
-      request.premium = { isPremium: false };
-      return;
-    }
-
-    request.premium = { isPremium: !!is_premium };
+    request.premium = { isPremium: !!result.rows[0].is_premium };
   };
 }
 

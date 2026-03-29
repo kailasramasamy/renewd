@@ -16,23 +16,28 @@ export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
-  // Test-only bypass
+  // Test-only bypass — requires explicit header to prevent accidental use
   if (env.NODE_ENV === "test") {
+    const testHeader = request.headers["x-test-uid"] as string | undefined;
+    request.user = { uid: testHeader ?? "test-user", email: "test@renewd.local" };
+    return;
+  }
+
+  // Dev bypass only when Firebase is NOT configured AND explicitly in development
+  if (!env.FIREBASE_PROJECT_ID && env.NODE_ENV === "development") {
     request.user = { uid: "dev-user", email: "dev@renewd.local" };
     return;
   }
 
-  // Dev bypass only when Firebase is NOT configured AND not in production
-  if (!env.FIREBASE_PROJECT_ID && env.NODE_ENV !== "production") {
-    request.user = { uid: "dev-user", email: "dev@renewd.local" };
+  if (!env.FIREBASE_PROJECT_ID) {
+    reply.status(503).send({ error: "Authentication unavailable", code: "AUTH_DISABLED" });
     return;
   }
 
   const authHeader = request.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    const err = new AppError("Missing or invalid Authorization header", 401, "UNAUTHORIZED");
-    reply.status(401).send({ error: err.message, code: err.code });
+    reply.status(401).send({ error: "Missing or invalid Authorization header", code: "UNAUTHORIZED" });
     return;
   }
 
@@ -47,5 +52,6 @@ export async function authMiddleware(
       return;
     }
     reply.status(401).send({ error: "Invalid token", code: "INVALID_TOKEN" });
+    return;
   }
 }

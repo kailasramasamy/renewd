@@ -15,7 +15,7 @@ interface RateLimitOptions {
 
 /**
  * Sliding-window rate limiter backed by Redis.
- * Uses a sorted set per user to track request timestamps.
+ * Falls back to allowing requests if Redis is unavailable.
  */
 export function createRateLimit(app: FastifyInstance, opts: RateLimitOptions) {
   const {
@@ -37,29 +37,34 @@ export function createRateLimit(app: FastifyInstance, opts: RateLimitOptions) {
     const now = Date.now();
     const windowStart = now - windowSeconds * 1000;
 
-    const pipeline = app.redis.pipeline();
-    pipeline.zremrangebyscore(key, 0, windowStart);
-    pipeline.zcard(key);
-    pipeline.zadd(key, now.toString(), `${now}:${Math.random()}`);
-    pipeline.expire(key, windowSeconds);
+    try {
+      const pipeline = app.redis.pipeline();
+      pipeline.zremrangebyscore(key, 0, windowStart);
+      pipeline.zcard(key);
+      pipeline.zadd(key, now.toString(), `${now}:${Math.random()}`);
+      pipeline.expire(key, windowSeconds);
 
-    const results = await pipeline.exec();
-    const count = results?.[1]?.[1] as number;
+      const results = await pipeline.exec();
+      const count = results?.[1]?.[1] as number;
 
-    if (count >= max) {
-      reply.status(429).send({
-        error: message,
-        code,
-        retry_after_seconds: windowSeconds,
-      });
-      return;
+      if (count >= max) {
+        reply.status(429).send({
+          error: message,
+          code,
+          retry_after_seconds: windowSeconds,
+        });
+        return;
+      }
+    } catch (err) {
+      // Redis down — allow request but log the failure
+      app.log.warn("Rate limit check failed (Redis unavailable): %s", String(err));
     }
   };
 }
 
 /**
  * Daily quota limiter backed by Redis.
- * Simple counter with TTL that resets at midnight UTC.
+ * Falls back to allowing requests if Redis is unavailable.
  */
 export function createDailyQuota(
   app: FastifyInstance,
@@ -101,23 +106,34 @@ export function createDailyQuota(
     const today = new Date().toISOString().slice(0, 10);
     const key = `${prefix}:${uid}:${today}`;
 
-    const count = await app.redis.get(key);
-    const current = count ? parseInt(count, 10) : 0;
+    try {
+      const count = await app.redis.get(key);
+      const current = count ? parseInt(count, 10) : 0;
 
-    if (current >= limit) {
-      reply.status(429).send({
-        error: message,
-        code,
-        daily_limit: limit,
-        used: current,
-      });
-      return;
+      if (current >= limit) {
+        reply.status(429).send({
+          error: message,
+          code,
+          daily_limit: limit,
+          used: current,
+        });
+        return;
+      }
+
+      // Increment with TTL until next midnight + 1hr buffer
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      tomorrow.setUTCHours(0, 0, 0, 0);
+      const ttl = Math.ceil((tomorrow.getTime() - now.getTime()) / 1000) + 3600;
+
+      const pipeline = app.redis.pipeline();
+      pipeline.incr(key);
+      pipeline.expire(key, ttl);
+      await pipeline.exec();
+    } catch (err) {
+      // Redis down — allow request but log the failure
+      app.log.warn("Daily quota check failed (Redis unavailable): %s", String(err));
     }
-
-    // Increment with TTL of 25 hours (buffer past midnight)
-    const pipeline = app.redis.pipeline();
-    pipeline.incr(key);
-    pipeline.expire(key, 90000);
-    await pipeline.exec();
   };
 }

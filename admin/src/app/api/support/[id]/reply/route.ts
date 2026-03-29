@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import admin from "firebase-admin";
+import { requireAdminAuth } from "@/lib/auth";
 
 // Initialize Firebase Admin if not already
 if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
@@ -17,6 +18,9 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await requireAdminAuth();
+  if (authError) return authError;
+
   const { id } = await params;
   const { message } = await request.json();
 
