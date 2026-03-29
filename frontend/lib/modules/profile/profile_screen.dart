@@ -208,6 +208,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showAbout() {
+    final isDark = Get.isDarkMode;
     Get.bottomSheet(
       SafeArea(
         child: Padding(
@@ -249,6 +250,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
+      backgroundColor: isDark ? RenewdColors.darkSlate : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),

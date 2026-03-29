@@ -109,6 +109,7 @@ class _PickerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -116,7 +117,7 @@ class _PickerScreen extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
         title: Text('Scan Document',
-            style: RenewdTextStyles.h3.copyWith(color: Colors.white)),
+            style: RenewdTextStyles.h3),
       ),
       body: Padding(
         padding: const EdgeInsets.all(RenewdSpacing.xl),
@@ -129,7 +130,7 @@ class _PickerScreen extends StatelessWidget {
             const SizedBox(height: RenewdSpacing.xl),
             Text(
               'Upload a document',
-              style: RenewdTextStyles.h2.copyWith(color: Colors.white),
+              style: RenewdTextStyles.h2,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: RenewdSpacing.sm),
@@ -176,21 +177,26 @@ class _PickerOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(RenewdSpacing.lg),
         decoration: BoxDecoration(
-          color: RenewdColors.darkSlate,
+          color: isDark ? RenewdColors.darkSlate : RenewdColors.mist,
           borderRadius: RenewdRadius.xlAll,
-          border: Border.all(color: RenewdColors.steel),
+          border: Border.all(
+            color: isDark ? RenewdColors.steel : RenewdColors.silver,
+          ),
         ),
         child: Row(
           children: [
             Icon(icon, color: RenewdColors.lavender, size: 24),
             const SizedBox(width: RenewdSpacing.md),
             Text(label,
-                style: RenewdTextStyles.body.copyWith(color: Colors.white)),
+                style: RenewdTextStyles.body.copyWith(
+                  color: isDark ? Colors.white : RenewdColors.deepNavy,
+                )),
             const Spacer(),
             Icon(LucideIcons.chevronRight,
                 color: RenewdColors.slate, size: 18),
@@ -207,6 +213,7 @@ class _AnalyzingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -219,9 +226,11 @@ class _AnalyzingScreen extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: RenewdColors.darkSlate,
+                    color: isDark ? RenewdColors.darkSlate : RenewdColors.mist,
                     borderRadius: RenewdRadius.xlAll,
-                    border: Border.all(color: RenewdColors.steel),
+                    border: Border.all(
+                      color: isDark ? RenewdColors.steel : RenewdColors.silver,
+                    ),
                   ),
                   child: Icon(LucideIcons.fileText,
                       size: 36, color: RenewdColors.lavender),
@@ -229,7 +238,7 @@ class _AnalyzingScreen extends StatelessWidget {
                 const SizedBox(height: RenewdSpacing.xl),
                 Text(
                   'Analyzing your document...',
-                  style: RenewdTextStyles.h3.copyWith(color: Colors.white),
+                  style: RenewdTextStyles.h3,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: RenewdSpacing.xl),
@@ -364,13 +373,16 @@ class _DetailChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(
           horizontal: RenewdSpacing.md, vertical: RenewdSpacing.xs),
       decoration: BoxDecoration(
-        color: RenewdColors.darkSlate,
+        color: isDark ? RenewdColors.darkSlate : RenewdColors.mist,
         borderRadius: RenewdRadius.pillAll,
-        border: Border.all(color: RenewdColors.steel),
+        border: Border.all(
+          color: isDark ? RenewdColors.steel : RenewdColors.silver,
+        ),
       ),
       child: Text(label,
           style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),

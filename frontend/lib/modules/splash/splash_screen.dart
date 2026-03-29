@@ -73,7 +73,9 @@ class _SplashScreenState extends State<SplashScreen>
                   style: GoogleFonts.dmSans(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : RenewdColors.deepNavy,
                     letterSpacing: -0.5,
                   ),
                 ),

@@ -429,7 +429,7 @@ class _StatsRow extends StatelessWidget {
         _StatCard(
           value: '${RenewdCurrency.symbol}${c.monthlySpend.toStringAsFixed(0)}',
           label: 'Monthly',
-          icon: LucideIcons.indianRupee,
+          icon: LucideIcons.wallet,
           color: RenewdColors.emerald,
         ),
       ],
