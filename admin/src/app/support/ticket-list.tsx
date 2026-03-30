@@ -12,6 +12,7 @@ interface Ticket {
   status: string;
   device_info: string | null;
   reply_count: number;
+  needs_response: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -121,9 +122,15 @@ export function TicketList({ tickets }: { tickets: Ticket[] }) {
                     {t.status.replace("_", " ")}
                   </span>
                 </div>
-                <h3 className="font-semibold text-sm truncate">{t.subject}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-sm truncate">{t.subject}</h3>
+                  {t.needs_response && (
+                    <span className="shrink-0 w-2 h-2 rounded-full bg-blue-500" title="Needs response" />
+                  )}
+                </div>
                 <p className="text-xs text-gray-500 mt-1" suppressHydrationWarning>
                   {t.user_name || t.user_email || "Unknown"} · {new Date(t.created_at).toLocaleDateString()} · {t.reply_count} replies
+                  {t.needs_response && <span className="text-blue-400 ml-1">· Awaiting reply</span>}
                 </p>
               </div>
               <svg
