@@ -436,10 +436,13 @@ class _StatsRow extends StatelessWidget {
           ],
         ),
         const SizedBox(height: RenewdSpacing.sm),
-        _SpendSummary(
-          monthly: _formatAmount(c.monthlySpend),
-          yearly: _formatAmount(c.yearlySpend),
-          annual: _formatAmount(c.totalAnnualSpend),
+        GestureDetector(
+          onTap: () => Get.toNamed(AppRoutes.analytics),
+          child: _SpendSummary(
+            monthly: _formatAmount(c.monthlySpend),
+            yearly: _formatAmount(c.yearlySpend),
+            annual: _formatAmount(c.totalAnnualSpend),
+          ),
         ),
       ],
     );

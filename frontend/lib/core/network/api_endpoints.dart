@@ -50,4 +50,8 @@ class ApiEndpoints {
   static const String payments = '/payments';
   static String paymentsByRenewal(String renewalId) =>
       '/payments/by-renewal/$renewalId';
+
+  // Analytics
+  static const String analyticsByCategory = '/payments/analytics/by-category';
+  static const String analyticsByMonth = '/payments/analytics/by-month';
 }

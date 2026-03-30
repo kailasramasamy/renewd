@@ -10,6 +10,7 @@ import '../../modules/profile/profile_screen.dart';
 import '../../modules/features/features_screen.dart';
 import '../../modules/premium/premium_screen.dart';
 import '../../modules/support/support_screen.dart';
+import '../../modules/analytics/analytics_screen.dart';
 import '../../modules/notifications/notification_inbox_screen.dart';
 import '../../modules/onboarding/onboarding_screen.dart';
 import '../../modules/notifications/notification_settings_screen.dart';
@@ -122,6 +123,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.support,
       page: () => const SupportScreen(),
+      transition: Transition.cupertino,
+    ),
+
+    // Analytics
+    GetPage(
+      name: AppRoutes.analytics,
+      page: () => const AnalyticsScreen(),
       transition: Transition.cupertino,
     ),
   ];
