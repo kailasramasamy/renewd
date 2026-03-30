@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/services/sharing_service.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/services/version_check_service.dart';
 import '../../app/routes/app_routes.dart';
@@ -42,6 +43,10 @@ class SplashController extends GetxController {
     final auth = Get.find<AuthService>();
     if (auth.isLoggedIn) {
       Get.offAllNamed(AppRoutes.home);
+      // Process any shared file that arrived during startup
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Get.find<SharingService>().processPendingShare();
+      });
       // Re-register FCM token + device info (non-blocking)
       Get.find<NotificationService>().registerToken();
       // Check for updates after navigating (non-blocking)
