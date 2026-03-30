@@ -111,6 +111,7 @@ export function UserTable({ users }: { users: User[] }) {
               <th className="px-5 py-3">Phone</th>
               <th className="px-5 py-3">Country</th>
               <th className="px-5 py-3">Device</th>
+              <th className="px-5 py-3">Version</th>
               <th className="px-5 py-3">Renewals</th>
               <th className="px-5 py-3">Premium</th>
               <th className="px-5 py-3">Joined</th>
@@ -131,6 +132,13 @@ export function UserTable({ users }: { users: User[] }) {
                 </td>
                 <td className="px-5 py-3 text-gray-400">
                   {u.device_os || "—"}
+                </td>
+                <td className="px-5 py-3">
+                  {u.app_version ? (
+                    <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-xs">
+                      v{u.app_version}
+                    </span>
+                  ) : "—"}
                 </td>
                 <td className="px-5 py-3">
                   <span className="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full text-xs">
@@ -155,7 +163,7 @@ export function UserTable({ users }: { users: User[] }) {
             {filtered.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={10}
                   className="px-5 py-8 text-center text-gray-500"
                 >
                   No users found
