@@ -324,9 +324,18 @@ class _InfoSection extends StatelessWidget {
                   label: 'Frequency',
                   value: _formatFrequency(renewal)),
               _Divider(),
+              if (renewal.category == RenewalCategory.insurance) ...[
+                _InfoRow(
+                    icon: LucideIcons.calendarCheck,
+                    label: 'Policy Start',
+                    value: RenewdDateUtils.formatDate(_policyStartDate(renewal))),
+                _Divider(),
+              ],
               _InfoRow(
                   icon: LucideIcons.calendar,
-                  label: 'Next Renewal',
+                  label: renewal.category == RenewalCategory.insurance
+                      ? 'Policy Expiry'
+                      : 'Next Renewal',
                   value: RenewdDateUtils.formatDate(renewal.renewalDate)),
               _Divider(),
               _InfoRow(
@@ -354,6 +363,22 @@ class _InfoSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  DateTime _policyStartDate(RenewalModel r) {
+    final end = r.renewalDate;
+    switch (r.frequency) {
+      case 'monthly':
+        return DateTime(end.year, end.month - 1, end.day);
+      case 'quarterly':
+        return DateTime(end.year, end.month - 3, end.day);
+      case 'yearly':
+        return DateTime(end.year - 1, end.month, end.day);
+      case 'custom':
+        return end.subtract(Duration(days: r.frequencyDays ?? 365));
+      default:
+        return DateTime(end.year - 1, end.month, end.day);
+    }
   }
 
   String _formatFrequency(RenewalModel r) {
