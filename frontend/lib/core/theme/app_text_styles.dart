@@ -12,13 +12,13 @@ class RenewdTextStyles {
 
   static TextStyle get h2 => GoogleFonts.dmSans(
         fontSize: 26,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         letterSpacing: -0.3,
       );
 
   static TextStyle get h3 => GoogleFonts.dmSans(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
       );
 
