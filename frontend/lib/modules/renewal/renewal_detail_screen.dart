@@ -12,6 +12,7 @@ import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_opacity.dart';
 import '../../core/utils/currency.dart';
 import '../../core/utils/date_utils.dart';
+import '../../data/models/document_model.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/models/renewal_model.dart';
 import '../../core/utils/haptics.dart';
@@ -110,7 +111,7 @@ class RenewalDetailScreen extends StatelessWidget {
         children: [
           _CountdownRing(renewal: renewal),
           const SizedBox(height: RenewdSpacing.xl),
-          _InfoSection(renewal: renewal),
+          _InfoSection(renewal: renewal, documents: c.documents),
           const SizedBox(height: RenewdSpacing.xl),
           _PolicySummary(c: c),
           _PaymentHistory(c: c),
@@ -294,7 +295,8 @@ class _CountdownRing extends StatelessWidget {
 
 class _InfoSection extends StatelessWidget {
   final RenewalModel renewal;
-  const _InfoSection({required this.renewal});
+  final List<DocumentModel> documents;
+  const _InfoSection({required this.renewal, required this.documents});
 
   @override
   Widget build(BuildContext context) {
@@ -324,11 +326,12 @@ class _InfoSection extends StatelessWidget {
                   label: 'Frequency',
                   value: _formatFrequency(renewal)),
               _Divider(),
-              if (renewal.category == RenewalCategory.insurance) ...[
+              if (renewal.category == RenewalCategory.insurance &&
+                  _policyStartDate() != null) ...[
                 _InfoRow(
                     icon: LucideIcons.calendarCheck,
                     label: 'Policy Start',
-                    value: RenewdDateUtils.formatDate(_policyStartDate(renewal))),
+                    value: RenewdDateUtils.formatDate(_policyStartDate()!)),
                 _Divider(),
               ],
               _InfoRow(
@@ -365,20 +368,12 @@ class _InfoSection extends StatelessWidget {
     );
   }
 
-  DateTime _policyStartDate(RenewalModel r) {
-    final end = r.renewalDate;
-    switch (r.frequency) {
-      case 'monthly':
-        return DateTime(end.year, end.month - 1, end.day);
-      case 'quarterly':
-        return DateTime(end.year, end.month - 3, end.day);
-      case 'yearly':
-        return DateTime(end.year - 1, end.month, end.day);
-      case 'custom':
-        return end.subtract(Duration(days: r.frequencyDays ?? 365));
-      default:
-        return DateTime(end.year - 1, end.month, end.day);
+  /// Get policy start date from the linked document's AI-extracted issue_date
+  DateTime? _policyStartDate() {
+    for (final doc in documents) {
+      if (doc.issueDate != null) return doc.issueDate;
     }
+    return null;
   }
 
   String _formatFrequency(RenewalModel r) {
