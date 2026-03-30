@@ -90,6 +90,9 @@ class AddRenewalController extends GetxController {
     isLoading.value = true;
     try {
       await _provider.create(data);
+      try {
+        Get.find<DashboardController>().fetchRenewals();
+      } catch (_) {}
       Get.back(result: true);
       showSuccessSnack('${name.value.trim()} added');
     } catch (e) {

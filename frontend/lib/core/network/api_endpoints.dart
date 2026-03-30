@@ -49,5 +49,5 @@ class ApiEndpoints {
   // Payments
   static const String payments = '/payments';
   static String paymentsByRenewal(String renewalId) =>
-      '/renewals/$renewalId/payments';
+      '/payments/by-renewal/$renewalId';
 }

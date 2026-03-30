@@ -448,6 +448,10 @@ class ScanAddController extends GetxController {
       if (document.value != null) {
         await _docProvider.linkToRenewal(document.value!.id, renewal.id);
       }
+      // Refresh dashboard before navigating back
+      try {
+        Get.find<DashboardController>().fetchRenewals();
+      } catch (_) {}
       Get.back(result: true);
       showSuccessSnack('${name.value.trim()} added from document');
     } catch (e) {
