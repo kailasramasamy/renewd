@@ -3,7 +3,7 @@ import { PremiumForm } from "./premium-form";
 
 async function getPremiumConfig() {
   const rows = await query<{ key: string; value: string; updated_at: string }>(
-    "SELECT key, value, updated_at::text FROM app_config WHERE key LIKE 'free_%' OR key LIKE 'premium_%' OR key LIKE 'feature_%' OR key LIKE 'iap_%' OR key LIKE 'chat_%' ORDER BY key"
+    "SELECT key, value, updated_at::text FROM app_config WHERE key LIKE 'free_%' OR key LIKE 'premium_%' OR key LIKE 'feature_%' OR key LIKE 'iap_%' OR key LIKE 'chat_%' OR key LIKE 'new_user_%' ORDER BY key"
   );
   const config: Record<string, { value: string; updated_at: string }> = {};
   for (const row of rows) {
