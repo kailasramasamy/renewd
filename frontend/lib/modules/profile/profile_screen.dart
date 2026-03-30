@@ -223,7 +223,7 @@ class ProfileScreen extends StatelessWidget {
     final isDark = Get.isDarkMode;
     Get.bottomSheet(
       SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(RenewdSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -235,29 +235,38 @@ class ProfileScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: RenewdSpacing.xl),
+              const SizedBox(height: RenewdSpacing.xxl),
               Container(
-                width: 64, height: 64,
+                width: 80, height: 80,
                 decoration: BoxDecoration(
                   color: RenewdColors.oceanBlue,
                   borderRadius: RenewdRadius.xlAll,
                 ),
-                child: Icon(LucideIcons.refreshCcw, size: 32, color: Colors.white),
+                child: Icon(LucideIcons.refreshCcw, size: 40, color: Colors.white),
               ),
-              const SizedBox(height: RenewdSpacing.lg),
-              Text('Renewd', style: RenewdTextStyles.h2.copyWith(
+              const SizedBox(height: RenewdSpacing.xl),
+              Text('Renewd', style: RenewdTextStyles.h1.copyWith(
                   fontWeight: FontWeight.w700)),
-              const SizedBox(height: RenewdSpacing.xs),
-              Text('Version 1.0.0', style: RenewdTextStyles.caption
+              const SizedBox(height: RenewdSpacing.sm),
+              Text('Version 1.0.0', style: RenewdTextStyles.body
                   .copyWith(color: RenewdColors.slate)),
-              const SizedBox(height: RenewdSpacing.md),
+              const SizedBox(height: RenewdSpacing.lg),
               Text(
                 'AI-powered personal renewal tracking.\nNever miss a renewal again.',
                 textAlign: TextAlign.center,
-                style: RenewdTextStyles.bodySmall.copyWith(
-                  color: RenewdColors.slate, height: 1.5),
+                style: RenewdTextStyles.body.copyWith(
+                  color: RenewdColors.slate, height: 1.6),
               ),
               const SizedBox(height: RenewdSpacing.xl),
+              Divider(color: isDark ? RenewdColors.steel : RenewdColors.mist),
+              const SizedBox(height: RenewdSpacing.md),
+              Text(
+                'Your data is encrypted with AES-256.\nSensitive ID numbers are automatically masked.',
+                textAlign: TextAlign.center,
+                style: RenewdTextStyles.caption.copyWith(
+                  color: RenewdColors.slate, height: 1.5),
+              ),
+              const SizedBox(height: RenewdSpacing.xxl),
             ],
           ),
         ),
