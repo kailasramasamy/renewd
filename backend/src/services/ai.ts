@@ -23,6 +23,14 @@ Don't just repeat the provider name. Make it specific and recognizable at a glan
 
 For category: Pick ONE from: insurance, subscription, utility, government, membership, finance, digital, education, other
 
+For subcategory: A specific type within the category. Examples:
+- insurance: "Health Insurance", "Car Insurance", "Life Insurance", "Home Insurance", "Travel Insurance"
+- subscription: "Streaming", "Cloud Storage", "Music", "Software", "News"
+- utility: "Electricity", "Water", "Gas", "Internet", "Phone"
+- government: "Passport", "Driver's License", "Visa", "Tax"
+- membership: "Gym", "Club", "Professional"
+Pick the most specific match. Use null if unclear.
+
 Return ONLY valid JSON, no other text:
 {
   "is_relevant": true or false,
@@ -30,6 +38,7 @@ Return ONLY valid JSON, no other text:
   "summary": "2-3 sentence summary. If not relevant, explain what the document actually is and suggest what types of documents to upload instead",
   "provider": "company/organization name or null",
   "category": "insurance/subscription/utility/government/membership/finance/digital/education/other",
+  "subcategory": "specific subcategory or null",
   "document_type": "policy/receipt/certificate/invoice/id/other",
   "issue_date": "YYYY-MM-DD or null",
   "expiry_date": "YYYY-MM-DD or null",

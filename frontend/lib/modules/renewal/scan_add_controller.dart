@@ -213,7 +213,12 @@ class ScanAddController extends GetxController {
       category.value = _detectCategory(docType, provider);
     }
 
-    groupName.value = _detectGroup(docType, provider, ext);
+    final aiSubcategory = ext['subcategory'] as String?;
+    if (aiSubcategory != null && aiSubcategory.isNotEmpty) {
+      groupName.value = aiSubcategory;
+    } else {
+      groupName.value = _detectGroup(docType, provider, ext);
+    }
     frequency.value = _defaultFrequency(category.value);
     final summary = ext['summary'] as String?;
     if (summary != null) notes.value = summary;
