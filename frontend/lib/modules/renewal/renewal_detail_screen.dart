@@ -260,7 +260,9 @@ class _CountdownRing extends StatelessWidget {
               CircularProgressIndicator(
                 value: 1 - progress,
                 strokeWidth: 8,
-                backgroundColor: RenewdColors.steel,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? RenewdColors.steel
+                    : RenewdColors.silver,
                 valueColor: AlwaysStoppedAnimation<Color>(statusColor),
               ),
               Center(
@@ -428,9 +430,13 @@ class _InfoRow extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: RenewdSpacing.sm),
-      child: Divider(color: RenewdColors.steel, height: 1),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.sm),
+      child: Divider(
+        color: isDark ? RenewdColors.steel : RenewdColors.silver,
+        height: 1,
+      ),
     );
   }
 }
@@ -540,7 +546,12 @@ class _KeyDetailsTable extends StatelessWidget {
           return Column(
             children: [
               if (entry.key > 0)
-                const Divider(color: RenewdColors.steel, height: 1),
+                Divider(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? RenewdColors.steel
+                      : RenewdColors.silver,
+                  height: 1,
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(
                     vertical: RenewdSpacing.sm),
