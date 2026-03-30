@@ -214,22 +214,18 @@ class _CategoryChips extends StatelessWidget {
       final active = c.activeCategories;
       if (active.isEmpty) return const SizedBox.shrink();
 
-      return SizedBox(
-        height: 36,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: active.length,
-          separatorBuilder: (_, _) => const SizedBox(width: RenewdSpacing.sm),
-          itemBuilder: (_, i) {
-            final cat = active[i];
-            final isSelected = c.selectedCategory.value == cat;
-            final color = CategoryConfig.color(cat);
+      return Wrap(
+        spacing: RenewdSpacing.sm,
+        runSpacing: RenewdSpacing.sm,
+        children: active.map((cat) {
+          final isSelected = c.selectedCategory.value == cat;
+          final color = CategoryConfig.color(cat);
 
-            return GestureDetector(
-              onTap: () => c.selectCategory(cat),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
+          return GestureDetector(
+            onTap: () => c.selectCategory(cat),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? color.withValues(alpha: RenewdOpacity.medium)
@@ -256,8 +252,7 @@ class _CategoryChips extends StatelessWidget {
                 ),
               ),
             );
-          },
-        ),
+          }).toList(),
       );
     });
   }
