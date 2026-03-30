@@ -454,7 +454,7 @@ class _StatCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Container(
-        height: 88,
+        height: 96,
         padding: const EdgeInsets.all(RenewdSpacing.md),
         decoration: BoxDecoration(
           color: isDark
