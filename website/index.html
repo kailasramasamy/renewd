@@ -261,6 +261,14 @@
       margin: 0 auto;
       padding: 0 24px 100px;
       position: relative;
+      text-align: center;
+    }
+
+    .phone-mockup-img {
+      max-width: 320px;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
     }
 
     .phone-mockup {
@@ -595,6 +603,7 @@
       .hero h1 { letter-spacing: -1px; }
       .hero p { font-size: 17px; }
       .phone-mockup { width: 240px; }
+      .phone-mockup-img { max-width: 260px; }
       .features, .categories, .security, .cta { padding-left: 20px; padding-right: 20px; }
       .section-title { letter-spacing: -0.5px; }
       .section-desc { font-size: 16px; }
@@ -623,6 +632,7 @@
       .btn { justify-content: center; padding: 16px 24px; font-size: 17px; }
 
       .app-preview { padding: 0 20px 60px; }
+      .phone-mockup-img { max-width: 220px; }
       .phone-mockup { width: 200px; border-radius: 24px; padding: 8px; }
       .phone-screen { padding: 14px 10px; min-height: 360px; border-radius: 18px; }
       .mock-header { margin-bottom: 14px; }
@@ -723,58 +733,7 @@
 
   <!-- App Preview -->
   <section class="app-preview">
-    <div class="phone-mockup">
-      <div class="phone-screen">
-        <div class="mock-header">
-          <span class="mock-greeting">Hi, Priya</span>
-          <div class="mock-avatar"></div>
-        </div>
-        <div class="mock-stats">
-          <div class="mock-stat" style="background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.12);">
-            <span class="mock-stat-val" style="color: var(--orange);">2</span>DUE
-          </div>
-          <div class="mock-stat" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.12);">
-            <span class="mock-stat-val" style="color: var(--blue);">8</span>ACTIVE
-          </div>
-          <div class="mock-stat" style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.12);">
-            <span class="mock-stat-val" style="color: var(--emerald);">12K</span>MONTHLY
-          </div>
-        </div>
-        <div class="mock-renewal" style="border-color: var(--coral);">
-          <div class="mock-icon" style="background: rgba(59, 130, 246, 0.12);"><i data-lucide="shield-check" style="width: 18px; height: 18px; color: var(--blue);"></i></div>
-          <div>
-            <div class="mock-name">Car Insurance</div>
-            <div class="mock-sub">Tata AIG</div>
-          </div>
-          <div>
-            <div class="mock-amount">₹12,495</div>
-            <div class="mock-days" style="background: rgba(255, 69, 58, 0.15); color: var(--coral);">3d overdue</div>
-          </div>
-        </div>
-        <div class="mock-renewal" style="border-color: var(--orange);">
-          <div class="mock-icon" style="background: rgba(191, 90, 242, 0.12);"><i data-lucide="tv" style="width: 18px; height: 18px; color: var(--purple);"></i></div>
-          <div>
-            <div class="mock-name">Netflix</div>
-            <div class="mock-sub">Entertainment</div>
-          </div>
-          <div>
-            <div class="mock-amount">₹649</div>
-            <div class="mock-days" style="background: rgba(255, 159, 10, 0.15); color: var(--orange);">in 5d</div>
-          </div>
-        </div>
-        <div class="mock-renewal" style="border-color: var(--emerald);">
-          <div class="mock-icon" style="background: rgba(52, 199, 89, 0.12);"><i data-lucide="globe" style="width: 18px; height: 18px; color: var(--emerald);"></i></div>
-          <div>
-            <div class="mock-name">renewd.app</div>
-            <div class="mock-sub">GoDaddy</div>
-          </div>
-          <div>
-            <div class="mock-amount">₹1,599</div>
-            <div class="mock-days" style="background: rgba(52, 199, 89, 0.15); color: var(--emerald);">4 Sep</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <img src="app-mockup.png" alt="Renewd app screenshot" class="phone-mockup-img">
   </section>
 
   <!-- Features -->
