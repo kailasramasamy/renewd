@@ -19,7 +19,6 @@ class RenewdCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? RenewdColors.darkSlate : Colors.white;
-    final shadowColor = isDark ? Colors.transparent : RenewdColors.mist;
 
     return Material(
       color: bgColor,
@@ -30,16 +29,10 @@ class RenewdCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: RenewdRadius.xlAll,
-            border: isDark
-                ? Border.all(color: RenewdColors.steel, width: 1)
-                : null,
-            boxShadow: [
-              BoxShadow(
-                color: shadowColor,
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(
+              color: isDark ? RenewdColors.steel : RenewdColors.silver,
+              width: 1,
+            ),
           ),
           padding: padding ?? const EdgeInsets.all(RenewdSpacing.lg),
           child: child,

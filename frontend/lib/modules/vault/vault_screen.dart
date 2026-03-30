@@ -129,7 +129,7 @@ class _SearchBar extends StatelessWidget {
           prefixIcon: Icon(LucideIcons.search, size: 18),
           border: OutlineInputBorder(
             borderRadius: RenewdRadius.mdAll,
-            borderSide: const BorderSide(color: RenewdColors.steel),
+            borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? RenewdColors.steel : RenewdColors.silver),
           ),
           contentPadding: const EdgeInsets.symmetric(
               horizontal: RenewdSpacing.md, vertical: RenewdSpacing.sm),
