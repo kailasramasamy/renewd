@@ -407,31 +407,134 @@ class _StatsRow extends StatelessWidget {
   final DashboardController c;
   const _StatsRow({required this.c});
 
+  static String _formatAmount(double amount) {
+    if (amount >= 100000) {
+      return '${RenewdCurrency.symbol}${(amount / 1000).toStringAsFixed(0)}K';
+    }
+    return '${RenewdCurrency.symbol}${amount.toStringAsFixed(0)}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        _StatCard(
-          value: '${c.dueThisMonth}',
-          label: 'Due',
-          icon: LucideIcons.clock,
-          color: c.dueThisMonth > 0 ? RenewdColors.tangerine : RenewdColors.slate,
+        Row(
+          children: [
+            _StatCard(
+              value: '${c.dueThisMonth}',
+              label: 'Due',
+              icon: LucideIcons.clock,
+              color: c.dueThisMonth > 0 ? RenewdColors.tangerine : RenewdColors.slate,
+            ),
+            const SizedBox(width: RenewdSpacing.sm),
+            _StatCard(
+              value: '${c.totalActive}',
+              label: 'Active',
+              icon: LucideIcons.checkCircle,
+              color: RenewdColors.oceanBlue,
+            ),
+          ],
         ),
-        const SizedBox(width: RenewdSpacing.sm),
-        _StatCard(
-          value: '${c.totalActive}',
-          label: 'Active',
-          icon: LucideIcons.checkCircle,
-          color: RenewdColors.oceanBlue,
-        ),
-        const SizedBox(width: RenewdSpacing.sm),
-        _StatCard(
-          value: '${RenewdCurrency.symbol}${c.monthlySpend.toStringAsFixed(0)}',
-          label: 'Monthly',
-          icon: LucideIcons.wallet,
-          color: RenewdColors.emerald,
+        const SizedBox(height: RenewdSpacing.sm),
+        _SpendSummary(
+          monthly: _formatAmount(c.monthlySpend),
+          yearly: _formatAmount(c.yearlySpend),
+          annual: _formatAmount(c.totalAnnualSpend),
         ),
       ],
+    );
+  }
+}
+
+class _SpendSummary extends StatelessWidget {
+  final String monthly;
+  final String yearly;
+  final String annual;
+
+  const _SpendSummary({
+    required this.monthly,
+    required this.yearly,
+    required this.annual,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(RenewdSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [RenewdColors.emerald.withValues(alpha: 0.15), RenewdColors.emerald.withValues(alpha: 0.05)]
+              : [RenewdColors.emerald.withValues(alpha: 0.08), RenewdColors.emerald.withValues(alpha: 0.18)],
+        ),
+        borderRadius: RenewdRadius.xlAll,
+      ),
+      child: Row(
+        children: [
+          _SpendItem(label: 'Monthly', value: monthly, isDark: isDark),
+          _SpendDivider(isDark: isDark),
+          _SpendItem(label: 'Yearly', value: yearly, isDark: isDark),
+          _SpendDivider(isDark: isDark),
+          _SpendItem(label: 'Est. Annual', value: annual, isDark: isDark, highlight: true),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpendItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isDark;
+  final bool highlight;
+
+  const _SpendItem({
+    required this.label,
+    required this.value,
+    required this.isDark,
+    this.highlight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(label,
+              style: RenewdTextStyles.caption.copyWith(
+                color: RenewdColors.emerald.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              )),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(value,
+                style: RenewdTextStyles.h3.copyWith(
+                  color: isDark ? Colors.white : RenewdColors.deepNavy,
+                  fontWeight: highlight ? FontWeight.w800 : FontWeight.w700,
+                )),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpendDivider extends StatelessWidget {
+  final bool isDark;
+  const _SpendDivider({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 32,
+      margin: const EdgeInsets.symmetric(horizontal: RenewdSpacing.sm),
+      color: RenewdColors.emerald.withValues(alpha: isDark ? 0.2 : 0.15),
     );
   }
 }

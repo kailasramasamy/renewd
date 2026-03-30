@@ -39,6 +39,36 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         .fold(0.0, (sum, r) => sum + (r.amount ?? 0));
   }
 
+  double get yearlySpend {
+    return renewals
+        .where((r) => r.frequency == 'yearly')
+        .fold(0.0, (sum, r) => sum + (r.amount ?? 0));
+  }
+
+  /// Estimated annual cost across all frequencies
+  double get totalAnnualSpend {
+    double total = 0;
+    for (final r in renewals) {
+      final amount = r.amount ?? 0;
+      switch (r.frequency) {
+        case 'monthly':
+          total += amount * 12;
+        case 'quarterly':
+          total += amount * 4;
+        case 'yearly':
+          total += amount;
+        case 'weekly':
+          total += amount * 52;
+        case 'custom':
+          final days = r.frequencyDays ?? 365;
+          total += amount * (365 / days);
+        default:
+          total += amount;
+      }
+    }
+    return total;
+  }
+
   int get overdueCount =>
       renewals.where((r) => r.daysRemaining < 0).length;
 
