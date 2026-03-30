@@ -325,9 +325,19 @@ class ScanAddController extends GetxController {
       showErrorSnack(error);
       return;
     }
+
+    final data = _buildRenewalData();
+
+    // Check for duplicates before saving
+    final duplicates = await _renewalProvider.checkDuplicate(data);
+    if (duplicates.isNotEmpty) {
+      final proceed = await _showDuplicateWarning(duplicates);
+      if (proceed != true) return;
+    }
+
     isSaving.value = true;
     try {
-      final renewal = await _renewalProvider.create(_buildRenewalData());
+      final renewal = await _renewalProvider.create(data);
       if (document.value != null) {
         await _docProvider.linkToRenewal(document.value!.id, renewal.id);
       }
@@ -338,6 +348,50 @@ class ScanAddController extends GetxController {
     } finally {
       isSaving.value = false;
     }
+  }
+
+  Future<bool?> _showDuplicateWarning(List<String> matches) {
+    return Get.dialog<bool>(
+      AlertDialog(
+        backgroundColor: Get.isDarkMode ? RenewdColors.darkSlate : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Text('Possible Duplicate',
+            style: RenewdTextStyles.h3.copyWith(fontWeight: FontWeight.w700)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('A similar renewal already exists:',
+                style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate)),
+            const SizedBox(height: 8),
+            ...matches.map((m) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded,
+                          size: 16, color: RenewdColors.amber),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(m, style: RenewdTextStyles.body)),
+                    ],
+                  ),
+                )),
+            const SizedBox(height: 8),
+            Text('Do you still want to add this renewal?',
+                style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text('Cancel', style: TextStyle(color: RenewdColors.slate)),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text('Add Anyway', style: TextStyle(color: RenewdColors.oceanBlue)),
+          ),
+        ],
+      ),
+    );
   }
 
   Map<String, dynamic> _buildRenewalData() => {

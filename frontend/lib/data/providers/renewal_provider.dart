@@ -21,6 +21,21 @@ class RenewalProvider {
     return RenewalModel.fromJson(body['renewal'] as Map<String, dynamic>);
   }
 
+  /// Check for duplicate renewals. Returns matching renewal names, or empty list.
+  Future<List<String>> checkDuplicate(Map<String, dynamic> data) async {
+    try {
+      final response =
+          await _client.safePost(ApiEndpoints.checkDuplicate, data);
+      final body = response.body as Map<String, dynamic>;
+      final matches = body['matches'] as List<dynamic>? ?? [];
+      return matches
+          .map((m) => (m as Map<String, dynamic>)['name'] as String)
+          .toList();
+    } catch (_) {
+      return []; // Don't block save if check fails
+    }
+  }
+
   Future<RenewalModel> create(Map<String, dynamic> data) async {
     final response =
         await _client.safePost(ApiEndpoints.renewals, data);

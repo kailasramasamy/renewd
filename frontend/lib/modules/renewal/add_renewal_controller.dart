@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../data/providers/renewal_provider.dart';
 
@@ -51,22 +54,31 @@ class AddRenewalController extends GetxController {
       showErrorSnack(error);
       return;
     }
+
+    final data = <String, dynamic>{
+      'name': name.value.trim(),
+      'category': category.value.name,
+      'renewal_date': renewalDate.value!.toIso8601String(),
+      'frequency': frequency.value,
+      'auto_renew': autoRenew.value,
+      if (groupName.value.trim().isNotEmpty)
+        'group_name': groupName.value.trim(),
+      if (providerName.value.trim().isNotEmpty)
+        'provider': providerName.value.trim(),
+      if (amount.value != null) 'amount': amount.value,
+      if (notes.value.trim().isNotEmpty) 'notes': notes.value.trim(),
+      if (isCustomFrequency) 'frequency_days': frequencyDays.value,
+    };
+
+    // Check for duplicates before saving
+    final duplicates = await _provider.checkDuplicate(data);
+    if (duplicates.isNotEmpty) {
+      final proceed = await _showDuplicateWarning(duplicates);
+      if (proceed != true) return;
+    }
+
     isLoading.value = true;
     try {
-      final data = <String, dynamic>{
-        'name': name.value.trim(),
-        'category': category.value.name,
-        'renewal_date': renewalDate.value!.toIso8601String(),
-        'frequency': frequency.value,
-        'auto_renew': autoRenew.value,
-        if (groupName.value.trim().isNotEmpty)
-          'group_name': groupName.value.trim(),
-        if (providerName.value.trim().isNotEmpty)
-          'provider': providerName.value.trim(),
-        if (amount.value != null) 'amount': amount.value,
-        if (notes.value.trim().isNotEmpty) 'notes': notes.value.trim(),
-        if (isCustomFrequency) 'frequency_days': frequencyDays.value,
-      };
       await _provider.create(data);
       Get.back(result: true);
       showSuccessSnack('${name.value.trim()} added');
@@ -75,5 +87,49 @@ class AddRenewalController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<bool?> _showDuplicateWarning(List<String> matches) {
+    return Get.dialog<bool>(
+      AlertDialog(
+        backgroundColor: Get.isDarkMode ? RenewdColors.darkSlate : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Text('Possible Duplicate',
+            style: RenewdTextStyles.h3.copyWith(fontWeight: FontWeight.w700)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('A similar renewal already exists:',
+                style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate)),
+            const SizedBox(height: 8),
+            ...matches.map((m) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded,
+                          size: 16, color: RenewdColors.amber),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(m, style: RenewdTextStyles.body)),
+                    ],
+                  ),
+                )),
+            const SizedBox(height: 8),
+            Text('Do you still want to add this renewal?',
+                style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text('Cancel', style: TextStyle(color: RenewdColors.slate)),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text('Add Anyway', style: TextStyle(color: RenewdColors.oceanBlue)),
+          ),
+        ],
+      ),
+    );
   }
 }

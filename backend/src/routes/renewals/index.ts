@@ -234,6 +234,32 @@ async function registerBackfillLogos(app: FastifyInstance) {
   });
 }
 
+async function registerDuplicateCheck(app: FastifyInstance) {
+  app.post("/check-duplicate", auth, async (request, reply) => {
+    const body = request.body as Record<string, unknown>;
+    const { name, provider, category, amount } = body;
+    const userId = await getUserId(app, request.user.uid);
+
+    // Check for similar renewals by name, provider, or category+amount
+    const result = await app.db.query(
+      `SELECT id, name, provider, category, amount::text, frequency
+       FROM renewals
+       WHERE user_id = $1 AND status = 'active' AND (
+         LOWER(name) = LOWER($2)
+         OR (LOWER(provider) = LOWER($3) AND provider IS NOT NULL AND $3 IS NOT NULL AND $3 != '')
+         OR (category = $4 AND amount = $5 AND $5 IS NOT NULL)
+       )
+       LIMIT 3`,
+      [userId, name ?? "", provider ?? "", category ?? "", amount ?? null]
+    );
+
+    return reply.send({
+      hasDuplicate: result.rows.length > 0,
+      matches: result.rows,
+    });
+  });
+}
+
 export default async function renewalRoutes(app: FastifyInstance) {
   await registerListAndGet(app);
   await registerCreate(app);
@@ -241,5 +267,6 @@ export default async function renewalRoutes(app: FastifyInstance) {
   await registerMarkRenewed(app);
   await registerReminderRoutes(app);
   await registerPriceCheck(app);
+  await registerDuplicateCheck(app);
   await registerBackfillLogos(app);
 }

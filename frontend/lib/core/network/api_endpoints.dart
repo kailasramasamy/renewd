@@ -13,6 +13,7 @@ class ApiEndpoints {
 
   // Renewals
   static const String renewals = '/renewals';
+  static const String checkDuplicate = '/renewals/check-duplicate';
   static String renewalById(String id) => '/renewals/$id';
 
   // Documents

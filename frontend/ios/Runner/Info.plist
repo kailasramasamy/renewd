@@ -45,6 +45,18 @@
 	<string>Renewd needs camera access to scan documents</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Renewd needs photo library access to upload documents</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.360842637861-denfn7lu3lnr6844c6e8f99cih2qh9jp</string>
+				<string>renewd</string>
+			</array>
+		</dict>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
