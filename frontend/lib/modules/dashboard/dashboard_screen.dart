@@ -481,13 +481,15 @@ class _StatCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: RenewdSpacing.sm),
-            Text(value,
-                style: RenewdTextStyles.h2.copyWith(
-                  color: isDark ? Colors.white : RenewdColors.deepNavy,
-                  fontWeight: FontWeight.w800,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(value,
+                  style: RenewdTextStyles.h2.copyWith(
+                    color: isDark ? Colors.white : RenewdColors.deepNavy,
+                    fontWeight: FontWeight.w800,
+                  )),
+            ),
           ],
         ),
       ),
