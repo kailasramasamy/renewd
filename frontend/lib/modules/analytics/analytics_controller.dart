@@ -1,109 +1,89 @@
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
-import '../../core/network/api_client.dart';
-import '../../core/network/api_endpoints.dart';
 import '../../data/models/renewal_model.dart';
 import '../dashboard/dashboard_controller.dart';
 
 class AnalyticsController extends GetxController {
-  final _client = Get.find<ApiClient>();
-
-  final RxBool isLoading = false.obs;
-  final RxString error = ''.obs;
-
-  final RxList<CategorySpend> categoryBreakdown = <CategorySpend>[].obs;
-  final RxList<MonthlySpend> monthlyTrend = <MonthlySpend>[].obs;
-  final RxDouble totalSpend = 0.0.obs;
-
-  List<RenewalModel> get topRenewals {
+  List<RenewalModel> get _renewals {
     try {
-      final dc = Get.find<DashboardController>();
-      final sorted = List<RenewalModel>.from(dc.renewals);
-      sorted.sort(
-        (a, b) => (b.amount ?? 0).compareTo(a.amount ?? 0),
-      );
-      return sorted.take(5).toList();
-    } catch (e) {
-      debugPrint('topRenewals failed: $e');
+      return Get.find<DashboardController>().renewals;
+    } catch (_) {
       return [];
     }
   }
 
-  bool get hasData =>
-      categoryBreakdown.isNotEmpty || monthlyTrend.isNotEmpty;
+  bool get hasData => _renewals.isNotEmpty;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchAnalytics();
-  }
-
-  Future<void> fetchAnalytics() async {
-    isLoading.value = true;
-    error.value = '';
-    try {
-      await Future.wait([
-        _fetchByCategory(),
-        _fetchByMonth(),
-      ]);
-    } catch (e) {
-      error.value = e.toString();
-      debugPrint('fetchAnalytics failed: $e');
-    } finally {
-      isLoading.value = false;
+  double _annualCost(RenewalModel r) {
+    final amount = r.amount ?? 0;
+    switch (r.frequency) {
+      case 'monthly': return amount * 12;
+      case 'quarterly': return amount * 4;
+      case 'yearly': return amount;
+      case 'weekly': return amount * 52;
+      case 'custom':
+        final days = r.frequencyDays ?? 365;
+        return amount * (365 / days);
+      default: return amount;
     }
   }
 
-  Future<void> _fetchByCategory() async {
-    final response = await _client.safeGet(
-      ApiEndpoints.analyticsByCategory,
-    );
-    final body = response.body as Map<String, dynamic>;
-    final list = body['categories'] as List<dynamic>? ?? [];
-    double total = 0;
-    final items = <CategorySpend>[];
-    for (final item in list) {
-      final map = item as Map<String, dynamic>;
-      final amount = (map['total'] as num?)?.toDouble() ?? 0;
-      total += amount;
-      final catName = (map['category'] as String?) ?? 'other';
-      final category = RenewalCategory.values.firstWhere(
-        (e) => e.name == catName.toLowerCase(),
-        orElse: () => RenewalCategory.other,
-      );
-      items.add(CategorySpend(category: category, amount: amount));
+  double get totalAnnualSpend =>
+      _renewals.fold(0.0, (sum, r) => sum + _annualCost(r));
+
+  double get monthlySpend =>
+      _renewals.where((r) => r.frequency == 'monthly')
+          .fold(0.0, (sum, r) => sum + (r.amount ?? 0));
+
+  double get yearlySpend =>
+      _renewals.where((r) => r.frequency == 'yearly')
+          .fold(0.0, (sum, r) => sum + (r.amount ?? 0));
+
+  List<CategorySpend> get categoryBreakdown {
+    final map = <RenewalCategory, _CatAccum>{};
+    for (final r in _renewals) {
+      map.putIfAbsent(r.category, () => _CatAccum());
+      map[r.category]!.count++;
+      map[r.category]!.annual += _annualCost(r);
     }
-    categoryBreakdown.assignAll(items);
-    totalSpend.value = total;
+    final items = map.entries
+        .map((e) => CategorySpend(
+              category: e.key,
+              annualCost: e.value.annual,
+              count: e.value.count,
+            ))
+        .toList();
+    items.sort((a, b) => b.annualCost.compareTo(a.annualCost));
+    return items;
   }
 
-  Future<void> _fetchByMonth() async {
-    final response = await _client.safeGet(
-      ApiEndpoints.analyticsByMonth,
-    );
-    final body = response.body as Map<String, dynamic>;
-    final list = body['months'] as List<dynamic>? ?? [];
-    final items = <MonthlySpend>[];
-    for (final item in list) {
-      final map = item as Map<String, dynamic>;
-      items.add(MonthlySpend(
-        month: map['month'] as String? ?? '',
-        amount: (map['total'] as num?)?.toDouble() ?? 0,
-      ));
+  List<RenewalModel> get topRenewals {
+    final sorted = List<RenewalModel>.from(_renewals);
+    sorted.sort((a, b) => _annualCost(b).compareTo(_annualCost(a)));
+    return sorted.take(5).toList();
+  }
+
+  double annualCostOf(RenewalModel r) => _annualCost(r);
+
+  String frequencyLabel(String? freq) {
+    switch (freq) {
+      case 'monthly': return '/mo';
+      case 'quarterly': return '/qtr';
+      case 'yearly': return '/yr';
+      case 'weekly': return '/wk';
+      default: return '';
     }
-    monthlyTrend.assignAll(items);
   }
 }
 
 class CategorySpend {
   final RenewalCategory category;
-  final double amount;
-  const CategorySpend({required this.category, required this.amount});
+  final double annualCost;
+  final int count;
+  const CategorySpend({required this.category, required this.annualCost, required this.count});
 }
 
-class MonthlySpend {
-  final String month;
-  final double amount;
-  const MonthlySpend({required this.month, required this.amount});
+class _CatAccum {
+  int count = 0;
+  double annual = 0;
 }

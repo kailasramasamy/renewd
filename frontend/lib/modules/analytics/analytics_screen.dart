@@ -6,7 +6,6 @@ import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../core/theme/app_radius.dart';
 import '../../core/utils/currency.dart';
 import '../../core/widgets/premium_gate.dart';
 import '../../widgets/minder_card.dart';
@@ -26,59 +25,31 @@ class AnalyticsScreen extends StatelessWidget {
           icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => Get.back(),
         ),
-        title: Text(
-          'Spending Analytics',
-          style: RenewdTextStyles.h3.copyWith(
-            color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy,
-          ),
-        ),
-        centerTitle: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text('Spending Analytics'),
       ),
       body: PremiumGate(
         feature: 'spending_analytics',
         child: Obx(() {
-          if (c.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (c.error.value.isNotEmpty && !c.hasData) {
-            return _ErrorState(c: c);
-          }
-          if (!c.hasData && c.topRenewals.isEmpty) {
+          if (!c.hasData) {
             return _EmptyState(isDark: isDark);
           }
-          return RefreshIndicator(
-            onRefresh: c.fetchAnalytics,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                RenewdSpacing.lg,
-                RenewdSpacing.sm,
-                RenewdSpacing.lg,
-                RenewdSpacing.xxxl,
-              ),
-              children: [
-                _TotalSpendCard(c: c, isDark: isDark),
-                const SizedBox(height: RenewdSpacing.xl),
-                if (c.categoryBreakdown.isNotEmpty) ...[
-                  _SectionTitle(title: 'BY CATEGORY', isDark: isDark),
-                  const SizedBox(height: RenewdSpacing.md),
-                  _CategoryBreakdown(c: c, isDark: isDark),
-                  const SizedBox(height: RenewdSpacing.xl),
-                ],
-                if (c.monthlyTrend.isNotEmpty) ...[
-                  _SectionTitle(title: 'MONTHLY TREND', isDark: isDark),
-                  const SizedBox(height: RenewdSpacing.md),
-                  _MonthlyChart(c: c, isDark: isDark),
-                  const SizedBox(height: RenewdSpacing.xl),
-                ],
-                if (c.topRenewals.isNotEmpty) ...[
-                  _SectionTitle(title: 'TOP RENEWALS', isDark: isDark),
-                  const SizedBox(height: RenewdSpacing.md),
-                  _TopRenewals(c: c, isDark: isDark),
-                ],
-              ],
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(
+              RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, 100,
             ),
+            children: [
+              _AnnualSummary(c: c, isDark: isDark),
+              const SizedBox(height: RenewdSpacing.xl),
+              _SectionTitle('CATEGORY BREAKDOWN', isDark),
+              const SizedBox(height: RenewdSpacing.md),
+              _DonutChart(c: c, isDark: isDark),
+              const SizedBox(height: RenewdSpacing.lg),
+              _CategoryList(c: c, isDark: isDark),
+              const SizedBox(height: RenewdSpacing.xl),
+              _SectionTitle('TOP RENEWALS BY ANNUAL COST', isDark),
+              const SizedBox(height: RenewdSpacing.md),
+              _TopRenewals(c: c, isDark: isDark),
+            ],
           );
         }),
       ),
@@ -86,279 +57,253 @@ class AnalyticsScreen extends StatelessWidget {
   }
 }
 
-// -- Total Spend Card --
-
-class _TotalSpendCard extends StatelessWidget {
-  final AnalyticsController c;
-  final bool isDark;
-  const _TotalSpendCard({required this.c, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return RenewdCard(
-      child: Column(
-        children: [
-          Text(
-            'Total Spend',
-            style: RenewdTextStyles.caption.copyWith(
-              color: isDark ? RenewdColors.warmGray : RenewdColors.slate,
-            ),
-          ),
-          const SizedBox(height: RenewdSpacing.xs),
-          Text(
-            RenewdCurrency.format(c.totalSpend.value),
-            style: RenewdTextStyles.numberLarge.copyWith(
-              color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// -- Section Title --
-
 class _SectionTitle extends StatelessWidget {
   final String title;
   final bool isDark;
-  const _SectionTitle({required this.title, required this.isDark});
+  const _SectionTitle(this.title, this.isDark);
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: RenewdTextStyles.sectionHeader.copyWith(
-        color: isDark ? RenewdColors.warmGray : RenewdColors.slate,
-      ),
-    );
+    return Text(title,
+        style: RenewdTextStyles.sectionHeader
+            .copyWith(color: isDark ? RenewdColors.warmGray : RenewdColors.slate));
   }
 }
 
-// -- Category Breakdown --
+// ─── Annual Summary ─────────────────────────────────
 
-class _CategoryBreakdown extends StatelessWidget {
+class _AnnualSummary extends StatelessWidget {
   final AnalyticsController c;
   final bool isDark;
-  const _CategoryBreakdown({required this.c, required this.isDark});
+  const _AnnualSummary({required this.c, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final total = c.totalSpend.value;
     return RenewdCard(
-      padding: const EdgeInsets.all(RenewdSpacing.lg),
+      padding: const EdgeInsets.all(RenewdSpacing.xl),
       child: Column(
         children: [
-          for (int i = 0; i < c.categoryBreakdown.length; i++) ...[
-            if (i > 0) const SizedBox(height: RenewdSpacing.md),
-            _CategoryRow(
-              item: c.categoryBreakdown[i],
-              total: total,
-              isDark: isDark,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _CategoryRow extends StatelessWidget {
-  final CategorySpend item;
-  final double total;
-  final bool isDark;
-  const _CategoryRow({
-    required this.item,
-    required this.total,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = total > 0 ? item.amount / total : 0.0;
-    final color = CategoryConfig.color(item.category);
-    final icon = CategoryConfig.icon(item.category);
-    final label = CategoryConfig.label(item.category);
-
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: color),
-        const SizedBox(width: RenewdSpacing.sm),
-        Expanded(
-          flex: 2,
-          child: Text(
-            label,
-            style: RenewdTextStyles.bodySmall.copyWith(
-              color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 3,
-          child: _PercentBar(fraction: pct, color: color, isDark: isDark),
-        ),
-        const SizedBox(width: RenewdSpacing.sm),
-        SizedBox(
-          width: 72,
-          child: Text(
-            RenewdCurrency.format(item.amount),
-            textAlign: TextAlign.right,
-            style: RenewdTextStyles.caption.copyWith(
-              color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PercentBar extends StatelessWidget {
-  final double fraction;
-  final Color color;
-  final bool isDark;
-  const _PercentBar({
-    required this.fraction,
-    required this.color,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final barWidth = constraints.maxWidth * fraction.clamp(0.0, 1.0);
-      return Container(
-        height: 8,
-        decoration: BoxDecoration(
-          color: isDark
-              ? RenewdColors.steel
-              : RenewdColors.cloudGray,
-          borderRadius: RenewdRadius.pillAll,
-        ),
-        alignment: Alignment.centerLeft,
-        child: Container(
-          width: barWidth,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: RenewdRadius.pillAll,
-          ),
-        ),
-      );
-    });
-  }
-}
-
-// -- Monthly Chart --
-
-class _MonthlyChart extends StatelessWidget {
-  final AnalyticsController c;
-  final bool isDark;
-  const _MonthlyChart({required this.c, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final months = c.monthlyTrend;
-    final maxAmount = months.fold<double>(
-      0,
-      (prev, e) => max(prev, e.amount),
-    );
-
-    return RenewdCard(
-      padding: const EdgeInsets.all(RenewdSpacing.lg),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 160,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (int i = 0; i < months.length; i++) ...[
-                  if (i > 0) const SizedBox(width: RenewdSpacing.xs),
-                  Expanded(
-                    child: _MonthBar(
-                      item: months[i],
-                      maxAmount: maxAmount,
-                      isDark: isDark,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+          Text('Estimated Annual Spend',
+              style: RenewdTextStyles.caption.copyWith(
+                color: RenewdColors.slate,
+                fontWeight: FontWeight.w600,
+              )),
           const SizedBox(height: RenewdSpacing.sm),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              RenewdCurrency.format(c.totalAnnualSpend),
+              style: RenewdTextStyles.numberLarge.copyWith(
+                color: isDark ? Colors.white : RenewdColors.deepNavy,
+              ),
+            ),
+          ),
+          const SizedBox(height: RenewdSpacing.lg),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (int i = 0; i < months.length; i++) ...[
-                if (i > 0) const SizedBox(width: RenewdSpacing.xs),
-                Expanded(
-                  child: Text(
-                    _shortMonth(months[i].month),
-                    textAlign: TextAlign.center,
-                    style: RenewdTextStyles.caption.copyWith(
-                      fontSize: 10,
-                      color: isDark
-                          ? RenewdColors.warmGray
-                          : RenewdColors.slate,
-                    ),
-                  ),
-                ),
-              ],
+              _MiniStat('Monthly', RenewdCurrency.format(c.monthlySpend), isDark),
+              Container(
+                width: 1, height: 24,
+                margin: const EdgeInsets.symmetric(horizontal: RenewdSpacing.lg),
+                color: isDark ? RenewdColors.steel : RenewdColors.silver,
+              ),
+              _MiniStat('Yearly', RenewdCurrency.format(c.yearlySpend), isDark),
             ],
           ),
         ],
       ),
     );
   }
-
-  String _shortMonth(String month) {
-    // Expects "2026-03" format; show "Mar"
-    final parts = month.split('-');
-    if (parts.length < 2) return month;
-    const names = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    final idx = int.tryParse(parts[1]);
-    if (idx == null || idx < 1 || idx > 12) return month;
-    return names[idx - 1];
-  }
 }
 
-class _MonthBar extends StatelessWidget {
-  final MonthlySpend item;
-  final double maxAmount;
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final String value;
   final bool isDark;
-  const _MonthBar({
-    required this.item,
-    required this.maxAmount,
-    required this.isDark,
-  });
+  const _MiniStat(this.label, this.value, this.isDark);
 
   @override
   Widget build(BuildContext context) {
-    final fraction = maxAmount > 0 ? item.amount / maxAmount : 0.0;
-    final barHeight = 140.0 * fraction.clamp(0.0, 1.0);
-
     return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Container(
-          height: max(barHeight, 4),
-          decoration: BoxDecoration(
-            color: RenewdColors.oceanBlue,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(RenewdRadius.sm),
-            ),
-          ),
-        ),
+        Text(label,
+            style: RenewdTextStyles.caption.copyWith(
+              color: RenewdColors.slate, fontSize: 10)),
+        const SizedBox(height: 2),
+        Text(value,
+            style: RenewdTextStyles.bodySmall.copyWith(
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : RenewdColors.deepNavy,
+            )),
       ],
     );
   }
 }
 
-// -- Top Renewals --
+// ─── Donut Chart ─────────────────────────────────────
+
+class _DonutChart extends StatelessWidget {
+  final AnalyticsController c;
+  final bool isDark;
+  const _DonutChart({required this.c, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final breakdown = c.categoryBreakdown;
+    final total = c.totalAnnualSpend;
+
+    return RenewdCard(
+      padding: const EdgeInsets.all(RenewdSpacing.xl),
+      child: SizedBox(
+        height: 200,
+        child: CustomPaint(
+          painter: _DonutPainter(
+            segments: breakdown.map((s) => _Segment(
+              fraction: total > 0 ? s.annualCost / total : 0,
+              color: CategoryConfig.color(s.category),
+            )).toList(),
+            isDark: isDark,
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${breakdown.length}',
+                    style: RenewdTextStyles.h2.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : RenewdColors.deepNavy,
+                    )),
+                Text('categories',
+                    style: RenewdTextStyles.caption.copyWith(
+                      color: RenewdColors.slate,
+                    )),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Segment {
+  final double fraction;
+  final Color color;
+  const _Segment({required this.fraction, required this.color});
+}
+
+class _DonutPainter extends CustomPainter {
+  final List<_Segment> segments;
+  final bool isDark;
+  _DonutPainter({required this.segments, required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = min(size.width, size.height) / 2 - 8;
+    final strokeWidth = 24.0;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    // Background circle
+    final bgPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..color = isDark ? RenewdColors.steel : RenewdColors.cloudGray;
+    canvas.drawCircle(center, radius, bgPaint);
+
+    // Segments
+    double startAngle = -pi / 2;
+    for (final seg in segments) {
+      final sweep = seg.fraction * 2 * pi;
+      final paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.butt
+        ..color = seg.color;
+      canvas.drawArc(rect, startAngle, sweep, false, paint);
+      startAngle += sweep;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DonutPainter old) => true;
+}
+
+// ─── Category List ───────────────────────────────────
+
+class _CategoryList extends StatelessWidget {
+  final AnalyticsController c;
+  final bool isDark;
+  const _CategoryList({required this.c, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final breakdown = c.categoryBreakdown;
+    final total = c.totalAnnualSpend;
+
+    return Column(
+      children: breakdown.map((item) {
+        final pct = total > 0 ? (item.annualCost / total * 100) : 0;
+        final color = CategoryConfig.color(item.category);
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: RenewdSpacing.sm),
+          child: RenewdCard(
+            padding: const EdgeInsets.all(RenewdSpacing.lg),
+            child: Row(
+              children: [
+                Container(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(CategoryConfig.icon(item.category),
+                      size: 18, color: color),
+                ),
+                const SizedBox(width: RenewdSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(CategoryConfig.label(item.category),
+                          style: RenewdTextStyles.bodySmall.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white : RenewdColors.deepNavy,
+                          )),
+                      const SizedBox(height: 2),
+                      Text('${item.count} renewal${item.count > 1 ? 's' : ''} · ${pct.toStringAsFixed(0)}%',
+                          style: RenewdTextStyles.caption.copyWith(
+                            color: RenewdColors.slate,
+                          )),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(RenewdCurrency.format(item.annualCost),
+                        style: RenewdTextStyles.bodySmall.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : RenewdColors.deepNavy,
+                        )),
+                    Text('/year',
+                        style: RenewdTextStyles.caption.copyWith(
+                          color: RenewdColors.slate, fontSize: 10,
+                        )),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ─── Top Renewals ────────────────────────────────────
 
 class _TopRenewals extends StatelessWidget {
   final AnalyticsController c;
@@ -374,55 +319,57 @@ class _TopRenewals extends StatelessWidget {
         children: [
           for (int i = 0; i < items.length; i++) ...[
             if (i > 0) Divider(
-              height: RenewdSpacing.lg,
-              color: isDark ? RenewdColors.darkBorder : RenewdColors.mist,
+              height: RenewdSpacing.xl,
+              color: isDark ? RenewdColors.steel : RenewdColors.silver,
             ),
             Row(
               children: [
                 Container(
-                  width: 28,
-                  height: 28,
+                  width: 24, height: 24,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: CategoryConfig.color(items[i].category)
-                        .withValues(alpha: 0.15),
-                    borderRadius: RenewdRadius.smAll,
+                    color: _rankColor(i).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(
-                    CategoryConfig.icon(items[i].category),
-                    size: 14,
-                    color: CategoryConfig.color(items[i].category),
-                  ),
+                  child: Text('${i + 1}',
+                      style: RenewdTextStyles.caption.copyWith(
+                        color: _rankColor(i),
+                        fontWeight: FontWeight.w700,
+                      )),
                 ),
                 const SizedBox(width: RenewdSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(items[i].name,
+                          style: RenewdTextStyles.bodySmall.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : RenewdColors.deepNavy,
+                          )),
                       Text(
-                        items[i].name,
-                        style: RenewdTextStyles.bodySmall.copyWith(
-                          color: isDark
-                              ? RenewdColors.warmWhite
-                              : RenewdColors.deepNavy,
+                        '${items[i].provider ?? CategoryConfig.label(items[i].category)}'
+                        ' · ${RenewdCurrency.format(items[i].amount ?? 0)}${c.frequencyLabel(items[i].frequency)}',
+                        style: RenewdTextStyles.caption.copyWith(
+                          color: RenewdColors.slate,
                         ),
                       ),
-                      if (items[i].provider != null)
-                        Text(
-                          items[i].provider!,
-                          style: RenewdTextStyles.caption.copyWith(
-                            color: RenewdColors.warmGray,
-                          ),
-                        ),
                     ],
                   ),
                 ),
-                Text(
-                  RenewdCurrency.format(items[i].amount ?? 0),
-                  style: RenewdTextStyles.subtitle.copyWith(
-                    color: isDark
-                        ? RenewdColors.warmWhite
-                        : RenewdColors.deepNavy,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(RenewdCurrency.format(c.annualCostOf(items[i])),
+                        style: RenewdTextStyles.bodySmall.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : RenewdColors.deepNavy,
+                        )),
+                    Text('/year',
+                        style: RenewdTextStyles.caption.copyWith(
+                          color: RenewdColors.slate, fontSize: 10,
+                        )),
+                  ],
                 ),
               ],
             ),
@@ -431,9 +378,18 @@ class _TopRenewals extends StatelessWidget {
       ),
     );
   }
+
+  Color _rankColor(int i) {
+    switch (i) {
+      case 0: return RenewdColors.tangerine;
+      case 1: return RenewdColors.oceanBlue;
+      case 2: return RenewdColors.emerald;
+      default: return RenewdColors.slate;
+    }
+  }
 }
 
-// -- Empty State --
+// ─── Empty State ─────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
   final bool isDark;
@@ -443,67 +399,18 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(top: 100),
-        child: Column(
-          children: [
-            Icon(
-              LucideIcons.barChart3,
-              size: 48,
-              color: isDark ? RenewdColors.warmGray : RenewdColors.slate,
-            ),
-            const SizedBox(height: RenewdSpacing.lg),
-            Text(
-              'No payment data yet',
-              style: RenewdTextStyles.body.copyWith(
-                color: isDark ? RenewdColors.warmGray : RenewdColors.slate,
-              ),
-            ),
-            const SizedBox(height: RenewdSpacing.sm),
-            Text(
-              'Add payments to your renewals to see analytics',
-              style: RenewdTextStyles.caption.copyWith(
-                color: RenewdColors.warmGray,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// -- Error State --
-
-class _ErrorState extends StatelessWidget {
-  final AnalyticsController c;
-  const _ErrorState({required this.c});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(RenewdSpacing.xl),
+        padding: const EdgeInsets.all(RenewdSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              LucideIcons.alertCircle,
-              size: 48,
-              color: RenewdColors.coralRed,
-            ),
+            Icon(LucideIcons.pieChart, size: 48, color: RenewdColors.slate),
             const SizedBox(height: RenewdSpacing.lg),
-            Text(
-              'Failed to load analytics',
-              style: RenewdTextStyles.body.copyWith(
-                color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy,
-              ),
-            ),
-            const SizedBox(height: RenewdSpacing.lg),
-            TextButton(
-              onPressed: c.fetchAnalytics,
-              child: const Text('Retry'),
-            ),
+            Text('No renewals yet',
+                style: RenewdTextStyles.body.copyWith(color: RenewdColors.slate)),
+            const SizedBox(height: RenewdSpacing.sm),
+            Text('Add renewals to see your spending breakdown',
+                textAlign: TextAlign.center,
+                style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),
           ],
         ),
       ),
