@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -8,6 +9,7 @@ import '../../core/services/storage_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/currency.dart';
 import '../../core/utils/snackbar_helper.dart';
 
 class CompleteProfileScreen extends StatefulWidget {
@@ -93,6 +95,11 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         'phone': _phoneCtrl.text.trim().isNotEmpty
             ? _phoneCtrl.text.trim()
             : null,
+        'default_currency': RenewdCurrency.detectFromLocale(),
+        'country': RenewdCurrency.deviceCountry,
+        'device_os': Platform.isIOS ? 'iOS' : 'Android',
+        'device_model': Platform.localHostname,
+        'app_version': '1.0.0',
       });
 
       // Update local storage
@@ -185,8 +192,19 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     hintText: 'Enter your phone number',
-                    prefixIcon: Icon(LucideIcons.phone,
-                        size: 18, color: RenewdColors.slate),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(left: 12, right: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.phone,
+                              size: 18, color: RenewdColors.slate),
+                          const SizedBox(width: 8),
+                          Text(RenewdCurrency.detectDialCode(),
+                              style: RenewdTextStyles.body),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],

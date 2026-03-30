@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -143,6 +144,9 @@ class AuthController extends GetxController {
         await client.safePut('/users/me', {
           'default_currency': detectedCurrency,
           'country': RenewdCurrency.deviceCountry,
+          'device_os': Platform.isIOS ? 'iOS' : 'Android',
+          'device_model': Platform.localHostname,
+          'app_version': '1.0.0',
         });
       } catch (e) {
         if (e is ApiException && e.statusCode != 409) {
@@ -201,6 +205,9 @@ class AuthController extends GetxController {
         await client.safePut('/users/me', {
           'default_currency': detectedCurrency,
           'country': RenewdCurrency.deviceCountry,
+          'device_os': Platform.isIOS ? 'iOS' : 'Android',
+          'device_model': Platform.localHostname,
+          'app_version': '1.0.0',
         });
       } catch (e) {
         if (e is ApiException && e.statusCode != 409) {

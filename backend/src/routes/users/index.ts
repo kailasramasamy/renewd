@@ -44,7 +44,7 @@ export default async function userRoutes(app: FastifyInstance) {
 
   const updateUser = async (request: any, reply: any) => {
     const body = request.body as Record<string, unknown>;
-    const { name, phone, email, avatar_url, default_currency, country } = body;
+    const { name, phone, email, avatar_url, default_currency, country, device_os, device_model, app_version } = body;
 
     const result = await app.db.query(
       `UPDATE users SET
@@ -54,9 +54,12 @@ export default async function userRoutes(app: FastifyInstance) {
         avatar_url = COALESCE($4, avatar_url),
         default_currency = COALESCE($5, default_currency),
         country = COALESCE($6, country),
+        device_os = COALESCE($7, device_os),
+        device_model = COALESCE($8, device_model),
+        app_version = COALESCE($9, app_version),
         updated_at = NOW()
-       WHERE firebase_uid = $7 RETURNING *`,
-      [name ?? null, phone ?? null, email ?? null, avatar_url ?? null, default_currency ?? null, country ?? null, request.user.uid]
+       WHERE firebase_uid = $10 RETURNING *`,
+      [name ?? null, phone ?? null, email ?? null, avatar_url ?? null, default_currency ?? null, country ?? null, device_os ?? null, device_model ?? null, app_version ?? null, request.user.uid]
     );
     if (result.rows.length === 0) throw new NotFoundError("User");
     return reply.send({ user: result.rows[0] });
