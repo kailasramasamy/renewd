@@ -45,9 +45,14 @@ class DocumentProvider {
 
     final streamed = await request.send();
     final body = await streamed.stream.bytesToString();
-    if (streamed.statusCode >= 400) throw Exception('Upload failed: $body');
-
     final json = jsonDecode(body) as Map<String, dynamic>;
+
+    // 409 = duplicate file — return the existing document
+    if (streamed.statusCode == 409 && json['document'] != null) {
+      return DocumentModel.fromJson(json['document'] as Map<String, dynamic>);
+    }
+
+    if (streamed.statusCode >= 400) throw Exception('Upload failed: $body');
     return DocumentModel.fromJson(json['document'] as Map<String, dynamic>);
   }
 
