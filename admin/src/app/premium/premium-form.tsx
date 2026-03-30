@@ -25,6 +25,7 @@ const labels: Record<string, string> = {
   iap_product_lifetime: "Lifetime Product ID",
   chat_daily_limit: "Daily Message Limit (per user)",
   chat_max_message_length: "Max Message Length (chars)",
+  new_user_trial_days: "New User Premium Trial",
 };
 
 const sections: { title: string; keys: string[] }[] = [
@@ -61,6 +62,10 @@ const sections: { title: string; keys: string[] }[] = [
     title: "AI Chat Limits",
     keys: ["chat_daily_limit", "chat_max_message_length"],
   },
+  {
+    title: "New User Trial",
+    keys: ["new_user_trial_days"],
+  },
 ];
 
 const inputClass =
@@ -91,6 +96,24 @@ export function PremiumForm({ config }: Props) {
   }
 
   function renderInput(key: string) {
+    if (key === "new_user_trial_days") {
+      return (
+        <select
+          value={values[key]}
+          onChange={(e) => setValues({ ...values, [key]: e.target.value })}
+          className={inputClass}
+        >
+          <option value="0">No Trial (Free Plan)</option>
+          <option value="7">7 Days</option>
+          <option value="14">14 Days</option>
+          <option value="30">30 Days</option>
+          <option value="60">60 Days</option>
+          <option value="90">90 Days</option>
+          <option value="365">1 Year</option>
+          <option value="-1">Lifetime (Beta)</option>
+        </select>
+      );
+    }
     if (key === "iap_enabled") {
       return (
         <select
