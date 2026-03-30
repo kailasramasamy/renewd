@@ -964,7 +964,10 @@ class _EmptyState extends StatelessWidget {
             subtitle: 'Point your camera at any policy or bill',
             color: RenewdColors.lavender,
             isDark: isDark,
-            onTap: () => Get.toNamed(AppRoutes.scanAdd),
+            onTap: () async {
+              final result = await Get.toNamed(AppRoutes.scanAdd);
+              if (result == true) Get.find<DashboardController>().fetchRenewals();
+            },
           ),
         ),
         const SizedBox(height: RenewdSpacing.md),

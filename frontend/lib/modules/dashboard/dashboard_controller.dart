@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/network/api_client.dart';
@@ -7,7 +7,7 @@ import '../../data/models/banner_model.dart';
 import '../../data/models/renewal_model.dart';
 import '../../data/providers/renewal_provider.dart';
 
-class DashboardController extends GetxController {
+class DashboardController extends GetxController with WidgetsBindingObserver {
   final _provider = RenewalProvider();
   final _client = Get.find<ApiClient>();
 
@@ -120,11 +120,25 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     ever(renewals, (_) => _invalidateGroupedCache());
     ever(searchQuery, (_) => _invalidateGroupedCache());
     fetchRenewals();
     fetchUnreadCount();
     fetchBanners();
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      fetchRenewals();
+    }
   }
 
   Future<void> fetchBanners() async {
