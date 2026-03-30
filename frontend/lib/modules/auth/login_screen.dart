@@ -65,7 +65,7 @@ class _Logo extends StatelessWidget {
         const SizedBox(height: RenewdSpacing.lg),
         Text(
           'Renewd',
-          style: GoogleFonts.dmSans(
+          style: GoogleFonts.manrope(
             fontSize: 28,
             fontWeight: FontWeight.w700,
             color: isDark ? Colors.white : RenewdColors.deepNavy,
