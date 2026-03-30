@@ -191,11 +191,28 @@ class ScanAddController extends GetxController {
   void _prefillBasicFields(Map<String, dynamic> ext) {
     final provider = ext['provider'] as String?;
     final docType = ext['document_type'] as String?;
-    if (provider != null) {
+    final displayName = ext['display_name'] as String?;
+    final aiCategory = ext['category'] as String?;
+
+    // Use AI's smart name, fall back to provider + doc type
+    if (displayName != null && displayName.isNotEmpty) {
+      name.value = displayName;
+    } else if (provider != null) {
       name.value = '$provider ${_humanDocType(docType)}';
-      providerName.value = provider;
     }
-    category.value = _detectCategory(docType, provider);
+
+    if (provider != null) providerName.value = provider;
+
+    // Use AI's category if available, fall back to detection
+    if (aiCategory != null) {
+      category.value = RenewalCategory.values.firstWhere(
+        (e) => e.name == aiCategory,
+        orElse: () => _detectCategory(docType, provider),
+      );
+    } else {
+      category.value = _detectCategory(docType, provider);
+    }
+
     groupName.value = _detectGroup(docType, provider, ext);
     frequency.value = _defaultFrequency(category.value);
     final summary = ext['summary'] as String?;

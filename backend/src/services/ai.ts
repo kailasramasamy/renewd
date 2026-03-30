@@ -13,11 +13,23 @@ If this is a relevant document (insurance policy, bill, invoice, receipt, certif
 
 If this is NOT a relevant document (random photo, screenshot, meme, selfie, etc.), set is_relevant to false and explain why in the summary.
 
+For display_name: Create a short, user-friendly name (2-5 words) that identifies what this renewal is about. Examples:
+- Car insurance for Toyota Camry → "Toyota Camry Insurance"
+- Health insurance from HDFC Ergo → "Family Health Insurance"
+- Netflix subscription → "Netflix Premium"
+- Passport renewal → "Passport Renewal"
+- Home insurance → "Home Insurance"
+Don't just repeat the provider name. Make it specific and recognizable at a glance.
+
+For category: Pick ONE from: insurance, subscription, utility, government, membership, finance, digital, education, other
+
 Return ONLY valid JSON, no other text:
 {
   "is_relevant": true or false,
+  "display_name": "short smart name for this renewal",
   "summary": "2-3 sentence summary. If not relevant, explain what the document actually is and suggest what types of documents to upload instead",
   "provider": "company/organization name or null",
+  "category": "insurance/subscription/utility/government/membership/finance/digital/education/other",
   "document_type": "policy/receipt/certificate/invoice/id/other",
   "issue_date": "YYYY-MM-DD or null",
   "expiry_date": "YYYY-MM-DD or null",
