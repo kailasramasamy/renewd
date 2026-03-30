@@ -52,7 +52,27 @@ class DashboardScreen extends StatelessWidget {
               ],
               const SizedBox(height: RenewdSpacing.lg),
               _StatsRow(c: c),
-              const SizedBox(height: RenewdSpacing.xl),
+              const SizedBox(height: RenewdSpacing.sm),
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () => Get.toNamed(AppRoutes.analytics),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('View Analytics',
+                          style: RenewdTextStyles.caption.copyWith(
+                            color: RenewdColors.oceanBlue,
+                            fontWeight: FontWeight.w600,
+                          )),
+                      const SizedBox(width: 4),
+                      Icon(LucideIcons.arrowRight,
+                          size: 14, color: RenewdColors.oceanBlue),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.lg),
               if (c.filteredRenewals.isEmpty && c.searchQuery.value.isEmpty)
                 _EmptyState()
               else if (c.filteredRenewals.isEmpty)
