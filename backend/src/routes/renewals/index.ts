@@ -237,20 +237,21 @@ async function registerBackfillLogos(app: FastifyInstance) {
 async function registerDuplicateCheck(app: FastifyInstance) {
   app.post("/check-duplicate", auth, async (request, reply) => {
     const body = request.body as Record<string, unknown>;
-    const { name, provider, category, amount } = body;
+    const { name, provider, category, amount, renewal_date } = body;
     const userId = await getUserId(app, request.user.uid);
 
-    // Check for similar renewals by name, provider, or category+amount
+    // Check for similar renewals by name, provider, category+amount, or same date for insurance
     const result = await app.db.query(
-      `SELECT id, name, provider, category, amount::text, frequency
+      `SELECT id, name, provider, category, amount::text, frequency, renewal_date::text
        FROM renewals
        WHERE user_id = $1 AND status = 'active' AND (
          LOWER(name) = LOWER($2)
          OR (LOWER(provider) = LOWER($3) AND provider IS NOT NULL AND $3 IS NOT NULL AND $3 != '')
          OR (category = $4 AND amount = $5 AND $5 IS NOT NULL)
+         OR (category = 'insurance' AND $4 = 'insurance' AND renewal_date = $6::date AND $6 IS NOT NULL)
        )
        LIMIT 3`,
-      [userId, name ?? "", provider ?? "", category ?? "", amount ?? null]
+      [userId, name ?? "", provider ?? "", category ?? "", amount ?? null, renewal_date ?? null]
     );
 
     return reply.send({
