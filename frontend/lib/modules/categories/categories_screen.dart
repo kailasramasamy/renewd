@@ -396,7 +396,7 @@ class _RenewalRow extends StatelessWidget {
                 children: [
                   Text(renewal.name,
                       style: RenewdTextStyles.body.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         fontSize: 15,
                       ),
                       maxLines: 1,
