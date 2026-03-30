@@ -94,7 +94,7 @@ class _PlanBadge extends StatelessWidget {
                     .copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
             if (expiresAt != null) ...[
               const SizedBox(height: RenewdSpacing.xs),
-              Text('Expires ${_formatDate(expiresAt)}',
+              Text(_trialLabel(expiresAt),
                   style: RenewdTextStyles.bodySmall
                       .copyWith(color: Colors.white.withValues(alpha: RenewdOpacity.heavy))),
             ],
@@ -117,12 +117,13 @@ class _PlanBadge extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  String _trialLabel(DateTime expiresAt) {
+    final daysLeft = expiresAt.difference(DateTime.now()).inDays;
+    if (daysLeft <= 0) return 'Trial expired';
+    if (daysLeft == 1) return 'Trial ends tomorrow';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    final dateStr = '${expiresAt.day} ${months[expiresAt.month - 1]} ${expiresAt.year}';
+    return 'Trial · $daysLeft days left (ends $dateStr)';
   }
 }
 

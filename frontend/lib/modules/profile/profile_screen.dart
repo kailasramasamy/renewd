@@ -97,9 +97,21 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildItem(_ProfileItem item) {
     final premiumService = Get.find<PremiumService>();
+    final authService = Get.find<AuthService>();
     final isUserPremium = item.isPremium && premiumService.isPremium;
     final allOpen = item.isPremium && !(premiumService.config?.iapEnabled ?? false);
     final showActive = isUserPremium || allOpen;
+
+    String badgeText = 'FREE';
+    if (showActive) {
+      final expiresAt = authService.currentUser?.premiumExpiresAt;
+      if (expiresAt != null) {
+        final daysLeft = expiresAt.difference(DateTime.now()).inDays;
+        badgeText = daysLeft <= 0 ? 'EXPIRED' : 'TRIAL · ${daysLeft}d';
+      } else {
+        badgeText = 'ACTIVE';
+      }
+    }
 
     return ListTile(
       leading: Icon(item.icon, color: RenewdColors.slate),
@@ -117,7 +129,7 @@ class ProfileScreen extends StatelessWidget {
                 borderRadius: RenewdRadius.pillAll,
               ),
               child: Text(
-                showActive ? 'ACTIVE' : 'FREE',
+                badgeText,
                 style: RenewdTextStyles.caption.copyWith(
                   color: showActive ? RenewdColors.emerald : RenewdColors.slate,
                 ),
