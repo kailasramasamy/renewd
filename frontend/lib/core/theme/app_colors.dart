@@ -6,8 +6,8 @@ class RenewdColors {
   // Core
   static const deepNavy = Color(0xFF111111);
   static const oceanBlue = Color(0xFF3B82F6);
-  static const softWhite = Color(0xFFF8FAFC);
-  static const cloudGray = Color(0xFFF1F5F9);
+  static const softWhite = Color(0xFFF2F4F7);
+  static const cloudGray = Color(0xFFE8ECF0);
   static const slate = Color(0xFF8E8E93);       // iOS secondary label
   static const mist = Color(0xFFE5E5EA);
 
@@ -26,7 +26,7 @@ class RenewdColors {
   static const charcoal = Color(0xFF111111);     // true dark bg
   static const darkSlate = Color(0xFF1C1C1E);   // iOS secondary bg
   static const steel = Color(0xFF2C2C2E);       // iOS tertiary bg
-  static const silver = Color(0xFFD1D1D6);
+  static const silver = Color(0xFFC7C7CC);
   static const darkBorder = Color(0xFF38383A);   // iOS separator
 
   // Text
