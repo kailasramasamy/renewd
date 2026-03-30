@@ -454,38 +454,40 @@ class _StatCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: RenewdSpacing.md,
-          vertical: RenewdSpacing.lg,
-        ),
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
         decoration: BoxDecoration(
-          color: isDark ? color.withValues(alpha: 0.1) : Colors.white,
-          borderRadius: RenewdRadius.lgAll,
-          border: Border.all(
-            color: isDark ? color.withValues(alpha: 0.2) : RenewdColors.silver,
-            width: 1,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)]
+                : [color.withValues(alpha: 0.08), color.withValues(alpha: 0.18)],
           ),
+          borderRadius: RenewdRadius.xlAll,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 18, color: color),
+            Row(
+              children: [
+                Text(label,
+                    style: RenewdTextStyles.caption.copyWith(
+                      color: isDark ? color.withValues(alpha: 0.8) : color.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    )),
+                const Spacer(),
+                Icon(icon, size: 16, color: color.withValues(alpha: 0.5)),
+              ],
+            ),
             const SizedBox(height: RenewdSpacing.sm),
             Text(value,
-                style: RenewdTextStyles.h3.copyWith(
+                style: RenewdTextStyles.h2.copyWith(
                   color: isDark ? Colors.white : RenewdColors.deepNavy,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 2),
-            Text(label.toUpperCase(),
-                style: RenewdTextStyles.caption.copyWith(
-                  color: color,
-                  letterSpacing: 0.8,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                )),
           ],
         ),
       ),
