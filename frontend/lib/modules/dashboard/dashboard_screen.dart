@@ -505,7 +505,9 @@ class _SpendItem extends StatelessWidget {
         children: [
           Text(label,
               style: RenewdTextStyles.caption.copyWith(
-                color: RenewdColors.emerald.withValues(alpha: 0.7),
+                color: isDark
+                    ? RenewdColors.emerald.withValues(alpha: 0.7)
+                    : RenewdColors.emerald,
                 fontWeight: FontWeight.w600,
                 fontSize: 10,
               )),
@@ -534,7 +536,7 @@ class _SpendDivider extends StatelessWidget {
       width: 1,
       height: 32,
       margin: const EdgeInsets.symmetric(horizontal: RenewdSpacing.sm),
-      color: RenewdColors.emerald.withValues(alpha: isDark ? 0.2 : 0.15),
+      color: RenewdColors.emerald.withValues(alpha: isDark ? 0.2 : 0.3),
     );
   }
 }
@@ -575,12 +577,12 @@ class _StatCard extends StatelessWidget {
               children: [
                 Text(label,
                     style: RenewdTextStyles.caption.copyWith(
-                      color: isDark ? color.withValues(alpha: 0.8) : color.withValues(alpha: 0.7),
+                      color: isDark ? color.withValues(alpha: 0.8) : color,
                       fontWeight: FontWeight.w600,
                       fontSize: 11,
                     )),
                 const Spacer(),
-                Icon(icon, size: 16, color: color.withValues(alpha: 0.5)),
+                Icon(icon, size: 16, color: isDark ? color.withValues(alpha: 0.5) : color),
               ],
             ),
             const SizedBox(height: RenewdSpacing.sm),
