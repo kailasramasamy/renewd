@@ -451,15 +451,20 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Container(
         height: 88,
         padding: const EdgeInsets.all(RenewdSpacing.md),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: RenewdOpacity.subtle),
+          color: isDark
+              ? color.withValues(alpha: RenewdOpacity.subtle)
+              : color.withValues(alpha: RenewdOpacity.light),
           borderRadius: RenewdRadius.lgAll,
           border: Border.all(
-            color: color.withValues(alpha: RenewdOpacity.light),
+            color: isDark
+                ? color.withValues(alpha: RenewdOpacity.light)
+                : color.withValues(alpha: RenewdOpacity.medium),
             width: 1,
           ),
         ),
@@ -467,10 +472,17 @@ class _StatCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, size: 16, color: color),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: isDark ? 0.2 : 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, size: 16, color: color),
+            ),
             Text(value,
                 style: RenewdTextStyles.h3.copyWith(
-                  color: color,
+                  color: isDark ? color : color.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w700,
                 ),
                 maxLines: 1,
