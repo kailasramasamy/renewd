@@ -96,6 +96,8 @@ const BRAND_DOMAINS: Record<string, string> = {
   expressvpn: "expressvpn.com",
   chatgpt: "openai.com",
   openai: "openai.com",
+  anthropic: "anthropic.com",
+  claude: "anthropic.com",
   canva: "canva.com",
   linkedin: "linkedin.com",
   // Utilities & telecom
