@@ -48,7 +48,7 @@ class RenewalModel {
         userId: json['user_id'] as String,
         name: json['name'] as String,
         category: RenewalCategory.values.firstWhere(
-          (e) => e.name == json['category'],
+          (e) => e.name == (json['category'] as String?)?.toLowerCase(),
           orElse: () => RenewalCategory.other,
         ),
         provider: json['provider'] as String?,
