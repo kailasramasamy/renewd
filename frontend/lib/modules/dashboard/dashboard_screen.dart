@@ -166,28 +166,25 @@ class _SearchBar extends StatelessWidget {
             ],
           ),
         ),
-        // Search field
+        // Search field — tappable, opens dedicated search screen
         const SizedBox(height: RenewdSpacing.md),
-        Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
-            borderRadius: RenewdRadius.pillAll,
-          ),
-          child: TextField(
-            onChanged: (v) => c.searchQuery.value = v,
-            style: RenewdTextStyles.bodySmall,
-            decoration: InputDecoration(
-              hintText: 'Search renewals...',
-              hintStyle: RenewdTextStyles.bodySmall
-                  .copyWith(color: RenewdColors.slate),
-              prefixIcon: Icon(LucideIcons.search,
-                  size: 18, color: RenewdColors.slate),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              filled: false,
+        GestureDetector(
+          onTap: () => Get.toNamed(AppRoutes.search),
+          child: Container(
+            height: 44,
+            decoration: BoxDecoration(
+              color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
+              borderRadius: RenewdRadius.pillAll,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Icon(LucideIcons.search, size: 18, color: RenewdColors.slate),
+                const SizedBox(width: 10),
+                Text('Search renewals...',
+                    style: RenewdTextStyles.bodySmall
+                        .copyWith(color: RenewdColors.slate)),
+              ],
             ),
           ),
         ),
@@ -427,12 +424,8 @@ class _StatsRow extends StatelessWidget {
   final DashboardController c;
   const _StatsRow({required this.c});
 
-  static String _formatAmount(double amount) {
-    if (amount >= 100000) {
-      return '${RenewdCurrency.symbol}${(amount / 1000).toStringAsFixed(0)}K';
-    }
-    return '${RenewdCurrency.symbol}${amount.toStringAsFixed(0)}';
-  }
+  static String _formatAmount(double amount) =>
+      RenewdCurrency.formatCompact(amount);
 
   @override
   Widget build(BuildContext context) {
@@ -839,7 +832,7 @@ class _RenewalRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (renewal.amount != null)
-                  Text('${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(0)}',
+                  Text(RenewdCurrency.format(renewal.amount!),
                       style: RenewdTextStyles.subtitle.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,

@@ -64,7 +64,7 @@ class DueSoonCard extends StatelessWidget {
           Text(days == 0 ? 'Today' : '$days days',
               style: RenewdTextStyles.caption.copyWith(color: statusColor)),
           if (renewal.amount != null)
-            Text('${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(0)}',
+            Text(RenewdCurrency.format(renewal.amount!),
                 style: RenewdTextStyles.caption
                     .copyWith(color: RenewdColors.slate)),
         ],
@@ -375,7 +375,7 @@ class RenewalListItem extends StatelessWidget {
                 ],
                 if (renewal.amount != null) ...[
                   const SizedBox(height: RenewdSpacing.xs),
-                  Text('${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(0)}',
+                  Text(RenewdCurrency.format(renewal.amount!),
                       style: RenewdTextStyles.caption
                           .copyWith(color: RenewdColors.slate)),
                 ],

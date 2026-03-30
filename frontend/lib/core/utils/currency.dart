@@ -44,13 +44,47 @@ class RenewdCurrency {
   /// Get symbol for a specific currency code
   static String symbolFor(String code) => symbols[code] ?? code;
 
-  /// Format amount with user's default currency
-  static String format(num amount) {
+  /// Format amount with user's default currency and locale-aware commas
+  static String format(num amount, {int decimals = 0}) {
     final sym = symbol;
-    if (amount == amount.toInt()) {
-      return '$sym${_addCommas(amount.toInt().toString(), userCurrency)}';
+    final currency = userCurrency;
+    if (decimals > 0) {
+      final parts = amount.toStringAsFixed(decimals).split('.');
+      return '$sym${_addCommas(parts[0], currency)}.${parts[1]}';
     }
-    return '$sym${amount.toStringAsFixed(2)}';
+    return '$sym${_addCommas(amount.toInt().toString(), currency)}';
+  }
+
+  /// Compact format for stats cards: ₹2.5L (INR) or $250K (others)
+  static String formatCompact(num amount) {
+    final sym = symbol;
+    final currency = userCurrency;
+    if (currency == 'INR') {
+      if (amount >= 10000000) {
+        final cr = amount / 10000000;
+        return '$sym${_compactNum(cr)}Cr';
+      }
+      if (amount >= 100000) {
+        final lakhs = amount / 100000;
+        return '$sym${_compactNum(lakhs)}L';
+      }
+      return '$sym${_addCommas(amount.toInt().toString(), currency)}';
+    }
+    // Western: K, M
+    if (amount >= 1000000) {
+      final millions = amount / 1000000;
+      return '$sym${_compactNum(millions)}M';
+    }
+    if (amount >= 100000) {
+      final thousands = amount / 1000;
+      return '$sym${thousands.toInt()}K';
+    }
+    return '$sym${_addCommas(amount.toInt().toString(), currency)}';
+  }
+
+  static String _compactNum(double v) {
+    if (v == v.toInt()) return v.toInt().toString();
+    return v.toStringAsFixed(1);
   }
 
   /// Get the country code from device locale (e.g., "IN", "US")

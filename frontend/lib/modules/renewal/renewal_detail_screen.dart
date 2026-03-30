@@ -320,7 +320,7 @@ class _InfoSection extends StatelessWidget {
                 _InfoRow(
                     icon: LucideIcons.wallet,
                     label: 'Amount',
-                    value: '${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(2)}'),
+                    value: RenewdCurrency.format(renewal.amount!, decimals: 2)),
                 _Divider(),
               ],
               _InfoRow(
@@ -810,7 +810,7 @@ class _PaymentRow extends StatelessWidget {
               ],
             ),
           ),
-          Text('${RenewdCurrency.symbol}${payment.amount.toStringAsFixed(0)}',
+          Text(RenewdCurrency.format(payment.amount),
               style: RenewdTextStyles.body
                   .copyWith(fontWeight: FontWeight.w600)),
         ],

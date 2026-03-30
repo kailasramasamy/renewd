@@ -20,4 +20,5 @@ abstract class AppRoutes {
   static const premium = '/premium';
   static const support = '/support';
   static const analytics = '/analytics';
+  static const search = '/search';
 }

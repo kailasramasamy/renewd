@@ -29,7 +29,6 @@ class SharingService extends GetxService with WidgetsBindingObserver {
   }
 
   @override
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _checkAndNavigate();
@@ -58,10 +57,10 @@ class SharingService extends GetxService with WidgetsBindingObserver {
   }
 
   /// Called by SplashController after navigation to home is complete
-  void processPendingShare() {
+  Future<void> processPendingShare() async {
     // Also check App Group UserDefaults (from native share extension)
     if (pendingShare == null) {
-      _checkAppGroupSharedData();
+      await _checkAppGroupSharedData();
     }
 
     if (pendingShare == null) return;
@@ -76,22 +75,21 @@ class SharingService extends GetxService with WidgetsBindingObserver {
 
   static const _channel = MethodChannel('com.quartex.renewd/share');
 
-  void _checkAppGroupSharedData() {
-    _channel.invokeMethod<String>('getSharedData').then((json) {
+  Future<void> _checkAppGroupSharedData() async {
+    try {
+      final json = await _channel.invokeMethod<String>('getSharedData');
       if (json == null || json.isEmpty) return;
-      try {
-        final list = jsonDecode(json) as List<dynamic>;
-        if (list.isNotEmpty) {
-          final item = list.first as Map<String, dynamic>;
-          final path = item['path'] as String?;
-          if (path != null) {
-            final name = path.split('/').last;
-            pendingShare = {'filePath': path, 'fileName': name};
-            _channel.invokeMethod('clearSharedData');
-          }
+      final list = jsonDecode(json) as List<dynamic>;
+      if (list.isNotEmpty) {
+        final item = list.first as Map<String, dynamic>;
+        final path = item['path'] as String?;
+        if (path != null) {
+          final name = path.split('/').last;
+          pendingShare = {'filePath': path, 'fileName': name};
+          await _channel.invokeMethod('clearSharedData');
         }
-      } catch (_) {}
-    }).catchError((_) {});
+      }
+    } catch (_) {}
   }
 
   void _storePendingShare(List<SharedMediaFile> files) {

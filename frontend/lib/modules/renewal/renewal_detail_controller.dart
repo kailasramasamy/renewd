@@ -147,7 +147,7 @@ class RenewalDetailController extends GetxController {
       });
       payments.insert(0, payment);
       showPaymentPrompt.value = false;
-      showSuccessSnack('${RenewdCurrency.symbol}${amount.toStringAsFixed(0)} payment recorded');
+      showSuccessSnack('${RenewdCurrency.format(amount)} payment recorded');
     } catch (e) {
       debugPrint('logPayment failed: $e');
       showErrorSnack('Failed to log payment');

@@ -18,6 +18,7 @@ import '../../modules/renewal/add_renewal_screen.dart';
 import '../../modules/renewal/renewal_detail_screen.dart';
 import '../../modules/renewal/edit_renewal_screen.dart';
 import '../../modules/renewal/scan_add_screen.dart';
+import '../../modules/search/search_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -130,6 +131,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.analytics,
       page: () => const AnalyticsScreen(),
+      transition: Transition.cupertino,
+    ),
+
+    // Search
+    GetPage(
+      name: AppRoutes.search,
+      page: () => const SearchScreen(),
       transition: Transition.cupertino,
     ),
   ];

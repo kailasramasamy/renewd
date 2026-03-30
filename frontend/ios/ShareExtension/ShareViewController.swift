@@ -101,7 +101,8 @@ class ShareViewController: UIViewController {
                     userDefaults?.set(String(data: jsonData, encoding: .utf8), forKey: self?.sharedKey ?? "")
                     userDefaults?.synchronize()
                 }
-                // Show success, then dismiss after 1.5s
+                // Open the main app, then dismiss
+                self?.openContainingApp()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     self?.completeRequest()
                 }
@@ -129,6 +130,23 @@ class ShareViewController: UIViewController {
         } catch {
             return nil
         }
+    }
+
+    private func openContainingApp() {
+        guard let url = URL(string: "renewd://share") else { return }
+        // Walk the responder chain to reach UIApplication.openURL
+        var responder: UIResponder? = self
+        while let r = responder {
+            if r.responds(to: #selector(openURL(_:))) {
+                r.perform(#selector(openURL(_:)), with: url)
+                return
+            }
+            responder = r.next
+        }
+    }
+
+    @objc private func openURL(_ url: URL) {
+        // Placeholder — never called directly; resolved via responder chain
     }
 
     private func completeRequest() {

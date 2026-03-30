@@ -335,7 +335,7 @@ class _SummaryBar extends StatelessWidget {
           if (spend > 0) ...[
             Text(' · ', style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),
             Text(
-              '${RenewdCurrency.symbol}${spend.toStringAsFixed(0)}',
+              RenewdCurrency.format(spend),
               style: RenewdTextStyles.caption.copyWith(
                 color: RenewdColors.emerald,
                 fontWeight: FontWeight.w600,
@@ -416,7 +416,7 @@ class _RenewalRow extends StatelessWidget {
               children: [
                 if (renewal.amount != null)
                   Text(
-                    '${RenewdCurrency.symbol}${renewal.amount!.toStringAsFixed(0)}',
+                    RenewdCurrency.format(renewal.amount!),
                     style: RenewdTextStyles.subtitle.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
