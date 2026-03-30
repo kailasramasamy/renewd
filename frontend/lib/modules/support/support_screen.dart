@@ -523,8 +523,8 @@ class _TicketDetailScreenState extends State<_TicketDetailScreen> {
                             ),
                             const SizedBox(height: RenewdSpacing.md),
                             Text(_ticket!['description'] as String,
-                                style: RenewdTextStyles.bodySmall
-                                    .copyWith(height: 1.5)),
+                                style: RenewdTextStyles.caption
+                                    .copyWith(height: 1.5, color: RenewdColors.slate)),
                           ],
                         ),
                       ),
@@ -643,7 +643,7 @@ class _ReplyBubble extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               reply['message'] as String,
-              style: RenewdTextStyles.body.copyWith(
+              style: RenewdTextStyles.bodySmall.copyWith(
                 color: isAdmin ? null : Colors.white,
                 height: 1.4,
               ),
