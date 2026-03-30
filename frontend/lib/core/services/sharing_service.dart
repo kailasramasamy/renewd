@@ -13,25 +13,13 @@ class SharingService extends GetxService with WidgetsBindingObserver {
   Map<String, String>? pendingShare;
 
   Future<SharingService> init() async {
-    debugPrint('[SharingService] init started');
-
     // Handle files shared while app is running
     _subscription = ReceiveSharingIntent.instance
         .getMediaStream()
-        .listen((files) {
-      debugPrint('[SharingService] stream received ${files.length} files');
-      for (final f in files) {
-        debugPrint('[SharingService] stream file: ${f.path} type=${f.type} mimeType=${f.mimeType}');
-      }
-      _handleSharedFiles(files);
-    });
+        .listen(_handleSharedFiles);
 
     // Handle files shared when app was closed — store for later
     final initial = await ReceiveSharingIntent.instance.getInitialMedia();
-    debugPrint('[SharingService] initial media: ${initial.length} files');
-    for (final f in initial) {
-      debugPrint('[SharingService] initial file: ${f.path} type=${f.type} mimeType=${f.mimeType}');
-    }
     if (initial.isNotEmpty) {
       _storePendingShare(initial);
     }
@@ -41,16 +29,15 @@ class SharingService extends GetxService with WidgetsBindingObserver {
   }
 
   @override
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      debugPrint('[SharingService] app resumed, checking App Group');
       _checkAndNavigate();
     }
   }
 
   void _checkAndNavigate() {
     _channel.invokeMethod<String>('getSharedData').then((json) {
-      debugPrint('[SharingService] resume check, App Group data: $json');
       if (json == null || json.isEmpty) return;
       try {
         final list = jsonDecode(json) as List<dynamic>;
@@ -59,7 +46,6 @@ class SharingService extends GetxService with WidgetsBindingObserver {
           final path = item['path'] as String?;
           if (path != null) {
             final name = path.split('/').last;
-            debugPrint('[SharingService] navigating to scanAdd with $path');
             _channel.invokeMethod('clearSharedData');
             Get.toNamed(
               AppRoutes.scanAdd,
@@ -67,18 +53,12 @@ class SharingService extends GetxService with WidgetsBindingObserver {
             );
           }
         }
-      } catch (e) {
-        debugPrint('[SharingService] Error parsing shared data: $e');
-      }
-    }).catchError((e) {
-      debugPrint('[SharingService] Channel error: $e');
-    });
+      } catch (_) {}
+    }).catchError((_) {});
   }
 
   /// Called by SplashController after navigation to home is complete
   void processPendingShare() {
-    debugPrint('[SharingService] processPendingShare called, pending=$pendingShare');
-
     // Also check App Group UserDefaults (from native share extension)
     if (pendingShare == null) {
       _checkAppGroupSharedData();
@@ -87,7 +67,6 @@ class SharingService extends GetxService with WidgetsBindingObserver {
     if (pendingShare == null) return;
     final share = pendingShare!;
     pendingShare = null;
-    debugPrint('[SharingService] navigating to scanAdd with $share');
     Get.toNamed(
       AppRoutes.scanAdd,
       arguments: share,
@@ -98,9 +77,7 @@ class SharingService extends GetxService with WidgetsBindingObserver {
   static const _channel = MethodChannel('com.quartex.renewd/share');
 
   void _checkAppGroupSharedData() {
-    // Try reading from NSUserDefaults via App Group
     _channel.invokeMethod<String>('getSharedData').then((json) {
-      debugPrint('[SharingService] App Group data: $json');
       if (json == null || json.isEmpty) return;
       try {
         final list = jsonDecode(json) as List<dynamic>;
@@ -110,17 +87,11 @@ class SharingService extends GetxService with WidgetsBindingObserver {
           if (path != null) {
             final name = path.split('/').last;
             pendingShare = {'filePath': path, 'fileName': name};
-            debugPrint('[SharingService] Found shared data from App Group: $pendingShare');
-            // Clear it
             _channel.invokeMethod('clearSharedData');
           }
         }
-      } catch (e) {
-        debugPrint('[SharingService] Error parsing App Group data: $e');
-      }
-    }).catchError((e) {
-      debugPrint('[SharingService] App Group channel not available: $e');
-    });
+      } catch (_) {}
+    }).catchError((_) {});
   }
 
   void _storePendingShare(List<SharedMediaFile> files) {
@@ -130,15 +101,10 @@ class SharingService extends GetxService with WidgetsBindingObserver {
     final name = path.split('/').last;
 
     final ext = name.split('.').last.toLowerCase();
-    debugPrint('[SharingService] _storePendingShare: name=$name ext=$ext path=$path');
     const allowed = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
-    if (!allowed.contains(ext)) {
-      debugPrint('[SharingService] _storePendingShare: REJECTED ext=$ext');
-      return;
-    }
+    if (!allowed.contains(ext)) return;
 
     pendingShare = {'filePath': path, 'fileName': name};
-    debugPrint('[SharingService] _storePendingShare: STORED pendingShare=$pendingShare');
   }
 
   void _handleSharedFiles(List<SharedMediaFile> files) {
