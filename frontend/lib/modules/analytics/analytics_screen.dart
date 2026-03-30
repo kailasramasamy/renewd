@@ -37,7 +37,7 @@ class AnalyticsScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: PremiumGate(
-        feature: 'analytics',
+        feature: 'spending_analytics',
         child: Obx(() {
           if (c.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
