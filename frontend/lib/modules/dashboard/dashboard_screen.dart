@@ -47,12 +47,12 @@ class DashboardScreen extends StatelessWidget {
             children: [
               _SearchBar(c: c),
               if (c.banners.isNotEmpty) ...[
-                const SizedBox(height: RenewdSpacing.md),
+                const SizedBox(height: RenewdSpacing.lg),
                 _BannerCarousel(c: c),
               ],
-              const SizedBox(height: RenewdSpacing.md),
+              const SizedBox(height: RenewdSpacing.lg),
               _StatsRow(c: c),
-              const SizedBox(height: RenewdSpacing.xxl),
+              const SizedBox(height: RenewdSpacing.xl),
               if (c.filteredRenewals.isEmpty && c.searchQuery.value.isEmpty)
                 _EmptyState()
               else if (c.filteredRenewals.isEmpty)
@@ -916,11 +916,14 @@ class _EmptyState extends StatelessWidget {
 
     return Column(
       children: [
-        const SizedBox(height: RenewdSpacing.lg),
+        const SizedBox(height: RenewdSpacing.xl),
         // Welcome message
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          padding: const EdgeInsets.symmetric(
+            horizontal: RenewdSpacing.xl,
+            vertical: RenewdSpacing.xxl,
+          ),
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: RenewdRadius.lgAll,
@@ -928,22 +931,22 @@ class _EmptyState extends StatelessWidget {
           child: Column(
             children: [
               Icon(LucideIcons.sparkles,
-                  size: 36, color: RenewdColors.oceanBlue),
-              const SizedBox(height: RenewdSpacing.md),
+                  size: 40, color: RenewdColors.oceanBlue),
+              const SizedBox(height: RenewdSpacing.lg),
               Text('Welcome to Renewd!',
-                  style: RenewdTextStyles.h3
+                  style: RenewdTextStyles.h2
                       .copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: RenewdSpacing.sm),
               Text(
-                'Track insurance, subscriptions, government docs and never miss a renewal again.',
+                'Track insurance, subscriptions, government docs and never miss a renewal again. Your data is encrypted with AES-256.',
                 textAlign: TextAlign.center,
                 style: RenewdTextStyles.bodySmall
-                    .copyWith(color: RenewdColors.slate, height: 1.5),
+                    .copyWith(color: RenewdColors.slate, height: 1.6),
               ),
             ],
           ),
         ),
-        const SizedBox(height: RenewdSpacing.lg),
+        const SizedBox(height: RenewdSpacing.xxl),
         // Quick-start suggestions
         Align(
           alignment: Alignment.centerLeft,
@@ -952,7 +955,7 @@ class _EmptyState extends StatelessWidget {
                 color: RenewdColors.slate,
               )),
         ),
-        const SizedBox(height: RenewdSpacing.md),
+        const SizedBox(height: RenewdSpacing.lg),
         AnimatedListItem(
           index: 0,
           child: _QuickStartTile(
@@ -964,7 +967,7 @@ class _EmptyState extends StatelessWidget {
             onTap: () => Get.toNamed(AppRoutes.scanAdd),
           ),
         ),
-        const SizedBox(height: RenewdSpacing.sm),
+        const SizedBox(height: RenewdSpacing.md),
         AnimatedListItem(
           index: 1,
           child: _QuickStartTile(
@@ -976,7 +979,7 @@ class _EmptyState extends StatelessWidget {
             onTap: () => Get.toNamed(AppRoutes.addRenewal),
           ),
         ),
-        const SizedBox(height: RenewdSpacing.sm),
+        const SizedBox(height: RenewdSpacing.md),
         AnimatedListItem(
           index: 2,
           child: _QuickStartTile(

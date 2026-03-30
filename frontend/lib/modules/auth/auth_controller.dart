@@ -140,7 +140,10 @@ class AuthController extends GetxController {
       try {
         final client = Get.find<ApiClient>();
         await client.safePost('/auth/register', {});
-        await client.safePut('/users/me', {'default_currency': detectedCurrency});
+        await client.safePut('/users/me', {
+          'default_currency': detectedCurrency,
+          'country': RenewdCurrency.deviceCountry,
+        });
       } catch (e) {
         if (e is ApiException && e.statusCode != 409) {
           // Non-conflict error — log but don't block login
@@ -195,7 +198,10 @@ class AuthController extends GetxController {
       try {
         final client = Get.find<ApiClient>();
         await client.safePost('/auth/register', {});
-        await client.safePut('/users/me', {'default_currency': detectedCurrency});
+        await client.safePut('/users/me', {
+          'default_currency': detectedCurrency,
+          'country': RenewdCurrency.deviceCountry,
+        });
       } catch (e) {
         if (e is ApiException && e.statusCode != 409) {
           // Non-conflict error — log but don't block login

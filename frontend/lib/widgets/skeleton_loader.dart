@@ -15,7 +15,7 @@ class SkeletonLoader extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(RenewdSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
