@@ -209,6 +209,7 @@ class _CategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Obx(() {
       final active = c.activeCategories;
       if (active.isEmpty) return const SizedBox.shrink();
@@ -232,10 +233,10 @@ class _CategoryChips extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? color.withValues(alpha: RenewdOpacity.medium)
-                      : RenewdColors.steel,
+                      : isDark ? RenewdColors.steel : RenewdColors.cloudGray,
                   borderRadius: RenewdRadius.pillAll,
                   border: Border.all(
-                    color: isSelected ? color : RenewdColors.darkBorder,
+                    color: isSelected ? color : isDark ? RenewdColors.darkBorder : RenewdColors.silver,
                     width: isSelected ? 1.5 : 1,
                   ),
                 ),
@@ -270,6 +271,7 @@ class _SubcategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Obx(() {
       final subs = c.availableSubcategories;
       if (subs.isEmpty) return const SizedBox.shrink();
@@ -299,7 +301,7 @@ class _SubcategoryChips extends StatelessWidget {
                       : Colors.transparent,
                   borderRadius: RenewdRadius.pillAll,
                   border: Border.all(
-                    color: isSelected ? catColor : RenewdColors.darkBorder,
+                    color: isSelected ? catColor : isDark ? RenewdColors.darkBorder : RenewdColors.silver,
                   ),
                 ),
                 child: Text(
