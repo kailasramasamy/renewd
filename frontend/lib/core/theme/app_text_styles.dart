@@ -24,12 +24,12 @@ class RenewdTextStyles {
 
   static TextStyle get body => GoogleFonts.dmSans(
         fontSize: 16,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
       );
 
   static TextStyle get bodySmall => GoogleFonts.dmSans(
         fontSize: 14,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
         letterSpacing: 0.1,
       );
 
