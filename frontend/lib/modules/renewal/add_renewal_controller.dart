@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../app/routes/app_routes.dart';
 import '../../core/constants/category_config.dart';
+import '../../core/services/premium_service.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/network/api_client.dart';
 import '../../core/utils/snackbar_helper.dart';
 import '../../data/providers/renewal_provider.dart';
+import '../dashboard/dashboard_controller.dart';
 
 class AddRenewalController extends GetxController {
   final _provider = RenewalProvider();
@@ -55,6 +62,9 @@ class AddRenewalController extends GetxController {
       return;
     }
 
+    // Check renewal limit before saving
+    if (!_checkRenewalLimit()) return;
+
     final data = <String, dynamic>{
       'name': name.value.trim(),
       'category': category.value.name,
@@ -83,7 +93,11 @@ class AddRenewalController extends GetxController {
       Get.back(result: true);
       showSuccessSnack('${name.value.trim()} added');
     } catch (e) {
-      showErrorSnack('Failed to add renewal');
+      if (e is ApiException && e.statusCode == 403) {
+        _showRenewalLimitReached();
+      } else {
+        showErrorSnack('Failed to add renewal');
+      }
     } finally {
       isLoading.value = false;
     }
@@ -129,6 +143,82 @@ class AddRenewalController extends GetxController {
             child: Text('Add Anyway', style: TextStyle(color: RenewdColors.oceanBlue)),
           ),
         ],
+      ),
+    );
+  }
+
+  bool _checkRenewalLimit() {
+    final premium = Get.find<PremiumService>();
+    int count = 0;
+    try {
+      final dashboard = Get.find<DashboardController>();
+      count = dashboard.totalActive;
+    } catch (_) {
+      return true;
+    }
+    if (!premium.canCreateRenewal(count)) {
+      _showRenewalLimitReached();
+      return false;
+    }
+    return true;
+  }
+
+  void _showRenewalLimitReached() {
+    final premium = Get.find<PremiumService>();
+    final limit = premium.freeRenewalLimit;
+    Get.bottomSheet(
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: RenewdColors.slate.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              Icon(LucideIcons.lock, size: 48, color: RenewdColors.tangerine),
+              const SizedBox(height: RenewdSpacing.lg),
+              Text('Renewal Limit Reached',
+                  style: RenewdTextStyles.h3
+                      .copyWith(fontWeight: FontWeight.w700)),
+              const SizedBox(height: RenewdSpacing.sm),
+              Text(
+                'Free plan allows up to $limit renewals. Upgrade to Premium for unlimited renewals.',
+                textAlign: TextAlign.center,
+                style: RenewdTextStyles.bodySmall
+                    .copyWith(color: RenewdColors.slate, height: 1.5),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.back();
+                    Get.toNamed(AppRoutes.premium);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: RenewdColors.tangerine,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: RenewdRadius.mdAll),
+                  ),
+                  child: const Text('View Premium Plans',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.md),
+            ],
+          ),
+        ),
+      ),
+      backgroundColor: Get.isDarkMode ? RenewdColors.darkSlate : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
     );
   }

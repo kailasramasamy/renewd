@@ -8,8 +8,11 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../core/services/premium_service.dart';
 import '../../core/utils/haptics.dart';
 import '../../core/utils/snackbar_helper.dart';
+import '../dashboard/dashboard_controller.dart';
 import '../../data/models/document_model.dart';
 import '../../data/providers/document_provider.dart';
 import '../../data/providers/renewal_provider.dart';
@@ -52,6 +55,9 @@ class ScanAddController extends GetxController {
       CategoryConfig.suggestedSubcategories(category.value);
 
   Future<void> uploadAndParse(String filePath, String fileName) async {
+    // Check renewal limit before expensive AI call
+    if (!_checkRenewalLimit()) return;
+
     isUploading.value = true;
     analyzeStep.value = 'Uploading document...';
     try {
@@ -81,12 +87,91 @@ class ScanAddController extends GetxController {
         _showPremiumRequired();
       } else {
         RenewdHaptics.error();
+        debugPrint('Document analysis error: $e');
         showErrorSnack('Failed to analyze document');
       }
     } finally {
       isUploading.value = false;
       isParsing.value = false;
     }
+  }
+
+  bool _checkRenewalLimit() {
+    final premium = Get.find<PremiumService>();
+    // Get current renewal count from dashboard if available
+    int count = 0;
+    try {
+      final dashboard = Get.find<DashboardController>();
+      count = dashboard.totalActive;
+    } catch (_) {
+      // Dashboard not loaded — let backend enforce
+      return true;
+    }
+    if (!premium.canCreateRenewal(count)) {
+      _showRenewalLimitReached();
+      return false;
+    }
+    return true;
+  }
+
+  void _showRenewalLimitReached() {
+    final premium = Get.find<PremiumService>();
+    final limit = premium.freeRenewalLimit;
+    Get.bottomSheet(
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: RenewdColors.slate.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              Icon(LucideIcons.lock, size: 48, color: RenewdColors.tangerine),
+              const SizedBox(height: RenewdSpacing.lg),
+              Text('Renewal Limit Reached',
+                  style: RenewdTextStyles.h3
+                      .copyWith(fontWeight: FontWeight.w700)),
+              const SizedBox(height: RenewdSpacing.sm),
+              Text(
+                'Free plan allows up to $limit renewals. Upgrade to Premium for unlimited renewals.',
+                textAlign: TextAlign.center,
+                style: RenewdTextStyles.bodySmall
+                    .copyWith(color: RenewdColors.slate, height: 1.5),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.back();
+                    Get.toNamed(AppRoutes.premium);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: RenewdColors.tangerine,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: RenewdRadius.mdAll),
+                  ),
+                  child: const Text('View Premium Plans',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.md),
+            ],
+          ),
+        ),
+      ),
+      backgroundColor: Get.isDarkMode ? RenewdColors.darkSlate : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    );
   }
 
   void _showPremiumRequired() {
@@ -366,7 +451,11 @@ class ScanAddController extends GetxController {
       Get.back(result: true);
       showSuccessSnack('${name.value.trim()} added from document');
     } catch (e) {
-      showErrorSnack('Failed to save renewal');
+      if (e is ApiException && e.statusCode == 403) {
+        _showRenewalLimitReached();
+      } else {
+        showErrorSnack('Failed to save renewal');
+      }
     } finally {
       isSaving.value = false;
     }
