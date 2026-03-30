@@ -24,6 +24,8 @@ class ScanAddForm extends StatelessWidget {
         const SizedBox(height: RenewdSpacing.xl),
         _ScanCategorySection(c: c),
         const SizedBox(height: RenewdSpacing.xl),
+        _ScanSubcategorySection(c: c),
+        const SizedBox(height: RenewdSpacing.xl),
         _ScanProviderField(c: c),
         const SizedBox(height: RenewdSpacing.xl),
         _ScanAmountField(c: c),
@@ -142,6 +144,66 @@ class _ScanCategorySection extends StatelessWidget {
             )),
       ],
     );
+  }
+}
+
+class _ScanSubcategorySection extends StatelessWidget {
+  final ScanAddController c;
+  const _ScanSubcategorySection({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Obx(() {
+      final suggestions = c.suggestedSubcategories;
+      if (suggestions.isEmpty) return const SizedBox.shrink();
+      final catColor = CategoryConfig.color(c.category.value);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Subcategory',
+              style: RenewdTextStyles.bodySmall
+                  .copyWith(color: RenewdColors.slate)),
+          const SizedBox(height: RenewdSpacing.sm),
+          Wrap(
+            spacing: RenewdSpacing.sm,
+            runSpacing: RenewdSpacing.sm,
+            children: suggestions.map((g) {
+              final isSelected = c.groupName.value == g;
+              return GestureDetector(
+                onTap: () => c.groupName.value = isSelected ? '' : g,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: RenewdSpacing.md,
+                      vertical: RenewdSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? catColor.withValues(alpha: 0.2)
+                        : isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
+                    borderRadius: RenewdRadius.pillAll,
+                    border: Border.all(
+                      color: isSelected ? catColor : isDark ? RenewdColors.steel : RenewdColors.silver,
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Text(g,
+                      style: RenewdTextStyles.caption.copyWith(
+                          color: isSelected ? catColor : RenewdColors.slate)),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: RenewdSpacing.sm),
+          TextField(
+            textCapitalization: TextCapitalization.sentences,
+            onChanged: (v) => c.groupName.value = v,
+            decoration: const InputDecoration(
+                hintText: 'Or type a custom subcategory...'),
+          ),
+        ],
+      );
+    });
   }
 }
 
