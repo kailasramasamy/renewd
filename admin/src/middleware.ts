@@ -17,7 +17,9 @@ export function middleware(request: NextRequest) {
   // Check for auth cookie presence (signature verified in API routes via requireAdminAuth)
   const authCookie = request.cookies.get("renewd_admin_auth");
   if (!authCookie || !authCookie.value) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
