@@ -43,6 +43,7 @@ const BRAND_DOMAINS: Record<string, string> = {
   "bajaj allianz": "bajajallianz.com",
   sbi: "sbi.co.in",
   "new india": "newindia.co.in",
+  "united india": "uiic.co.in",
   acko: "acko.com",
   digit: "godigit.com",
   swiggy: "swiggy.com",
