@@ -107,10 +107,17 @@ export async function POST() {
   }>("SELECT id, name, provider FROM renewals WHERE logo_url IS NULL");
 
   let updated = 0;
+  const skipped: { name: string; provider: string | null; reason: string }[] = [];
+
   for (const row of rows) {
     let domain = findDomain(row.name, row.provider);
     if (!domain && client) {
       domain = await findDomainWithAI(client, row.name, row.provider);
+    }
+    if (!domain && !client) {
+      skipped.push({ name: row.name, provider: row.provider, reason: "no CLAUDE_API_KEY" });
+    } else if (!domain) {
+      skipped.push({ name: row.name, provider: row.provider, reason: "AI returned no match" });
     }
     if (domain) {
       const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
@@ -122,5 +129,5 @@ export async function POST() {
     }
   }
 
-  return NextResponse.json({ updated, total: rows.length });
+  return NextResponse.json({ updated, total: rows.length, skipped });
 }

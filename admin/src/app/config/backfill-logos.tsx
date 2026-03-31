@@ -4,15 +4,20 @@ import { useState } from "react";
 export function BackfillLogos() {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [skipped, setSkipped] = useState<
+    { name: string; provider: string | null; reason: string }[]
+  >([]);
 
   async function handleBackfill() {
     setRunning(true);
     setResult(null);
+    setSkipped([]);
     try {
       const res = await fetch("/api/backfill-logos", { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
       setResult(`Updated ${data.updated} of ${data.total} renewals`);
+      if (data.skipped?.length) setSkipped(data.skipped);
     } catch (err) {
       setResult(err instanceof Error ? err.message : "Failed");
     }
@@ -37,6 +42,16 @@ export function BackfillLogos() {
           <span className="text-sm text-gray-300">{result}</span>
         )}
       </div>
+      {skipped.length > 0 && (
+        <div className="mt-4 space-y-1">
+          <p className="text-sm text-yellow-400">Skipped:</p>
+          {skipped.map((s, i) => (
+            <p key={i} className="text-xs text-gray-400">
+              {s.name}{s.provider ? ` (${s.provider})` : ""} — {s.reason}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
