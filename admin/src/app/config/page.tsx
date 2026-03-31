@@ -1,5 +1,6 @@
 import { query } from "@/lib/db";
 import { ConfigForm } from "./config-form";
+import { BackfillLogos } from "./backfill-logos";
 
 async function getConfig() {
   const rows = await query<{ key: string; value: string; updated_at: string }>(
@@ -21,6 +22,9 @@ export default async function ConfigPage() {
     <div>
       <h2 className="text-2xl font-bold mb-6">App Config</h2>
       <ConfigForm config={config} />
+      <div className="mt-8">
+        <BackfillLogos />
+      </div>
     </div>
   );
 }
