@@ -226,7 +226,7 @@ async function registerBackfillLogos(app: FastifyInstance) {
     if (adminKey && adminKey === process.env.ADMIN_KEY) {
       // Admin panel access — allowed
     } else {
-      await auth(request, reply);
+      await authMiddleware(request, reply);
       if (reply.sent) return;
     }
     const result = await app.db.query(
