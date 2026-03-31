@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Account — Renewd</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="icon.png">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { max-width: 100vw; overflow-x: hidden; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: #0A0A0A;
+      color: #F2F2F7;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(10,10,10,0.8);
+      border-bottom: 1px solid #2C2C2E;
+    }
+    .nav-inner {
+      max-width: 800px; margin: 0 auto; padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F2F2F7; }
+    .logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .logo span { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .back { color: #3B82F6; text-decoration: none; font-size: 14px; font-weight: 500; }
+    .content {
+      max-width: 800px; margin: 0 auto; padding: 100px 24px 80px;
+    }
+    h1 { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
+    .subtitle { color: #8E8E93; font-size: 14px; margin-bottom: 48px; }
+    h2 { font-size: 22px; font-weight: 600; margin: 40px 0 16px; }
+    p { margin-bottom: 16px; color: #D1D1D6; line-height: 1.7; }
+    ul { margin: 0 0 16px 24px; color: #D1D1D6; }
+    li { margin-bottom: 8px; }
+    a { color: #3B82F6; }
+    .warning {
+      background: rgba(255, 59, 48, 0.1);
+      border: 1px solid rgba(255, 59, 48, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      color: #FF6B6B;
+    }
+    .steps {
+      background: #1C1C1E;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+    .steps ol { margin: 0 0 0 24px; color: #D1D1D6; }
+    .steps li { margin-bottom: 12px; }
+    .divider { border: none; border-top: 1px solid #2C2C2E; margin: 48px 0; }
+    form { margin-top: 24px; }
+    label { display: block; font-size: 14px; font-weight: 500; color: #8E8E93; margin-bottom: 8px; }
+    input, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      background: #1C1C1E;
+      border: 1px solid #3A3A3C;
+      border-radius: 10px;
+      color: #F2F2F7;
+      font-family: inherit;
+      font-size: 16px;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus { border-color: #3B82F6; }
+    textarea { resize: vertical; min-height: 80px; }
+    button {
+      background: #FF3B30;
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .success {
+      display: none;
+      background: rgba(48, 209, 88, 0.1);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      color: #30D158;
+      text-align: center;
+    }
+    footer {
+      border-top: 1px solid #2C2C2E; padding: 32px 24px;
+      text-align: center; color: #8E8E93; font-size: 14px;
+    }
+    @media (max-width: 480px) {
+      .content { padding: 90px 20px 60px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo"><img src="icon.png" alt="Renewd"><span>Renewd</span></a>
+      <a href="/" class="back">Back to Home</a>
+    </div>
+  </nav>
+
+  <div class="content">
+    <h1>Delete Your Account</h1>
+    <p class="subtitle">Account and data deletion request</p>
+
+    <h2>Delete from the App</h2>
+    <p>The fastest way to delete your account is directly in the app:</p>
+    <div class="steps">
+      <ol>
+        <li>Open Renewd and go to <strong>Profile</strong></li>
+        <li>Tap <strong>Delete Account</strong></li>
+        <li>Confirm deletion in the dialog</li>
+      </ol>
+    </div>
+
+    <div class="warning">
+      <strong>This action is permanent.</strong> Deleting your account will permanently remove all your data including renewals, documents, payments, reminders, notifications, and settings. This cannot be undone.
+    </div>
+
+    <h2>What Gets Deleted</h2>
+    <ul>
+      <li>Your user profile and account</li>
+      <li>All renewals and payment records</li>
+      <li>All uploaded documents</li>
+      <li>All reminders and notification history</li>
+      <li>All support tickets</li>
+      <li>All chat and AI usage history</li>
+    </ul>
+
+    <hr class="divider">
+
+    <h2>Can't Access the App?</h2>
+    <p>If you're unable to delete your account from the app, submit a request below and we'll process it within 3 business days.</p>
+
+    <form id="deleteForm">
+      <label for="email">Email or phone number associated with your account</label>
+      <input type="text" id="email" name="email" placeholder="you@example.com or +91 98765 43210" required>
+
+      <label for="reason">Reason for deletion (optional)</label>
+      <textarea id="reason" name="reason" placeholder="Let us know why you're leaving..."></textarea>
+
+      <button type="submit" id="submitBtn">Request Account Deletion</button>
+    </form>
+
+    <div class="success" id="successMsg">
+      <strong>Request received.</strong><br>
+      We'll process your account deletion within 3 business days and send a confirmation to your email.
+    </div>
+
+    <hr class="divider">
+
+    <h2>Questions?</h2>
+    <p>Contact us at <a href="#" onclick="window.location='mai'+'lto:'+'support'+'@'+'renewd.app';return false;">support@renewd.app</a></p>
+  </div>
+
+  <footer>&copy; 2026 Quartex. All rights reserved.</footer>
+
+  <script>
+    document.getElementById('deleteForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('submitBtn');
+      var form = document.getElementById('deleteForm');
+      var msg = document.getElementById('successMsg');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      fetch('https://api.renewd.app/api/v1/support/delete-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contact: document.getElementById('email').value,
+          reason: document.getElementById('reason').value
+        })
+      })
+      .then(function() {
+        form.style.display = 'none';
+        msg.style.display = 'block';
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Request Account Deletion';
+        alert('Something went wrong. Please email support@renewd.app instead.');
+      });
+    });
+  </script>
+</body>
+</html>
