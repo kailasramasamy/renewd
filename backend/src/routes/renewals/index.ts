@@ -221,7 +221,14 @@ async function registerPriceCheck(app: FastifyInstance) {
 }
 
 async function registerBackfillLogos(app: FastifyInstance) {
-  app.post("/backfill-logos", auth, async (_request, reply) => {
+  app.post("/backfill-logos", async (request, reply) => {
+    const adminKey = request.headers["x-admin-key"] as string | undefined;
+    if (adminKey && adminKey === process.env.ADMIN_KEY) {
+      // Admin panel access — allowed
+    } else {
+      await auth(request, reply);
+      if (reply.sent) return;
+    }
     const result = await app.db.query(
       "SELECT id, name, provider FROM renewals WHERE logo_url IS NULL"
     );
