@@ -20,11 +20,11 @@ const nav = [
   { href: "/users", label: "Users", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/notifications", label: "Notifications", icon: Bell },
-  { href: "/config", label: "App Config", icon: Settings },
-  { href: "/premium", label: "Premium Config", icon: Crown },
   { href: "/ai-usage", label: "AI Usage", icon: BrainCircuit },
   { href: "/banners", label: "Banners", icon: Image },
   { href: "/support", label: "Support", icon: LifeBuoy, badge: true },
+  { href: "/config", label: "App Config", icon: Settings },
+  { href: "/premium", label: "Premium Config", icon: Crown },
 ];
 
 export function Sidebar() {
