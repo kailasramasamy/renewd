@@ -121,12 +121,16 @@ const BRAND_DOMAINS: Record<string, string> = {
 };
 
 function findDomainFromMap(name: string, provider: string | null): string | null {
-  const search = (provider || name).toLowerCase().trim();
+  // Try name first (e.g. "Zoho"), then provider (e.g. "quartex.in")
+  for (const input of [name, provider]) {
+    if (!input) continue;
+    const search = input.toLowerCase().trim();
 
-  if (BRAND_DOMAINS[search]) return BRAND_DOMAINS[search];
+    if (BRAND_DOMAINS[search]) return BRAND_DOMAINS[search];
 
-  for (const [brand, domain] of Object.entries(BRAND_DOMAINS)) {
-    if (search.includes(brand) || brand.includes(search)) return domain;
+    for (const [brand, domain] of Object.entries(BRAND_DOMAINS)) {
+      if (search.includes(brand) || brand.includes(search)) return domain;
+    }
   }
 
   return null;
