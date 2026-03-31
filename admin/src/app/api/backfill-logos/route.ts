@@ -129,5 +129,10 @@ export async function POST() {
     }
   }
 
-  return NextResponse.json({ updated, total: rows.length, skipped });
+  return NextResponse.json({
+    updated,
+    total: rows.length,
+    skipped,
+    hasApiKey: !!process.env.CLAUDE_API_KEY,
+  });
 }

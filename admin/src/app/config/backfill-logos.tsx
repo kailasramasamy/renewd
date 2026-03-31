@@ -16,7 +16,8 @@ export function BackfillLogos() {
       const res = await fetch("/api/backfill-logos", { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
-      setResult(`Updated ${data.updated} of ${data.total} renewals`);
+      const keyStatus = data.hasApiKey ? "" : " (API key not found!)";
+      setResult(`Updated ${data.updated} of ${data.total} renewals${keyStatus}`);
       if (data.skipped?.length) setSkipped(data.skipped);
     } catch (err) {
       setResult(err instanceof Error ? err.message : "Failed");
