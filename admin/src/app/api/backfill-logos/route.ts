@@ -14,7 +14,7 @@ export async function POST() {
   }
 
   try {
-    const res = await fetch(`${backendUrl}/backfill-logos`, {
+    const res = await fetch(`${backendUrl}/api/v1/renewals/backfill-logos`, {
       method: "POST",
       headers: {
         "x-admin-key": process.env.ADMIN_KEY || "",
