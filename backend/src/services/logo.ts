@@ -109,6 +109,15 @@ const BRAND_DOMAINS: Record<string, string> = {
   comcast: "xfinity.com",
   xfinity: "xfinity.com",
   spectrum: "spectrum.com",
+  // Business & productivity
+  zoho: "zoho.com",
+  freshworks: "freshworks.com",
+  salesforce: "salesforce.com",
+  hubspot: "hubspot.com",
+  mailchimp: "mailchimp.com",
+  twilio: "twilio.com",
+  stripe: "stripe.com",
+  razorpay: "razorpay.com",
 };
 
 function findDomainFromMap(name: string, provider: string | null): string | null {
