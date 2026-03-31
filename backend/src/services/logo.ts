@@ -121,8 +121,8 @@ const BRAND_DOMAINS: Record<string, string> = {
 };
 
 function findDomainFromMap(name: string, provider: string | null): string | null {
-  // Try name first (e.g. "Zoho"), then provider (e.g. "quartex.in")
-  for (const input of [name, provider]) {
+  // Try provider first, then name as fallback
+  for (const input of [provider, name]) {
     if (!input) continue;
     const search = input.toLowerCase().trim();
 
