@@ -13,20 +13,35 @@ export async function POST() {
     );
   }
 
-  const res = await fetch(`${backendUrl}/backfill-logos`, {
-    method: "POST",
-    headers: {
-      "x-admin-key": process.env.ADMIN_KEY || "",
-    },
-  });
+  try {
+    const res = await fetch(`${backendUrl}/backfill-logos`, {
+      method: "POST",
+      headers: {
+        "x-admin-key": process.env.ADMIN_KEY || "",
+      },
+    });
 
-  const data = await res.json();
-  if (!res.ok) {
+    const text = await res.text();
+    if (!text) {
+      return NextResponse.json(
+        { error: `Backend returned empty response (status ${res.status})` },
+        { status: 502 }
+      );
+    }
+
+    const data = JSON.parse(text);
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: data.error || `Backend error (status ${res.status})` },
+        { status: res.status }
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (err) {
     return NextResponse.json(
-      { error: data.error || "Backend call failed" },
-      { status: res.status }
+      { error: err instanceof Error ? err.message : "Failed to reach backend" },
+      { status: 502 }
     );
   }
-
-  return NextResponse.json(data);
 }
