@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "test-plan.md",
+                "file": "production-readiness-checklist.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "test-plan"
+              "title": "production-readiness-checklist"
             }
           }
         ]
@@ -185,8 +185,14 @@
   },
   "active": "46c813632a9ba3d7",
   "lastOpenFiles": [
-    "build-plan.md",
+    "marketing/whatsapp-launch-message.md",
+    "marketing",
+    "v2-roadmap.md",
+    "security-audit-tracker.md",
+    "production-readiness-checklist.md",
     "test-plan.md",
+    "competitive-analysis.md",
+    "build-plan.md",
     "feature-spec.md",
     "design-system.md"
   ]
