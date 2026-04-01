@@ -1,4 +1,5 @@
 import { query } from "@/lib/db";
+import { LogTable } from "./log-table";
 
 interface NotifStat {
   type: string;
@@ -6,16 +7,85 @@ interface NotifStat {
   read: number;
 }
 
-interface RecentNotif {
+interface LogEntry {
+  id: string;
+  user_name: string | null;
+  user_email: string | null;
+  renewal_name: string | null;
   title: string;
   body: string;
   type: string;
   is_read: boolean;
   created_at: string;
-  user_name: string | null;
 }
 
-async function getData() {
+interface Props {
+  searchParams: Promise<{
+    page?: string;
+    type?: string;
+    q?: string;
+    from?: string;
+    to?: string;
+  }>;
+}
+
+const PAGE_SIZE = 50;
+
+export const dynamic = "force-dynamic";
+
+export default async function NotificationsPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10));
+  const type = params.type ?? "";
+  const search = params.q ?? "";
+  const from = params.from ?? "";
+  const to = params.to ?? "";
+
+  const conditions: string[] = [];
+  const values: unknown[] = [];
+  let idx = 1;
+
+  if (type) {
+    conditions.push(`n.type = $${idx++}`);
+    values.push(type);
+  }
+  if (search) {
+    conditions.push(
+      `(u.name ILIKE $${idx} OR u.email ILIKE $${idx} OR n.title ILIKE $${idx} OR n.body ILIKE $${idx})`
+    );
+    values.push(`%${search}%`);
+    idx++;
+  }
+  if (from) {
+    conditions.push(`n.created_at >= $${idx++}::date`);
+    values.push(from);
+  }
+  if (to) {
+    conditions.push(`n.created_at < ($${idx++}::date + INTERVAL '1 day')`);
+    values.push(to);
+  }
+
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+  const [{ total }] = await query<{ total: number }>(
+    `SELECT COUNT(*)::int AS total FROM notification_log n JOIN users u ON u.id = n.user_id ${where}`,
+    values
+  );
+
+  const offset = (page - 1) * PAGE_SIZE;
+  const logs = await query<LogEntry>(
+    `SELECT n.id, u.name AS user_name, u.email AS user_email,
+            ren.name AS renewal_name,
+            n.title, n.body, n.type, n.is_read, n.created_at
+     FROM notification_log n
+     JOIN users u ON u.id = n.user_id
+     LEFT JOIN renewals ren ON ren.id = n.renewal_id
+     ${where}
+     ORDER BY n.created_at DESC
+     LIMIT ${PAGE_SIZE} OFFSET ${offset}`,
+    values
+  );
+
   const stats = await query<NotifStat>(
     `SELECT type,
             COUNT(*)::int AS total,
@@ -23,29 +93,16 @@ async function getData() {
      FROM notification_log GROUP BY type`
   );
 
-  const recent = await query<RecentNotif>(
-    `SELECT n.title, n.body, n.type, n.is_read, n.created_at,
-            u.name AS user_name
-     FROM notification_log n
-     JOIN users u ON u.id = n.user_id
-     ORDER BY n.created_at DESC LIMIT 20`
-  );
-
-  const [total] = await query<{ total: number; read: number }>(
+  const [totals] = await query<{ total: number; read: number }>(
     `SELECT COUNT(*)::int AS total,
             COUNT(*) FILTER (WHERE is_read)::int AS read
      FROM notification_log`
   );
 
-  return { stats, recent, total };
-}
-
-export const dynamic = "force-dynamic";
-
-export default async function NotificationsPage() {
-  const { stats, recent, total } = await getData();
   const readRate =
-    total.total > 0 ? ((total.read / total.total) * 100).toFixed(1) : "0";
+    totals.total > 0 ? ((totals.read / totals.total) * 100).toFixed(1) : "0";
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div>
@@ -54,16 +111,16 @@ export default async function NotificationsPage() {
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-[#38383A]">
           <p className="text-gray-500 text-sm">Total Sent</p>
-          <p className="text-3xl font-bold mt-2">{total.total}</p>
+          <p className="text-3xl font-bold mt-2">{totals.total}</p>
         </div>
         <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-[#38383A]">
           <p className="text-gray-500 text-sm">Read</p>
-          <p className="text-3xl font-bold mt-2 text-green-400">{total.read}</p>
+          <p className="text-3xl font-bold mt-2 text-green-400">{totals.read}</p>
         </div>
         <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-[#38383A]">
           <p className="text-gray-500 text-sm">Unread</p>
           <p className="text-3xl font-bold mt-2 text-orange-400">
-            {total.total - total.read}
+            {totals.total - totals.read}
           </p>
         </div>
         <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-[#38383A]">
@@ -88,52 +145,13 @@ export default async function NotificationsPage() {
         ))}
       </div>
 
-      <h3 className="text-lg font-semibold mb-4">Recent Notifications</h3>
-      <div className="bg-[#1C1C1E] rounded-2xl border border-[#38383A] overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[#38383A] text-gray-500 text-left">
-              <th className="px-5 py-3">User</th>
-              <th className="px-5 py-3">Title</th>
-              <th className="px-5 py-3">Type</th>
-              <th className="px-5 py-3">Status</th>
-              <th className="px-5 py-3">Sent</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recent.map((n, i) => (
-              <tr
-                key={i}
-                className="border-b border-[#38383A] hover:bg-[#2C2C2E]"
-              >
-                <td className="px-5 py-3">{n.user_name || "—"}</td>
-                <td className="px-5 py-3 font-medium">{n.title}</td>
-                <td className="px-5 py-3">
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs ${
-                      n.type === "reminder"
-                        ? "bg-orange-500/20 text-orange-400"
-                        : "bg-blue-500/20 text-blue-400"
-                    }`}
-                  >
-                    {n.type}
-                  </span>
-                </td>
-                <td className="px-5 py-3">
-                  {n.is_read ? (
-                    <span className="text-green-400">Read</span>
-                  ) : (
-                    <span className="text-gray-500">Unread</span>
-                  )}
-                </td>
-                <td className="px-5 py-3 text-gray-500">
-                  {new Date(n.created_at).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <LogTable
+        logs={logs}
+        total={total}
+        page={page}
+        totalPages={totalPages}
+        filters={{ type, q: search, from, to }}
+      />
     </div>
   );
 }

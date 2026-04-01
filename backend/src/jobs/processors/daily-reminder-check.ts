@@ -11,7 +11,7 @@ interface DueReminder {
   fcm_token: string | null;
 }
 
-export async function processDailyReminderCheck(_job: Job): Promise<void> {
+export async function processDailyReminderCheck(_job: Job): Promise<{ processed: number; failed: number }> {
   const pool = getJobPool();
 
   const { rows } = await pool.query<DueReminder>(
@@ -28,12 +28,16 @@ export async function processDailyReminderCheck(_job: Job): Promise<void> {
 
   console.log(`[ReminderCheck] Found ${rows.length} due reminders`);
 
+  let failed = 0;
   for (const reminder of rows) {
-    await sendSingleReminder(pool, reminder);
+    const ok = await sendSingleReminder(pool, reminder);
+    if (!ok) failed++;
   }
+
+  return { processed: rows.length, failed };
 }
 
-async function sendSingleReminder(pool: ReturnType<typeof getJobPool>, reminder: DueReminder): Promise<void> {
+async function sendSingleReminder(pool: ReturnType<typeof getJobPool>, reminder: DueReminder): Promise<boolean> {
   const { title, body } = formatMessage(reminder.renewal_name, reminder.days_before);
 
   try {
@@ -58,6 +62,7 @@ async function sendSingleReminder(pool: ReturnType<typeof getJobPool>, reminder:
        VALUES ($1, $2, $3, $4, 'reminder')`,
       [reminder.user_id, reminder.renewal_id, title, body]
     );
+    return true;
   } catch (err) {
     if (err instanceof Error && err.message.includes("INVALID_FCM_TOKEN")) {
       await pool.query(
@@ -68,6 +73,7 @@ async function sendSingleReminder(pool: ReturnType<typeof getJobPool>, reminder:
     } else {
       console.error(`[ReminderCheck] Failed to send reminder ${reminder.id}:`, err);
     }
+    return false;
   }
 }
 

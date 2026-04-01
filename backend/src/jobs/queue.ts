@@ -31,25 +31,52 @@ export const renewdQueue = new Queue("renewd-jobs", { connection });
 export const renewdWorker = new Worker(
   "renewd-jobs",
   async (job) => {
-    switch (job.name) {
-      case "daily-reminder-check":
-        return processDailyReminderCheck(job);
-      case "daily-digest":
-        return processDailyDigest(job);
-      default:
-        throw new Error(`Unknown job type: ${job.name}`);
+    const pool = getJobPool();
+    const [{ id: runId }] = (
+      await pool.query(
+        `INSERT INTO job_runs (job_name, status) VALUES ($1, 'running') RETURNING id`,
+        [job.name]
+      )
+    ).rows;
+
+    const start = Date.now();
+    try {
+      let result: { processed: number; failed: number } | undefined;
+      switch (job.name) {
+        case "daily-reminder-check":
+          result = await processDailyReminderCheck(job);
+          break;
+        case "daily-digest":
+          result = await processDailyDigest(job);
+          break;
+        default:
+          throw new Error(`Unknown job type: ${job.name}`);
+      }
+
+      const durationMs = Date.now() - start;
+      await pool.query(
+        `UPDATE job_runs
+         SET status = 'completed', finished_at = NOW(), duration_ms = $1,
+             processed = $2, failed = $3
+         WHERE id = $4`,
+        [durationMs, result?.processed ?? 0, result?.failed ?? 0, runId]
+      );
+      console.log(`Job ${job.id} (${job.name}) completed in ${durationMs}ms`);
+    } catch (err) {
+      const durationMs = Date.now() - start;
+      const message = err instanceof Error ? err.message : String(err);
+      await pool.query(
+        `UPDATE job_runs
+         SET status = 'failed', finished_at = NOW(), duration_ms = $1, error = $2
+         WHERE id = $3`,
+        [durationMs, message, runId]
+      );
+      console.error(`Job ${job?.id} (${job?.name}) failed:`, message);
+      throw err;
     }
   },
   { connection, concurrency: 5 }
 );
-
-renewdWorker.on("completed", (job) => {
-  console.log(`Job ${job.id} (${job.name}) completed`);
-});
-
-renewdWorker.on("failed", (job, err) => {
-  console.error(`Job ${job?.id} (${job?.name}) failed:`, err.message);
-});
 
 /** Graceful shutdown — call from server close hook */
 export async function closeJobs(): Promise<void> {

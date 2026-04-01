@@ -13,6 +13,7 @@ import {
   LifeBuoy,
   LogOut,
   BrainCircuit,
+  Timer,
 } from "lucide-react";
 
 const nav = [
@@ -21,6 +22,7 @@ const nav = [
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/ai-usage", label: "AI Usage", icon: BrainCircuit },
+  { href: "/job-runs", label: "Job Runs", icon: Timer },
   { href: "/banners", label: "Banners", icon: Image },
   { href: "/support", label: "Support", icon: LifeBuoy, badge: true },
   { href: "/config", label: "App Config", icon: Settings },

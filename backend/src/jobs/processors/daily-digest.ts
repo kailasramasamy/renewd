@@ -13,7 +13,7 @@ interface UpcomingRenewal {
   amount: number | null;
 }
 
-export async function processDailyDigest(_job: Job): Promise<void> {
+export async function processDailyDigest(_job: Job): Promise<{ processed: number; failed: number }> {
   const pool = getJobPool();
 
   const { rows: users } = await pool.query<DigestUser>(
@@ -26,15 +26,19 @@ export async function processDailyDigest(_job: Job): Promise<void> {
 
   console.log(`[Digest] Processing digest for ${users.length} users`);
 
+  let failed = 0;
   for (const user of users) {
-    await sendDigestForUser(pool, user);
+    const ok = await sendDigestForUser(pool, user);
+    if (!ok) failed++;
   }
+
+  return { processed: users.length, failed };
 }
 
 async function sendDigestForUser(
   pool: ReturnType<typeof getJobPool>,
   user: DigestUser
-): Promise<void> {
+): Promise<boolean> {
   const { rows } = await pool.query<UpcomingRenewal>(
     `SELECT name, renewal_date, amount
      FROM renewals
@@ -44,7 +48,7 @@ async function sendDigestForUser(
     [user.user_id]
   );
 
-  if (rows.length === 0) return;
+  if (rows.length === 0) return true;
 
   const names = rows.slice(0, 3).map((r) => r.name).join(", ");
   const suffix = rows.length > 3 ? ` and ${rows.length - 3} more` : "";
@@ -65,11 +69,13 @@ async function sendDigestForUser(
       body: digestBody,
       data: { action: "digest" },
     });
+    return true;
   } catch (err) {
     if (err instanceof Error && err.message.includes("INVALID_FCM_TOKEN")) {
       await pool.query("UPDATE users SET fcm_token = NULL WHERE id = $1", [user.user_id]);
     } else {
       console.error(`[Digest] Failed for user ${user.user_id}:`, err);
     }
+    return false;
   }
 }
