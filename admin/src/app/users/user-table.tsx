@@ -122,9 +122,10 @@ export function UserTable({ users }: { users: User[] }) {
             {filtered.map((u) => (
               <tr
                 key={u.id}
-                className="border-b border-[#38383A] hover:bg-[#2C2C2E]"
+                className="border-b border-[#38383A] hover:bg-[#2C2C2E] cursor-pointer"
+                onClick={() => window.location.href = `/users/${u.id}`}
               >
-                <td className="px-5 py-3 font-medium">{u.name || "—"}</td>
+                <td className="px-5 py-3 font-medium text-blue-400 hover:text-blue-300">{u.name || "—"}</td>
                 <td className="px-5 py-3 text-gray-400">{u.email || "—"}</td>
                 <td className="px-5 py-3 text-gray-400">{u.phone || "—"}</td>
                 <td className="px-5 py-3 text-gray-400">

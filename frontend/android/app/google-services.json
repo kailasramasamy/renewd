@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "360842637861-00rk3vt4t0948u4ddba4s1ilpnp6l5e5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.quartex.renewd",
+            "certificate_hash": "da6ca6b1b1297066b4ccf5760cc7d167db2e864a"
+          }
+        },
+        {
+          "client_id": "360842637861-398m2nj2h7lpb57ac396d11j37puahjr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.quartex.renewd",
+            "certificate_hash": "2d7ecef8d880ab1be18126fe317d4f6603bb380a"
+          }
+        },
+        {
           "client_id": "360842637861-sq0kg26gjitchb2kq6fso2g9h6gvdlqb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
