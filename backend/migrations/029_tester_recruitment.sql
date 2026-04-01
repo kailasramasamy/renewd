@@ -38,14 +38,3 @@ CREATE TABLE tester_feedback (
 CREATE INDEX idx_testers_program ON testers(program_id);
 CREATE INDEX idx_tester_feedback_program ON tester_feedback(program_id);
 CREATE INDEX idx_tester_feedback_tester ON tester_feedback(tester_id);
-
--- Seed the first program for Renewd
-INSERT INTO tester_programs (app_name, description, reward, platforms, tester_cap, status)
-VALUES (
-  'Renewd',
-  'Help us test Renewd — the AI-powered renewal tracker. Find bugs, share feedback, and earn a reward!',
-  '₹100 Amazon Gift Card',
-  '{android}',
-  20,
-  'open'
-);

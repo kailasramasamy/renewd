@@ -33,3 +33,15 @@ export async function PUT(
 
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const authError = await requireAdminAuth();
+  if (authError) return authError;
+
+  const { id } = await params;
+  await query("DELETE FROM tester_programs WHERE id = $1", [id]);
+  return NextResponse.json({ success: true });
+}
