@@ -40,7 +40,7 @@ export function ProgramList({ programs }: { programs: Program[] }) {
   }
 
   function copyLink(id: string) {
-    navigator.clipboard.writeText(`https://renewd.app/testers.html?id=${id}`);
+    navigator.clipboard.writeText(`https://www.renewd.app/testers.html?id=${id}`);
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
   }
