@@ -11,14 +11,14 @@ export async function PUT(
 
   const { id } = await params;
   const body = await request.json();
-  const { description, reward, tester_cap, status, platforms, android_test_link, ios_test_link } = body;
+  const { description, reward, tester_cap, test_duration_days, status, platforms, android_test_link, ios_test_link } = body;
 
   await query(
     `UPDATE tester_programs
      SET description = $1, reward = $2, tester_cap = $3, status = $4,
          platforms = $5, android_test_link = $6, ios_test_link = $7,
-         updated_at = NOW()
-     WHERE id = $8`,
+         test_duration_days = $8, updated_at = NOW()
+     WHERE id = $9`,
     [
       description || null,
       reward,
@@ -27,6 +27,7 @@ export async function PUT(
       platforms,
       android_test_link || null,
       ios_test_link || null,
+      test_duration_days || 7,
       id,
     ]
   );

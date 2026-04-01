@@ -9,6 +9,7 @@ interface Program {
   platforms: string[];
   tester_cap: number;
   status: string;
+  test_duration_days: number;
   android_test_link: string | null;
   ios_test_link: string | null;
   tester_count: number;

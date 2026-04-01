@@ -6,6 +6,7 @@ CREATE TABLE tester_programs (
   platforms TEXT[] NOT NULL DEFAULT '{android}',
   tester_cap INT NOT NULL DEFAULT 20,
   status VARCHAR(20) NOT NULL DEFAULT 'open',
+  test_duration_days INT NOT NULL DEFAULT 7,
   android_test_link TEXT,
   ios_test_link TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),

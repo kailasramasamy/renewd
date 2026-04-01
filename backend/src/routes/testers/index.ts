@@ -21,7 +21,7 @@ export default async function testerRoutes(app: FastifyInstance) {
     const [program] = (
       await app.db.query(
         `SELECT id, app_name, description, reward, platforms, tester_cap, status,
-                android_test_link, ios_test_link
+                test_duration_days, android_test_link, ios_test_link
          FROM tester_programs WHERE id = $1`,
         [id]
       )

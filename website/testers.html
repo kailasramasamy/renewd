@@ -150,7 +150,10 @@
       <h1>Join the <span id="appName">Renewd</span> Beta</h1>
       <p class="subtitle">Help us build a better app and earn rewards</p>
 
-      <p id="description"></p>
+      <div id="aboutApp" style="display:none; background:#1C1C1E; border:1px solid #2C2C2E; border-radius:12px; padding:24px; margin-bottom:24px;">
+        <h2 style="font-size:18px; font-weight:600; margin:0 0 8px;">About <span id="aboutAppName"></span></h2>
+        <p id="description" style="color:#D1D1D6; margin:0;"></p>
+      </div>
 
       <div class="reward-card">
         <div class="reward-label">Reward for testers</div>
@@ -166,6 +169,10 @@
         <div class="stat">
           <div class="value orange" id="spotsTaken">—</div>
           <div class="label">Testers Joined</div>
+        </div>
+        <div class="stat">
+          <div class="value" style="color:#3B82F6" id="duration">—</div>
+          <div class="label">Test Duration</div>
         </div>
       </div>
 
@@ -210,8 +217,12 @@
 
       <div class="success" id="successMsg">
         <h3>You're In!</h3>
-        <p>Welcome to the beta program. Use the link below to submit your feedback as you test the app.</p>
+        <p>Welcome to the beta program. Download the app using the link below, test it out, and share your feedback.</p>
         <div id="testLinkSection" style="margin-top:16px"></div>
+        <div style="background:rgba(255,204,0,0.1); border:1px solid rgba(255,204,0,0.3); border-radius:10px; padding:16px; margin-top:16px; text-align:left;">
+          <p style="color:#FFCC00; font-weight:600; margin:0 0 4px; font-size:15px;">About the reward</p>
+          <p style="color:#D1D1D6; margin:0; font-size:14px;">Your <span id="rewardName"></span> will be sent to your email after the <span id="rewardDuration"></span>-day test period ends and we've reviewed your feedback.</p>
+        </div>
         <a class="feedback-link" id="feedbackLink" href="#">Go to Feedback Portal →</a>
       </div>
     </div>
@@ -241,10 +252,17 @@
           document.getElementById('main').style.display = 'block';
 
           document.getElementById('appName').textContent = data.app_name;
-          document.getElementById('description').textContent = data.description || '';
+          if (data.description) {
+            document.getElementById('aboutAppName').textContent = data.app_name;
+            document.getElementById('description').textContent = data.description;
+            document.getElementById('aboutApp').style.display = 'block';
+          }
           document.getElementById('reward').textContent = data.reward;
+          document.getElementById('rewardName').textContent = data.reward;
+          document.getElementById('rewardDuration').textContent = data.test_duration_days;
           document.getElementById('spotsRemaining').textContent = data.spots_remaining;
           document.getElementById('spotsTaken').textContent = data.spots_taken;
+          document.getElementById('duration').textContent = data.test_duration_days + 'd';
           document.title = 'Beta Testers — ' + data.app_name;
 
           var platformsEl = document.getElementById('platforms');

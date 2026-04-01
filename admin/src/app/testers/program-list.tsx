@@ -13,6 +13,7 @@ interface Program {
   status: string;
   android_test_link: string | null;
   ios_test_link: string | null;
+  test_duration_days: number;
   tester_count: number;
   feedback_count: number;
   created_at: string;
@@ -82,6 +83,7 @@ export function ProgramList({ programs }: { programs: Program[] }) {
                 <th className="px-5 py-3">Feedback</th>
                 <th className="px-5 py-3">Platforms</th>
                 <th className="px-5 py-3">Reward</th>
+                <th className="px-5 py-3">Duration</th>
                 <th className="px-5 py-3">Created</th>
                 <th className="px-5 py-3"></th>
               </tr>
@@ -123,6 +125,7 @@ export function ProgramList({ programs }: { programs: Program[] }) {
                       ))}
                     </td>
                     <td className="px-5 py-3 text-yellow-400 text-xs">{p.reward}</td>
+                    <td className="px-5 py-3 text-gray-400 text-xs">{p.test_duration_days} days</td>
                     <td className="px-5 py-3 text-gray-500 whitespace-nowrap" suppressHydrationWarning>
                       {new Date(p.created_at).toLocaleDateString()}
                     </td>
@@ -152,7 +155,7 @@ export function ProgramList({ programs }: { programs: Program[] }) {
                   </tr>
                   {editing === p.id && (
                     <tr key={`${p.id}-edit`}>
-                      <td colSpan={8} className="p-0">
+                      <td colSpan={9} className="p-0">
                         <EditForm program={p} onSaved={() => { setEditing(null); router.refresh(); }} />
                       </td>
                     </tr>
@@ -173,6 +176,7 @@ function EditForm({ program, onSaved }: { program: Program; onSaved: () => void 
     description: program.description ?? "",
     reward: program.reward,
     tester_cap: program.tester_cap,
+    test_duration_days: program.test_duration_days,
     status: program.status,
     platforms: program.platforms,
     android_test_link: program.android_test_link ?? "",
@@ -234,7 +238,7 @@ function EditForm({ program, onSaved }: { program: Program; onSaved: () => void 
         className="w-full bg-[#2C2C2E] border border-[#38383A] rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
       />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <input
           value={values.reward}
           onChange={(e) => setValues((v) => ({ ...v, reward: e.target.value }))}
@@ -246,6 +250,13 @@ function EditForm({ program, onSaved }: { program: Program; onSaved: () => void 
           value={values.tester_cap}
           onChange={(e) => setValues((v) => ({ ...v, tester_cap: parseInt(e.target.value) || 0 }))}
           placeholder="Cap"
+          className="bg-[#2C2C2E] border border-[#38383A] rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+        />
+        <input
+          type="number"
+          value={values.test_duration_days}
+          onChange={(e) => setValues((v) => ({ ...v, test_duration_days: parseInt(e.target.value) || 7 }))}
+          placeholder="Duration (days)"
           className="bg-[#2C2C2E] border border-[#38383A] rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
         />
       </div>

@@ -11,6 +11,7 @@ export function CreateProgram({ onCreated }: { onCreated?: () => void } = {}) {
     reward: "₹100 Amazon Gift Card",
     tester_cap: 20,
     platforms: ["android"] as string[],
+    test_duration_days: 7,
     android_test_link: "",
     ios_test_link: "",
   });
@@ -79,7 +80,7 @@ export function CreateProgram({ onCreated }: { onCreated?: () => void } = {}) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1">Reward</label>
             <input
@@ -94,6 +95,15 @@ export function CreateProgram({ onCreated }: { onCreated?: () => void } = {}) {
               type="number"
               value={values.tester_cap}
               onChange={(e) => setValues((v) => ({ ...v, tester_cap: parseInt(e.target.value) || 0 }))}
+              className="w-full bg-[#2C2C2E] border border-[#38383A] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Test Duration (days)</label>
+            <input
+              type="number"
+              value={values.test_duration_days}
+              onChange={(e) => setValues((v) => ({ ...v, test_duration_days: parseInt(e.target.value) || 7 }))}
               className="w-full bg-[#2C2C2E] border border-[#38383A] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
             />
           </div>
