@@ -315,7 +315,7 @@
         var msg = document.getElementById('successMsg');
         msg.style.display = 'block';
 
-        document.getElementById('feedbackLink').href = 'testers-feedback.html?id=' + res.data.id;
+        document.getElementById('feedbackLink').href = 'testers-feedback?id=' + res.data.id;
 
         // Show test link if available
         var platform = document.getElementById('platform').value;

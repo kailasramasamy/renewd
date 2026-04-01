@@ -90,7 +90,7 @@ export function TesterList({ testers }: { testers: Tester[] }) {
                 </td>
                 <td className="px-5 py-3">
                   <button
-                    onClick={() => navigator.clipboard.writeText(`https://www.renewd.app/testers-feedback.html?id=${t.id}`)}
+                    onClick={() => navigator.clipboard.writeText(`https://www.renewd.app/testers-feedback?id=${t.id}`)}
                     className="text-blue-400 hover:text-blue-300 text-xs transition-colors"
                   >
                     Copy Link
