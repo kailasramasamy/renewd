@@ -18,6 +18,7 @@ import userRoutes from "./routes/users/index.js";
 import bannerRoutes from "./routes/banners/index.js";
 import supportRoutes from "./routes/support/index.js";
 import revenueCatWebhookRoutes from "./routes/webhooks/revenuecat.js";
+import testerRoutes from "./routes/testers/index.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -74,6 +75,7 @@ export async function buildApp() {
   await app.register(bannerRoutes, { prefix: "/api/v1/banners" });
   await app.register(supportRoutes, { prefix: "/api/v1/support" });
   await app.register(revenueCatWebhookRoutes, { prefix: "/api/v1/webhooks" });
+  await app.register(testerRoutes, { prefix: "/api/v1/testers" });
 
   return app;
 }

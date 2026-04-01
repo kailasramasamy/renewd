@@ -14,6 +14,7 @@ import {
   LogOut,
   BrainCircuit,
   Timer,
+  FlaskConical,
 } from "lucide-react";
 
 const nav = [
@@ -27,6 +28,7 @@ const nav = [
   { href: "/support", label: "Support", icon: LifeBuoy, badge: true },
   { href: "/config", label: "App Config", icon: Settings },
   { href: "/premium", label: "Premium Config", icon: Crown },
+  { href: "/testers", label: "Testers", icon: FlaskConical },
 ];
 
 export function Sidebar() {
@@ -62,7 +64,7 @@ export function Sidebar() {
       </div>
       <nav className="mt-2 flex-1">
         {nav.map((item) => {
-          const active = pathname === item.href;
+          const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
           const Icon = item.icon;
           const count = item.badge ? supportCount : 0;
           return (

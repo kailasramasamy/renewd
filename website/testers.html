@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beta Testers — Renewd</title>
+  <meta name="description" content="Join the Renewd beta testing program. Test the app, share feedback, and earn rewards.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="icon.png">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { max-width: 100vw; overflow-x: hidden; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: #0A0A0A;
+      color: #F2F2F7;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(10,10,10,0.8);
+      border-bottom: 1px solid #2C2C2E;
+    }
+    .nav-inner {
+      max-width: 800px; margin: 0 auto; padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F2F2F7; }
+    .logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .logo span { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .back { color: #3B82F6; text-decoration: none; font-size: 14px; font-weight: 500; }
+    .content { max-width: 800px; margin: 0 auto; padding: 100px 24px 80px; }
+    h1 { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
+    .subtitle { color: #8E8E93; font-size: 14px; margin-bottom: 48px; }
+    h2 { font-size: 22px; font-weight: 600; margin: 40px 0 16px; }
+    p { margin-bottom: 16px; color: #D1D1D6; line-height: 1.7; }
+    a { color: #3B82F6; }
+
+    .reward-card {
+      background: linear-gradient(135deg, #1C1C1E, #2C2C2E);
+      border: 1px solid #3B82F6;
+      border-radius: 16px;
+      padding: 24px;
+      margin: 24px 0 32px;
+      text-align: center;
+    }
+    .reward-card .reward-label { color: #8E8E93; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+    .reward-card .reward-value { font-size: 28px; font-weight: 700; color: #FFCC00; margin: 8px 0; }
+    .reward-card .reward-note { color: #8E8E93; font-size: 14px; }
+
+    .stats {
+      display: flex; gap: 16px; margin: 24px 0 32px;
+    }
+    .stat {
+      flex: 1; background: #1C1C1E; border-radius: 12px; padding: 20px; text-align: center;
+      border: 1px solid #2C2C2E;
+    }
+    .stat .value { font-size: 28px; font-weight: 700; }
+    .stat .label { color: #8E8E93; font-size: 13px; margin-top: 4px; }
+    .stat .value.green { color: #34C759; }
+    .stat .value.orange { color: #FF9F0A; }
+
+    .platforms { display: flex; gap: 10px; margin: 16px 0 32px; }
+    .platform-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #1C1C1E; border: 1px solid #2C2C2E; border-radius: 8px;
+      padding: 8px 16px; font-size: 14px; font-weight: 500;
+    }
+    .platform-badge.active { border-color: #34C759; color: #34C759; }
+
+    .closed-banner {
+      background: rgba(255, 59, 48, 0.1);
+      border: 1px solid rgba(255, 59, 48, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      color: #FF6B6B;
+      text-align: center;
+      margin: 24px 0;
+      display: none;
+    }
+
+    label { display: block; font-size: 14px; font-weight: 500; color: #8E8E93; margin-bottom: 8px; }
+    input, select, textarea {
+      width: 100%; padding: 14px 16px;
+      background: #1C1C1E; border: 1px solid #3A3A3C; border-radius: 10px;
+      color: #F2F2F7; font-family: inherit; font-size: 16px;
+      margin-bottom: 20px; outline: none; transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #3B82F6; }
+    select { appearance: none; cursor: pointer; }
+
+    .btn {
+      background: #3B82F6; color: #fff; border: none;
+      padding: 14px 32px; border-radius: 10px;
+      font-family: inherit; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s; width: 100%;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .success {
+      display: none; background: rgba(48, 209, 88, 0.1);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+      border-radius: 12px; padding: 24px; color: #30D158; text-align: center;
+    }
+    .success h3 { font-size: 20px; margin-bottom: 8px; color: #30D158; }
+    .success p { color: #8E8E93; }
+    .success .feedback-link {
+      display: inline-block; margin-top: 16px;
+      background: #3B82F6; color: #fff; padding: 12px 24px;
+      border-radius: 10px; text-decoration: none; font-weight: 600;
+    }
+
+    .what-list { list-style: none; margin: 16px 0 24px; }
+    .what-list li {
+      padding: 12px 0; border-bottom: 1px solid #2C2C2E;
+      color: #D1D1D6; display: flex; align-items: center; gap: 12px;
+    }
+    .what-list li::before { content: '✓'; color: #34C759; font-weight: 700; }
+
+    .divider { border: none; border-top: 1px solid #2C2C2E; margin: 48px 0; }
+    footer {
+      border-top: 1px solid #2C2C2E; padding: 32px 24px;
+      text-align: center; color: #8E8E93; font-size: 14px;
+    }
+    .loading { text-align: center; padding: 60px 0; color: #8E8E93; }
+
+    @media (max-width: 480px) {
+      .content { padding: 90px 20px 60px; }
+      h1 { font-size: 28px; }
+      .stats { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo"><img src="icon.png" alt="Renewd"><span>Renewd</span></a>
+      <a href="/" class="back">Back to Home</a>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div id="loading" class="loading">Loading program details...</div>
+
+    <div id="main" style="display:none">
+      <h1>Join the <span id="appName">Renewd</span> Beta</h1>
+      <p class="subtitle">Help us build a better app and earn rewards</p>
+
+      <p id="description"></p>
+
+      <div class="reward-card">
+        <div class="reward-label">Reward for testers</div>
+        <div class="reward-value" id="reward"></div>
+        <div class="reward-note">After submitting useful feedback</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="value green" id="spotsRemaining">—</div>
+          <div class="label">Spots Left</div>
+        </div>
+        <div class="stat">
+          <div class="value orange" id="spotsTaken">—</div>
+          <div class="label">Testers Joined</div>
+        </div>
+      </div>
+
+      <h2>Available Platforms</h2>
+      <div class="platforms" id="platforms"></div>
+
+      <h2>What You'll Do</h2>
+      <ul class="what-list">
+        <li>Install and use the app on your device</li>
+        <li>Report bugs or crashes you encounter</li>
+        <li>Share suggestions for improvements</li>
+        <li>Give honest feedback on the experience</li>
+      </ul>
+
+      <div id="closedBanner" class="closed-banner">
+        <strong>Registration Closed</strong><br>
+        All tester spots have been filled. Thank you for your interest!
+      </div>
+
+      <div id="formSection">
+        <hr class="divider">
+        <h2>Sign Up to Test</h2>
+
+        <form id="signupForm">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Your name" required>
+
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+
+          <label for="platform">Platform</label>
+          <select id="platform" required>
+            <option value="">Select platform...</option>
+          </select>
+
+          <label for="device">Device (optional)</label>
+          <input type="text" id="device" placeholder="e.g. Samsung Galaxy S24, Pixel 8">
+
+          <button type="submit" class="btn" id="submitBtn">Join as Beta Tester</button>
+        </form>
+      </div>
+
+      <div class="success" id="successMsg">
+        <h3>You're In!</h3>
+        <p>Welcome to the beta program. Use the link below to submit your feedback as you test the app.</p>
+        <div id="testLinkSection" style="margin-top:16px"></div>
+        <a class="feedback-link" id="feedbackLink" href="#">Go to Feedback Portal →</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>&copy; 2026 Quartex. All rights reserved.</footer>
+
+  <script>
+    var API_BASE = 'https://api.renewd.app/api/v1/testers';
+    var programId = new URLSearchParams(window.location.search).get('id');
+
+    if (!programId) {
+      document.getElementById('loading').textContent = 'No program specified. Please use the link shared with you.';
+    } else {
+      loadProgram();
+    }
+
+    function loadProgram() {
+      fetch(API_BASE + '/programs/' + programId)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.error) {
+            document.getElementById('loading').textContent = 'Program not found.';
+            return;
+          }
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('main').style.display = 'block';
+
+          document.getElementById('appName').textContent = data.app_name;
+          document.getElementById('description').textContent = data.description || '';
+          document.getElementById('reward').textContent = data.reward;
+          document.getElementById('spotsRemaining').textContent = data.spots_remaining;
+          document.getElementById('spotsTaken').textContent = data.spots_taken;
+          document.title = 'Beta Testers — ' + data.app_name;
+
+          var platformsEl = document.getElementById('platforms');
+          var selectEl = document.getElementById('platform');
+          var labels = { android: 'Android', ios: 'iOS' };
+          data.platforms.forEach(function(p) {
+            platformsEl.innerHTML += '<div class="platform-badge active">' + (labels[p] || p) + '</div>';
+            var opt = document.createElement('option');
+            opt.value = p;
+            opt.textContent = labels[p] || p;
+            selectEl.appendChild(opt);
+          });
+
+          if (data.status !== 'open' || data.spots_remaining <= 0) {
+            document.getElementById('closedBanner').style.display = 'block';
+            document.getElementById('formSection').style.display = 'none';
+          }
+        })
+        .catch(function() {
+          document.getElementById('loading').textContent = 'Failed to load program. Please try again.';
+        });
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Signing up...';
+
+      fetch(API_BASE + '/programs/' + programId + '/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          platform: document.getElementById('platform').value,
+          device_info: document.getElementById('device').value || undefined
+        })
+      })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        if (!res.ok) {
+          alert(res.data.error || 'Something went wrong');
+          btn.disabled = false;
+          btn.textContent = 'Join as Beta Tester';
+          return;
+        }
+
+        document.getElementById('formSection').style.display = 'none';
+        var msg = document.getElementById('successMsg');
+        msg.style.display = 'block';
+
+        document.getElementById('feedbackLink').href = 'testers-feedback.html?id=' + res.data.id;
+
+        // Show test link if available
+        var platform = document.getElementById('platform').value;
+        fetch(API_BASE + '/' + res.data.id)
+          .then(function(r) { return r.json(); })
+          .then(function(t) {
+            var link = platform === 'ios' ? t.ios_test_link : t.android_test_link;
+            if (link) {
+              document.getElementById('testLinkSection').innerHTML =
+                '<p style="color:#D1D1D6;margin-bottom:8px;">Download the test app:</p>' +
+                '<a href="' + link + '" style="color:#3B82F6;word-break:break-all;" target="_blank">' + link + '</a>';
+            }
+          });
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Join as Beta Tester';
+        alert('Network error. Please try again.');
+      });
+    });
+  </script>
+</body>
+</html>

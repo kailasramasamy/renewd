@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tester Feedback — Renewd</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="icon.png">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { max-width: 100vw; overflow-x: hidden; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: #0A0A0A;
+      color: #F2F2F7;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(10,10,10,0.8);
+      border-bottom: 1px solid #2C2C2E;
+    }
+    .nav-inner {
+      max-width: 800px; margin: 0 auto; padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F2F2F7; }
+    .logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .logo span { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .back { color: #3B82F6; text-decoration: none; font-size: 14px; font-weight: 500; }
+    .content { max-width: 800px; margin: 0 auto; padding: 100px 24px 80px; }
+    h1 { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
+    .subtitle { color: #8E8E93; font-size: 14px; margin-bottom: 32px; }
+    h2 { font-size: 22px; font-weight: 600; margin: 40px 0 16px; }
+    p { margin-bottom: 16px; color: #D1D1D6; line-height: 1.7; }
+    a { color: #3B82F6; }
+
+    .tester-info {
+      background: #1C1C1E; border: 1px solid #2C2C2E; border-radius: 12px;
+      padding: 20px; margin-bottom: 32px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    .tester-info .name { font-weight: 600; font-size: 18px; }
+    .tester-info .meta { color: #8E8E93; font-size: 14px; }
+    .tester-info .badge {
+      background: #34C759; color: #000; font-size: 12px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px;
+    }
+
+    label { display: block; font-size: 14px; font-weight: 500; color: #8E8E93; margin-bottom: 8px; }
+    input, select, textarea {
+      width: 100%; padding: 14px 16px;
+      background: #1C1C1E; border: 1px solid #3A3A3C; border-radius: 10px;
+      color: #F2F2F7; font-family: inherit; font-size: 16px;
+      margin-bottom: 20px; outline: none; transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #3B82F6; }
+    select { appearance: none; cursor: pointer; }
+    textarea { resize: vertical; min-height: 120px; }
+
+    .btn {
+      background: #3B82F6; color: #fff; border: none;
+      padding: 14px 32px; border-radius: 10px;
+      font-family: inherit; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s; width: 100%;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .success-toast {
+      display: none; background: rgba(48, 209, 88, 0.1);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+      border-radius: 12px; padding: 16px; color: #30D158;
+      text-align: center; margin-bottom: 24px;
+    }
+
+    .divider { border: none; border-top: 1px solid #2C2C2E; margin: 40px 0; }
+
+    .feedback-item {
+      background: #1C1C1E; border: 1px solid #2C2C2E; border-radius: 12px;
+      padding: 20px; margin-bottom: 12px;
+    }
+    .feedback-item .header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+    .feedback-item .title { font-weight: 600; }
+    .feedback-item .cat {
+      font-size: 12px; padding: 3px 10px; border-radius: 20px;
+    }
+    .cat-bug { background: rgba(255,59,48,0.15); color: #FF6B6B; }
+    .cat-suggestion { background: rgba(255,159,10,0.15); color: #FF9F0A; }
+    .cat-general { background: rgba(59,130,246,0.15); color: #3B82F6; }
+    .feedback-item .desc { color: #D1D1D6; font-size: 15px; }
+    .feedback-item .time { color: #8E8E93; font-size: 13px; margin-top: 8px; }
+
+    .empty { text-align: center; color: #8E8E93; padding: 40px 0; }
+    .loading { text-align: center; padding: 60px 0; color: #8E8E93; }
+
+    footer {
+      border-top: 1px solid #2C2C2E; padding: 32px 24px;
+      text-align: center; color: #8E8E93; font-size: 14px;
+    }
+    @media (max-width: 480px) {
+      .content { padding: 90px 20px 60px; }
+      h1 { font-size: 28px; }
+      .tester-info { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo"><img src="icon.png" alt="Renewd"><span>Renewd</span></a>
+      <a href="/" class="back">Back to Home</a>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div id="loading" class="loading" style="display:none">Loading your profile...</div>
+
+    <div id="emailLookup">
+      <h1>Feedback Portal</h1>
+      <p class="subtitle">Enter your email to submit bugs, suggestions, and feedback</p>
+
+      <form id="lookupForm">
+        <label for="lookupEmail">Email Address</label>
+        <input type="email" id="lookupEmail" placeholder="Enter the email you signed up with" required>
+        <button type="submit" class="btn" id="lookupBtn">Continue</button>
+      </form>
+      <div id="lookupError" style="display:none; color:#FF6B6B; margin-top:12px; font-size:15px;"></div>
+    </div>
+
+    <div id="main" style="display:none">
+      <h1>Feedback Portal</h1>
+      <p class="subtitle">Submit bugs, suggestions, and feedback for <span id="appName">Renewd</span></p>
+
+      <div class="tester-info">
+        <div>
+          <div class="name" id="testerName"></div>
+          <div class="meta" id="testerMeta"></div>
+        </div>
+        <div class="badge" id="testerStatus">Active</div>
+      </div>
+
+      <div class="success-toast" id="successToast">Feedback submitted! Thank you.</div>
+
+      <h2>Submit Feedback</h2>
+      <form id="feedbackForm">
+        <label for="category">Category</label>
+        <select id="category" required>
+          <option value="bug">Bug Report</option>
+          <option value="suggestion">Suggestion</option>
+          <option value="general">General Feedback</option>
+        </select>
+
+        <label for="title">Title</label>
+        <input type="text" id="title" placeholder="Brief summary of your feedback" required>
+
+        <label for="description">Description</label>
+        <textarea id="description" placeholder="Describe in detail. For bugs: what happened, what you expected, steps to reproduce." required></textarea>
+
+        <button type="submit" class="btn" id="submitBtn">Submit Feedback</button>
+      </form>
+
+      <hr class="divider">
+
+      <h2>Your Feedback History</h2>
+      <div id="feedbackList"></div>
+    </div>
+  </div>
+
+  <footer>&copy; 2026 Quartex. All rights reserved.</footer>
+
+  <script>
+    var API_BASE = 'https://api.renewd.app/api/v1/testers';
+    var testerId = new URLSearchParams(window.location.search).get('id');
+
+    if (testerId) {
+      document.getElementById('emailLookup').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+      loadTesterById(testerId);
+    }
+
+    document.getElementById('lookupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('lookupBtn');
+      var errEl = document.getElementById('lookupError');
+      btn.disabled = true;
+      btn.textContent = 'Looking up...';
+      errEl.style.display = 'none';
+
+      fetch(API_BASE + '/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: document.getElementById('lookupEmail').value })
+      })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        btn.disabled = false;
+        btn.textContent = 'Continue';
+        if (!res.ok) {
+          errEl.textContent = res.data.error || 'Not found';
+          errEl.style.display = 'block';
+          return;
+        }
+        testerId = res.data.id;
+        document.getElementById('emailLookup').style.display = 'none';
+        showTester(res.data);
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Continue';
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.style.display = 'block';
+      });
+    });
+
+    function loadTesterById(id) {
+      fetch(API_BASE + '/' + id)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('emailLookup').style.display = 'block';
+            return;
+          }
+          document.getElementById('loading').style.display = 'none';
+          showTester(data);
+        })
+        .catch(function() {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('emailLookup').style.display = 'block';
+        });
+    }
+
+    function showTester(data) {
+      document.getElementById('main').style.display = 'block';
+      document.getElementById('appName').textContent = data.app_name;
+      document.getElementById('testerName').textContent = data.name;
+      document.getElementById('testerMeta').textContent = data.email + ' · ' + data.platform;
+      document.getElementById('testerStatus').textContent = data.status === 'active' ? 'Active' : data.status;
+      document.title = 'Feedback — ' + data.app_name;
+
+      if (data.status !== 'active') {
+        document.getElementById('feedbackForm').style.display = 'none';
+        document.getElementById('testerStatus').style.background = '#FF3B30';
+        document.getElementById('testerStatus').style.color = '#fff';
+      }
+
+      renderFeedback(data.feedback || []);
+    }
+
+    function renderFeedback(items) {
+      var list = document.getElementById('feedbackList');
+      if (items.length === 0) {
+        list.innerHTML = '<div class="empty">No feedback submitted yet. Be the first!</div>';
+        return;
+      }
+      list.innerHTML = items.map(function(fb) {
+        var catClass = 'cat-' + fb.category;
+        return '<div class="feedback-item">' +
+          '<div class="header">' +
+            '<div class="title">' + escapeHtml(fb.title) + '</div>' +
+            '<span class="cat ' + catClass + '">' + fb.category + '</span>' +
+          '</div>' +
+          '<div class="desc">' + escapeHtml(fb.description) + '</div>' +
+          '<div class="time">' + new Date(fb.created_at).toLocaleString() + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      fetch(API_BASE + '/' + testerId + '/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: document.getElementById('category').value,
+          title: document.getElementById('title').value,
+          description: document.getElementById('description').value
+        })
+      })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        btn.disabled = false;
+        btn.textContent = 'Submit Feedback';
+
+        if (!res.ok) {
+          alert(res.data.error || 'Something went wrong');
+          return;
+        }
+
+        document.getElementById('title').value = '';
+        document.getElementById('description').value = '';
+        var toast = document.getElementById('successToast');
+        toast.style.display = 'block';
+        setTimeout(function() { toast.style.display = 'none'; }, 3000);
+
+        loadTesterById(testerId);
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Submit Feedback';
+        alert('Network error. Please try again.');
+      });
+    });
+  </script>
+</body>
+</html>
