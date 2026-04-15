@@ -26,563 +26,192 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(DashboardController());
+    final allRenewalsKey = GlobalKey();
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Obx(() {
-        if (c.isLoading.value && c.renewals.isEmpty) {
-          return const SkeletonLoader();
-        }
-        if (c.error.value.isNotEmpty && c.renewals.isEmpty) {
-          return _ErrorState(c: c);
-        }
-        return RefreshIndicator(
-          onRefresh: c.fetchRenewals,
-          child: ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(
-                RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, 100),
-            children: [
-              _SearchBar(c: c),
-              if (c.banners.isNotEmpty) ...[
-                const SizedBox(height: RenewdSpacing.lg),
-                _BannerCarousel(c: c),
-              ],
-              const SizedBox(height: RenewdSpacing.lg),
-              _StatsRow(c: c),
-              const SizedBox(height: RenewdSpacing.sm),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.analytics),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('View Analytics',
-                          style: RenewdTextStyles.caption.copyWith(
-                            color: RenewdColors.oceanBlue,
-                            fontWeight: FontWeight.w600,
-                          )),
-                      const SizedBox(width: 4),
-                      Icon(LucideIcons.arrowRight,
-                          size: 14, color: RenewdColors.oceanBlue),
+        body: SafeArea(
+          bottom: false,
+          child: Obx(() {
+            if (c.isLoading.value && c.renewals.isEmpty) {
+              return const SkeletonLoader();
+            }
+            if (c.error.value.isNotEmpty && c.renewals.isEmpty) {
+              return _ErrorState(c: c);
+            }
+            return RefreshIndicator(
+              onRefresh: c.fetchRenewals,
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(
+                    RenewdSpacing.lg, RenewdSpacing.sm, RenewdSpacing.lg, 100),
+                children: [
+                  _Header(c: c),
+                  const SizedBox(height: RenewdSpacing.lg),
+                  if (c.renewals.isNotEmpty) ...[
+                    _SummaryCard(c: c),
+                    const SizedBox(height: RenewdSpacing.xl),
+                    _UpcomingGrid(c: c, allRenewalsKey: allRenewalsKey),
+                    if (c.banners.isNotEmpty) ...[
+                      const SizedBox(height: RenewdSpacing.xl),
+                      _BannerCarousel(c: c),
                     ],
-                  ),
-                ),
+                    const SizedBox(height: RenewdSpacing.xl),
+                    _RenewalsListSection(key: allRenewalsKey, c: c),
+                  ] else if (c.filteredRenewals.isEmpty &&
+                      c.searchQuery.value.isEmpty)
+                    _EmptyState()
+                  else
+                    _NoResults(),
+                ],
               ),
-              const SizedBox(height: RenewdSpacing.lg),
-              if (c.filteredRenewals.isEmpty && c.searchQuery.value.isEmpty)
-                _EmptyState()
-              else if (c.filteredRenewals.isEmpty)
-                _NoResults()
-              else
-                _SectionedList(c: c),
-            ],
-          ),
-        );
-      })),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'dashboard_fab',
-        onPressed: () => _showAddOptions(context, c),
-        backgroundColor: RenewdColors.oceanBlue,
-        child: const Icon(Icons.add, color: Colors.white),
+            );
+          }),
+        ),
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'dashboard_fab',
+          onPressed: () => _showAddOptions(context, c),
+          backgroundColor: RenewdColors.oceanBlue,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
-    ),
     );
   }
 }
 
-// ─── Search Bar ───────────────────────────────────────
+// ─── Header ──────────────────────────────────────────
 
-class _SearchBar extends StatelessWidget {
+class _Header extends StatelessWidget {
   final DashboardController c;
-  const _SearchBar({required this.c});
+  const _Header({required this.c});
 
-  String get _greeting {
+  String get _firstName {
     final storage = Get.find<StorageService>();
     final userData = storage.readUserData();
     final name = userData?['name'] as String?;
-    if (name != null && name.isNotEmpty) {
-      final firstName = name.split(' ').first;
-      return 'Hi, $firstName';
-    }
-    return 'Hi there';
+    if (name != null && name.isNotEmpty) return name.split(' ').first;
+    return 'there';
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Column(
-      children: [
-        // Profile row
-        Padding(
-          padding: const EdgeInsets.only(top: RenewdSpacing.sm),
-          child: Row(
-            children: [
-              Semantics(
-                label: 'Profile',
-                button: true,
-                child: GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.profile),
-                  child: SizedBox(
-                    width: 44,
-                    height: 44,
-                    child: Center(
-                      child: CircleAvatar(
-                        radius: 18,
-                        backgroundColor: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
-                        child: Icon(LucideIcons.user, size: 18,
-                            color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
-                      ),
-                    ),
-                  ),
+    return Padding(
+      padding: const EdgeInsets.only(top: RenewdSpacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GestureDetector(
+            onTap: () => Get.toNamed(AppRoutes.profile),
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: RenewdColors.oceanBlue,
+              child: Text(
+                _firstName[0].toUpperCase(),
+                style: RenewdTextStyles.body.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
               ),
-              const SizedBox(width: RenewdSpacing.md),
-              Expanded(
-                child: Text(_greeting,
-                    style: RenewdTextStyles.h3.copyWith(fontWeight: FontWeight.w600)),
-              ),
-              Obx(() {
-                final count = c.unreadNotificationCount.value;
-                return IconButton(
-                  tooltip: 'Notifications',
-                  icon: Badge(
-                    isLabelVisible: count > 0,
-                    label: Text('$count',
-                        style: const TextStyle(fontSize: 10, color: Colors.white)),
-                    backgroundColor: RenewdColors.coralRed,
-                    child: Icon(LucideIcons.bell,
-                        size: 22, color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
-                  ),
-                  onPressed: () async {
-                    await Get.toNamed(AppRoutes.notificationInbox);
-                    c.fetchUnreadCount();
-                  },
-                );
-              }),
-            ],
-          ),
-        ),
-        // Search field — tappable, opens dedicated search screen
-        const SizedBox(height: RenewdSpacing.md),
-        GestureDetector(
-          onTap: () => Get.toNamed(AppRoutes.search),
-          child: Container(
-            height: 44,
-            decoration: BoxDecoration(
-              color: isDark ? RenewdColors.darkSlate : RenewdColors.cloudGray,
-              borderRadius: RenewdRadius.pillAll,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
+          ),
+          const SizedBox(width: RenewdSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(LucideIcons.search, size: 18, color: RenewdColors.slate),
-                const SizedBox(width: 10),
-                Text('Search renewals...',
-                    style: RenewdTextStyles.bodySmall
+                Text('Hello, $_firstName',
+                    style: RenewdTextStyles.h3
+                        .copyWith(fontWeight: FontWeight.w700)),
+                Text('Track your renewals',
+                    style: RenewdTextStyles.caption
                         .copyWith(color: RenewdColors.slate)),
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Banner Carousel ─────────────────────────────────
-
-class _BannerCarousel extends StatefulWidget {
-  final DashboardController c;
-  const _BannerCarousel({required this.c});
-
-  @override
-  State<_BannerCarousel> createState() => _BannerCarouselState();
-}
-
-class _BannerCarouselState extends State<_BannerCarousel> {
-  final _pageController = PageController(viewportFraction: 1.0);
-  int _currentPage = 0;
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final banners = widget.c.banners;
-      if (banners.isEmpty) return const SizedBox.shrink();
-
-      return Column(
-        children: [
-          SizedBox(
-            height: 140,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: banners.length,
-              onPageChanged: (i) => setState(() => _currentPage = i),
-              itemBuilder: (_, i) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: _BannerCard(banner: banners[i]),
-              ),
-            ),
+          _CircleIconButton(
+            icon: LucideIcons.search,
+            isDark: isDark,
+            onTap: () => Get.toNamed(AppRoutes.search),
           ),
-          if (banners.length > 1) ...[
-            const SizedBox(height: RenewdSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(banners.length, (i) => Container(
-                width: _currentPage == i ? 20 : 6,
-                height: 6,
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                decoration: BoxDecoration(
-                  color: _currentPage == i
-                      ? RenewdColors.oceanBlue
-                      : RenewdColors.slate.withValues(alpha: RenewdOpacity.moderate),
-                  borderRadius: RenewdRadius.pillAll,
-                ),
-              )),
-            ),
-          ],
-        ],
-      );
-    });
-  }
-}
-
-class _BannerCard extends StatelessWidget {
-  final BannerModel banner;
-  const _BannerCard({required this.banner});
-
-  Color _parseColor(String? hex) {
-    if (hex == null || hex.length != 7) return RenewdColors.oceanBlue;
-    return Color(int.parse(hex.substring(1), radix: 16) + 0xFF000000);
-  }
-
-  bool get _hasImage => banner.imageUrl != null && banner.imageUrl!.isNotEmpty;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = screenWidth - RenewdSpacing.lg * 2;
-
-    if (_hasImage) {
-      return _buildImageBanner(cardWidth);
-    }
-    return _buildGradientBanner(cardWidth);
-  }
-
-  Widget _buildImageBanner(double width) {
-    final imageUrl = banner.imageUrl!.startsWith('/')
-        ? '${AppConstants.apiBaseUrl.replaceAll('/api/v1', '')}${banner.imageUrl}'
-        : banner.imageUrl!;
-
-    return GestureDetector(
-      onTap: _handleTap,
-      child: ClipRRect(
-        borderRadius: RenewdRadius.lgAll,
-        child: SizedBox(
-          width: width,
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => _buildGradientBanner(width),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGradientBanner(double width) {
-    final startColor = _parseColor(banner.bgGradientStart ?? banner.bgColor);
-    final endColor = _parseColor(banner.bgGradientEnd ?? banner.bgColor);
-
-    return GestureDetector(
-      onTap: _handleTap,
-      child: Container(
-        width: width,
-        padding: const EdgeInsets.all(RenewdSpacing.lg),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [startColor, endColor],
-          ),
-          borderRadius: RenewdRadius.lgAll,
-        ),
-        child: Stack(
-          children: [
-            // Decorative circles
-            Positioned(
-              top: -20,
-              right: -10,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: RenewdOpacity.subtle),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -30,
-              right: 40,
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: RenewdOpacity.subtle),
-                ),
-              ),
-            ),
-            // Content
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: RenewdSpacing.sm,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: RenewdOpacity.medium),
-                          borderRadius: RenewdRadius.pillAll,
-                        ),
-                        child: Text(
-                          banner.type.toUpperCase(),
-                          style: RenewdTextStyles.caption.copyWith(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: RenewdSpacing.sm),
-                      Text(banner.title,
-                          style: RenewdTextStyles.body.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
-                      if (banner.subtitle != null) ...[
-                        const SizedBox(height: RenewdSpacing.xs),
-                        Text(banner.subtitle!,
-                            style: RenewdTextStyles.caption.copyWith(
-                              color: Colors.white.withValues(alpha: RenewdOpacity.strong),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: RenewdSpacing.md),
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: RenewdOpacity.medium),
-                    borderRadius: RenewdRadius.mdAll,
-                  ),
-                  child: Icon(LucideIcons.arrowRight, size: 22, color: Colors.white),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _handleTap() {
-    if (banner.deeplink != null && banner.deeplink!.isNotEmpty) {
-      Get.toNamed(banner.deeplink!);
-    } else if (banner.externalUrl != null && banner.externalUrl!.isNotEmpty) {
-      launchUrl(Uri.parse(banner.externalUrl!));
-    }
-  }
-}
-
-// ─── Stats ────────────────────────────────────────────
-
-class _StatsRow extends StatelessWidget {
-  final DashboardController c;
-  const _StatsRow({required this.c});
-
-  static String _formatAmount(double amount) =>
-      RenewdCurrency.formatCompact(amount);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            _StatCard(
-              value: '${c.dueThisMonth}',
-              label: 'Due',
-              icon: LucideIcons.clock,
-              color: c.dueThisMonth > 0 ? RenewdColors.tangerine : RenewdColors.slate,
-            ),
-            const SizedBox(width: RenewdSpacing.sm),
-            _StatCard(
-              value: '${c.totalActive}',
-              label: 'Active',
-              icon: LucideIcons.checkCircle,
-              color: RenewdColors.oceanBlue,
-            ),
-          ],
-        ),
-        const SizedBox(height: RenewdSpacing.sm),
-        GestureDetector(
-          onTap: () => Get.toNamed(AppRoutes.analytics),
-          child: _SpendSummary(
-            monthly: _formatAmount(c.monthlySpend),
-            yearly: _formatAmount(c.yearlySpend),
-            annual: _formatAmount(c.totalAnnualSpend),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SpendSummary extends StatelessWidget {
-  final String monthly;
-  final String yearly;
-  final String annual;
-
-  const _SpendSummary({
-    required this.monthly,
-    required this.yearly,
-    required this.annual,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(RenewdSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [RenewdColors.emerald.withValues(alpha: 0.15), RenewdColors.emerald.withValues(alpha: 0.05)]
-              : [RenewdColors.emerald.withValues(alpha: 0.08), RenewdColors.emerald.withValues(alpha: 0.18)],
-        ),
-        borderRadius: RenewdRadius.xlAll,
-      ),
-      child: Row(
-        children: [
-          _SpendItem(label: 'Monthly', value: monthly, isDark: isDark),
-          _SpendDivider(isDark: isDark),
-          _SpendItem(label: 'Yearly', value: yearly, isDark: isDark),
-          _SpendDivider(isDark: isDark),
-          _SpendItem(label: 'Est. Annual', value: annual, isDark: isDark, highlight: true),
+          const SizedBox(width: RenewdSpacing.sm),
+          Obx(() {
+            final count = c.unreadNotificationCount.value;
+            return _CircleIconButton(
+              icon: LucideIcons.bell,
+              isDark: isDark,
+              badgeCount: count,
+              onTap: () async {
+                await Get.toNamed(AppRoutes.notificationInbox);
+                c.fetchUnreadCount();
+              },
+            );
+          }),
         ],
       ),
     );
   }
 }
 
-class _SpendItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isDark;
-  final bool highlight;
-
-  const _SpendItem({
-    required this.label,
-    required this.value,
-    required this.isDark,
-    this.highlight = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(label,
-              style: RenewdTextStyles.caption.copyWith(
-                color: isDark
-                    ? RenewdColors.emerald.withValues(alpha: 0.7)
-                    : RenewdColors.emerald,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              )),
-          const SizedBox(height: 4),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(value,
-                style: RenewdTextStyles.h3.copyWith(
-                  color: isDark ? Colors.white : RenewdColors.deepNavy,
-                  fontWeight: highlight ? FontWeight.w800 : FontWeight.w700,
-                )),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SpendDivider extends StatelessWidget {
-  final bool isDark;
-  const _SpendDivider({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 32,
-      margin: const EdgeInsets.symmetric(horizontal: RenewdSpacing.sm),
-      color: RenewdColors.emerald.withValues(alpha: isDark ? 0.2 : 0.3),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String value;
-  final String label;
+class _CircleIconButton extends StatelessWidget {
   final IconData icon;
-  final Color color;
+  final bool isDark;
+  final VoidCallback onTap;
+  final int badgeCount;
 
-  const _StatCard({
-    required this.value,
-    required this.label,
+  const _CircleIconButton({
     required this.icon,
-    required this.color,
+    required this.isDark,
+    required this.onTap,
+    this.badgeCount = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Expanded(
+    return GestureDetector(
+      onTap: onTap,
+      child: Badge(
+        isLabelVisible: badgeCount > 0,
+        offset: const Offset(-2, 2),
+        label: Text('$badgeCount',
+            style: const TextStyle(fontSize: 10, color: Colors.white)),
+        backgroundColor: RenewdColors.coralRed,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon,
+              size: 20,
+              color:
+                  isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Summary Card ────────────────────────────────────
+
+class _SummaryCard extends StatelessWidget {
+  final DashboardController c;
+  const _SummaryCard({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.analytics),
       child: Container(
-        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        padding: const EdgeInsets.all(RenewdSpacing.xl),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: isDark
-                ? [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)]
-                : [color.withValues(alpha: 0.08), color.withValues(alpha: 0.18)],
+            colors: [Color(0xFF3B3BDB), Color(0xFF7C3AED)],
           ),
           borderRadius: RenewdRadius.xlAll,
         ),
@@ -590,26 +219,63 @@ class _StatCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(label,
+                Text('Total Annual Spend',
                     style: RenewdTextStyles.caption.copyWith(
-                      color: isDark ? color.withValues(alpha: 0.8) : color,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
                     )),
-                const Spacer(),
-                Icon(icon, size: 16, color: isDark ? color.withValues(alpha: 0.5) : color),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: RenewdSpacing.sm, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: RenewdRadius.pillAll,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Analytics',
+                          style: RenewdTextStyles.caption.copyWith(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          )),
+                      const SizedBox(width: 4),
+                      const Icon(LucideIcons.arrowRight,
+                          size: 12, color: Colors.white),
+                    ],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: RenewdSpacing.sm),
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text(value,
-                  style: RenewdTextStyles.h2.copyWith(
-                    color: isDark ? Colors.white : RenewdColors.deepNavy,
-                    fontWeight: FontWeight.w800,
-                  )),
+              child: Text(
+                RenewdCurrency.formatCompact(c.totalAnnualSpend),
+                style: RenewdTextStyles.h1.copyWith(
+                  color: Colors.white,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: RenewdSpacing.lg),
+            Row(
+              children: [
+                _SummaryChip(
+                  icon: LucideIcons.clock,
+                  label: '${c.dueThisMonth} due this month',
+                ),
+                const SizedBox(width: RenewdSpacing.sm),
+                _SummaryChip(
+                  icon: LucideIcons.checkCircle,
+                  label: '${c.totalActive} active',
+                ),
+              ],
             ),
           ],
         ),
@@ -618,48 +284,238 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ─── Sectioned list by urgency ────────────────────────
-
-class _SectionedList extends StatelessWidget {
-  final DashboardController c;
-  const _SectionedList({required this.c});
+class _SummaryChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _SummaryChip({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
-    final all = c.filteredRenewals;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: RenewdSpacing.md, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: RenewdRadius.pillAll,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white.withValues(alpha: 0.8)),
+          const SizedBox(width: 6),
+          Text(label,
+              style: RenewdTextStyles.caption.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Upcoming Grid (2x2) ────────────────────────────
+
+class _UpcomingGrid extends StatelessWidget {
+  final DashboardController c;
+  final GlobalKey allRenewalsKey;
+  const _UpcomingGrid({required this.c, required this.allRenewalsKey});
+
+  @override
+  Widget build(BuildContext context) {
+    final upcoming = c.renewals.where((r) => r.daysRemaining >= 0).toList();
+    if (upcoming.isEmpty) return const SizedBox.shrink();
+    final items = upcoming.take(2).toList();
+    return Column(
+      children: [
+        _SectionHeader(
+          title: 'Upcoming Renewals',
+          onSeeAll: () {
+            final ctx = allRenewalsKey.currentContext;
+            if (ctx != null) {
+              Scrollable.ensureVisible(ctx,
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOut);
+            }
+          },
+        ),
+        const SizedBox(height: RenewdSpacing.md),
+        Row(
+          children: [
+            Expanded(child: _UpcomingCard(renewal: items[0])),
+            const SizedBox(width: RenewdSpacing.md),
+            if (items.length > 1)
+              Expanded(child: _UpcomingCard(renewal: items[1]))
+            else
+              const Expanded(child: SizedBox()),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _UpcomingCard extends StatelessWidget {
+  final RenewalModel renewal;
+  const _UpcomingCard({required this.renewal});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final days = renewal.daysRemaining;
+    final statusColor = RenewdDateUtils.statusColorFromDays(days);
+
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.renewalDetail, arguments: renewal),
+      child: AspectRatio(
+        aspectRatio: 1.0,
+        child: Container(
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        decoration: BoxDecoration(
+          color: isDark ? RenewdColors.darkSlate : Colors.white,
+          borderRadius: RenewdRadius.xlAll,
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BrandLogo(renewal: renewal, size: 44),
+                const Spacer(),
+                Icon(LucideIcons.moreVertical,
+                    size: 18, color: RenewdColors.slate),
+              ],
+            ),
+            const Spacer(),
+            Text(renewal.name,
+                style: RenewdTextStyles.h3
+                    .copyWith(fontWeight: FontWeight.w800, fontSize: 18),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 4),
+            if (renewal.amount != null)
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: RenewdCurrency.format(renewal.amount!),
+                      style: RenewdTextStyles.body.copyWith(
+                        color: isDark ? RenewdColors.warmWhite : RenewdColors.deepNavy,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '/${_freqLabel(renewal.frequency)}',
+                      style: RenewdTextStyles.caption.copyWith(
+                        color: RenewdColors.slate,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 6),
+            Text(
+              days == 0
+                  ? 'Due today'
+                  : days == 1
+                      ? 'Tomorrow'
+                      : '$days days left',
+              style: RenewdTextStyles.caption.copyWith(
+                color: statusColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+
+  String _freqLabel(String? freq) {
+    switch (freq) {
+      case 'monthly':
+        return 'month';
+      case 'yearly':
+        return 'year';
+      case 'quarterly':
+        return 'quarter';
+      case 'weekly':
+        return 'week';
+      default:
+        return 'year';
+    }
+  }
+}
+
+// ─── Renewals List ───────────────────────────────────
+
+class _RenewalsListSection extends StatelessWidget {
+  final DashboardController c;
+  const _RenewalsListSection({super.key, required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    // Exclude the top 2 upcoming renewals already shown in the cards above
+    final upcomingCardIds = c.renewals
+        .where((r) => r.daysRemaining >= 0)
+        .take(2)
+        .map((r) => r.id)
+        .toSet();
+    final all = c.filteredRenewals
+        .where((r) => !upcomingCardIds.contains(r.id))
+        .toList();
     final overdue = all.where((r) => r.daysRemaining < 0).toList();
-    final thisWeek = all
-        .where((r) => r.daysRemaining >= 0 && r.daysRemaining <= 7)
-        .toList();
-    final thisMonth = all
-        .where((r) => r.daysRemaining > 7 && r.daysRemaining <= 30)
-        .toList();
-    final later =
-        all.where((r) => r.daysRemaining > 30).toList();
+    final thisWeek =
+        all.where((r) => r.daysRemaining >= 0 && r.daysRemaining <= 7).toList();
+    final thisMonth =
+        all.where((r) => r.daysRemaining > 7 && r.daysRemaining <= 30).toList();
+    final later = all.where((r) => r.daysRemaining > 30).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _SectionHeader(title: 'All Renewals'),
+        const SizedBox(height: RenewdSpacing.md),
         if (overdue.isNotEmpty)
-          _Section(
+          _UrgencyGroup(
               label: 'OVERDUE',
               color: RenewdColors.coralRed,
               items: overdue,
               c: c),
         if (thisWeek.isNotEmpty)
-          _Section(
+          _UrgencyGroup(
               label: 'THIS WEEK',
               color: RenewdColors.tangerine,
               items: thisWeek,
               c: c),
         if (thisMonth.isNotEmpty)
-          _Section(
+          _UrgencyGroup(
               label: 'THIS MONTH',
               color: RenewdColors.amber,
               items: thisMonth,
               c: c),
         if (later.isNotEmpty)
-          _Section(
+          _UrgencyGroup(
               label: 'UPCOMING',
               color: RenewdColors.emerald,
               items: later,
@@ -669,13 +525,13 @@ class _SectionedList extends StatelessWidget {
   }
 }
 
-class _Section extends StatefulWidget {
+class _UrgencyGroup extends StatefulWidget {
   final String label;
   final Color color;
   final List<RenewalModel> items;
   final DashboardController c;
 
-  const _Section({
+  const _UrgencyGroup({
     required this.label,
     required this.color,
     required this.items,
@@ -683,18 +539,17 @@ class _Section extends StatefulWidget {
   });
 
   @override
-  State<_Section> createState() => _SectionState();
+  State<_UrgencyGroup> createState() => _UrgencyGroupState();
 }
 
-class _SectionState extends State<_Section> {
+class _UrgencyGroupState extends State<_UrgencyGroup> {
   static const _initialLimit = 5;
   bool _showAll = false;
 
   @override
   Widget build(BuildContext context) {
-    final visible = _showAll
-        ? widget.items
-        : widget.items.take(_initialLimit).toList();
+    final visible =
+        _showAll ? widget.items : widget.items.take(_initialLimit).toList();
     final hasMore = widget.items.length > _initialLimit;
 
     return Padding(
@@ -708,20 +563,16 @@ class _SectionState extends State<_Section> {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: widget.color,
-                  shape: BoxShape.circle,
-                ),
+                    color: widget.color, shape: BoxShape.circle),
               ),
               const SizedBox(width: RenewdSpacing.sm),
               Text(widget.label,
-                  style: RenewdTextStyles.sectionHeader.copyWith(
-                    color: RenewdColors.slate,
-                  )),
+                  style: RenewdTextStyles.sectionHeader
+                      .copyWith(color: RenewdColors.slate)),
               const SizedBox(width: RenewdSpacing.sm),
               Text('${widget.items.length}',
-                  style: RenewdTextStyles.caption.copyWith(
-                    color: RenewdColors.slate,
-                  )),
+                  style: RenewdTextStyles.caption
+                      .copyWith(color: RenewdColors.slate)),
             ],
           ),
           const SizedBox(height: RenewdSpacing.md),
@@ -731,8 +582,7 @@ class _SectionState extends State<_Section> {
                   renewal: entry.value,
                   statusColor: widget.color,
                   onTap: () async {
-                    final result = await Get.toNamed(
-                        AppRoutes.renewalDetail,
+                    final result = await Get.toNamed(AppRoutes.renewalDetail,
                         arguments: entry.value);
                     if (result == true) widget.c.fetchRenewals();
                   },
@@ -786,30 +636,36 @@ class _RenewalRow extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: RenewdSpacing.sm),
-        padding: const EdgeInsets.symmetric(
-          horizontal: RenewdSpacing.lg,
-          vertical: RenewdSpacing.md,
-        ),
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
         decoration: BoxDecoration(
           color: isDark ? RenewdColors.darkSlate : Colors.white,
           borderRadius: RenewdRadius.lgAll,
-          border: Border(
-            left: BorderSide(color: statusColor, width: 3),
-          ),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Row(
           children: [
-            // Brand logo or category icon
-            BrandLogo(renewal: renewal, size: 40),
+            BrandLogo(renewal: renewal, size: 44),
             const SizedBox(width: RenewdSpacing.md),
-            // Name + provider
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(renewal.name,
                       style: RenewdTextStyles.body.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         fontSize: 15,
                       ),
                       maxLines: 1,
@@ -827,7 +683,6 @@ class _RenewalRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: RenewdSpacing.sm),
-            // Amount + status pill
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -840,11 +695,10 @@ class _RenewalRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: RenewdSpacing.sm,
-                    vertical: 2,
-                  ),
+                      horizontal: RenewdSpacing.sm, vertical: 2),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: RenewdOpacity.medium),
+                    color:
+                        statusColor.withValues(alpha: RenewdOpacity.medium),
                     borderRadius: RenewdRadius.pillAll,
                   ),
                   child: Text(
@@ -873,14 +727,238 @@ class _RenewalRow extends StatelessWidget {
   }
 }
 
-// ─── Add options sheet ────────────────────────────────
+// ─── Section Header ──────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final VoidCallback? onSeeAll;
+  const _SectionHeader({required this.title, this.onSeeAll});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title,
+            style:
+                RenewdTextStyles.h3.copyWith(fontWeight: FontWeight.w700)),
+        if (onSeeAll != null)
+          GestureDetector(
+            onTap: onSeeAll,
+            child: Text('See all',
+                style: RenewdTextStyles.caption.copyWith(
+                  color: RenewdColors.oceanBlue,
+                  fontWeight: FontWeight.w600,
+                )),
+          ),
+      ],
+    );
+  }
+}
+
+// ─── Banner Carousel ─────────────────────────────────
+
+class _BannerCarousel extends StatefulWidget {
+  final DashboardController c;
+  const _BannerCarousel({required this.c});
+
+  @override
+  State<_BannerCarousel> createState() => _BannerCarouselState();
+}
+
+class _BannerCarouselState extends State<_BannerCarousel> {
+  final _pageController = PageController(viewportFraction: 1.0);
+  int _currentPage = 0;
+
+  bool get _hasImageBanner => widget.c.banners
+      .any((b) => b.imageUrl != null && b.imageUrl!.isNotEmpty);
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final banners = widget.c.banners;
+      if (banners.isEmpty) return const SizedBox.shrink();
+
+      return Column(
+        children: [
+          SizedBox(
+            height: _hasImageBanner ? 140 : 100,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: banners.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
+              itemBuilder: (_, i) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: _BannerCard(banner: banners[i]),
+              ),
+            ),
+          ),
+          if (banners.length > 1) ...[
+            const SizedBox(height: RenewdSpacing.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                  banners.length,
+                  (i) => Container(
+                        width: _currentPage == i ? 20 : 6,
+                        height: 6,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          color: _currentPage == i
+                              ? RenewdColors.oceanBlue
+                              : RenewdColors.slate.withValues(
+                                  alpha: RenewdOpacity.moderate),
+                          borderRadius: RenewdRadius.pillAll,
+                        ),
+                      )),
+            ),
+          ],
+        ],
+      );
+    });
+  }
+}
+
+class _BannerCard extends StatelessWidget {
+  final BannerModel banner;
+  const _BannerCard({required this.banner});
+
+  Color _parseColor(String? hex) {
+    if (hex == null || hex.length != 7) return RenewdColors.oceanBlue;
+    return Color(int.parse(hex.substring(1), radix: 16) + 0xFF000000);
+  }
+
+  bool get _hasImage => banner.imageUrl != null && banner.imageUrl!.isNotEmpty;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth - RenewdSpacing.lg * 2;
+    return _hasImage
+        ? _buildImageBanner(cardWidth)
+        : _buildGradientBanner(cardWidth);
+  }
+
+  Widget _buildImageBanner(double width) {
+    final imageUrl = banner.imageUrl!.startsWith('/')
+        ? '${AppConstants.apiBaseUrl.replaceAll('/api/v1', '')}${banner.imageUrl}'
+        : banner.imageUrl!;
+
+    return GestureDetector(
+      onTap: _handleTap,
+      child: ClipRRect(
+        borderRadius: RenewdRadius.lgAll,
+        child: SizedBox(
+          width: width,
+          child: Image.network(imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _buildGradientBanner(width)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientBanner(double width) {
+    final isDark =
+        Theme.of(Get.context!).brightness == Brightness.dark;
+    final startColor = _parseColor(banner.bgGradientStart ?? banner.bgColor);
+
+    return GestureDetector(
+      onTap: _handleTap,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        decoration: BoxDecoration(
+          color: isDark
+              ? startColor.withValues(alpha: 0.1)
+              : startColor.withValues(alpha: 0.07),
+          borderRadius: RenewdRadius.xlAll,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: RenewdSpacing.sm, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? startColor.withValues(alpha: 0.2)
+                          : startColor.withValues(alpha: 0.12),
+                      borderRadius: RenewdRadius.pillAll,
+                    ),
+                    child: Text(banner.type.toUpperCase(),
+                        style: RenewdTextStyles.caption.copyWith(
+                          color: startColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        )),
+                  ),
+                  const SizedBox(height: RenewdSpacing.sm),
+                  Text(banner.title,
+                      style: RenewdTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ),
+            const SizedBox(width: RenewdSpacing.lg),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: startColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: startColor.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(LucideIcons.arrowRight,
+                  size: 18, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleTap() {
+    if (banner.deeplink != null && banner.deeplink!.isNotEmpty) {
+      Get.toNamed(banner.deeplink!);
+    } else if (banner.externalUrl != null && banner.externalUrl!.isNotEmpty) {
+      launchUrl(Uri.parse(banner.externalUrl!));
+    }
+  }
+}
+
+// ─── Add Options ─────────────────────────────────────
 
 Future<void> _showAddOptions(
     BuildContext context, DashboardController c) async {
   await showModalBottomSheet(
     context: context,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(RenewdRadius.xl)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(RenewdRadius.xl)),
     ),
     builder: (_) => _AddOptionsSheet(c: c),
   );
@@ -900,9 +978,11 @@ class _AddOptionsSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 36, height: 4,
+              width: 36,
+              height: 4,
               decoration: BoxDecoration(
-                color: RenewdColors.slate.withValues(alpha: RenewdOpacity.moderate),
+                color: RenewdColors.slate
+                    .withValues(alpha: RenewdOpacity.moderate),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -969,7 +1049,8 @@ class _SheetOption extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 40, height: 40,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: RenewdOpacity.light),
                 borderRadius: BorderRadius.circular(10),
@@ -981,8 +1062,9 @@ class _SheetOption extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: RenewdTextStyles.body
-                      .copyWith(fontWeight: FontWeight.w500)),
+                  Text(label,
+                      style: RenewdTextStyles.body
+                          .copyWith(fontWeight: FontWeight.w500)),
                   Text(subtitle,
                       style: RenewdTextStyles.caption
                           .copyWith(color: RenewdColors.slate)),
@@ -998,7 +1080,7 @@ class _SheetOption extends StatelessWidget {
   }
 }
 
-// ─── Empty / Error ────────────────────────────────────
+// ─── Empty / Error ───────────────────────────────────
 
 class _ErrorState extends StatelessWidget {
   final DashboardController c;
@@ -1031,8 +1113,8 @@ class _NoResults extends StatelessWidget {
         Icon(LucideIcons.search, size: 40, color: RenewdColors.slate),
         const SizedBox(height: RenewdSpacing.md),
         Text('No matches found',
-            style: RenewdTextStyles.body
-                .copyWith(color: RenewdColors.slate)),
+            style:
+                RenewdTextStyles.body.copyWith(color: RenewdColors.slate)),
       ],
     );
   }
@@ -1042,21 +1124,25 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? RenewdColors.darkSlate : Colors.white;
-
     return Column(
       children: [
         const SizedBox(height: RenewdSpacing.xl),
-        // Welcome message
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(
-            horizontal: RenewdSpacing.xl,
-            vertical: RenewdSpacing.xxl,
-          ),
+              horizontal: RenewdSpacing.xl, vertical: RenewdSpacing.xxl),
           decoration: BoxDecoration(
-            color: cardBg,
+            color: isDark ? RenewdColors.darkSlate : Colors.white,
             borderRadius: RenewdRadius.lgAll,
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
           ),
           child: Column(
             children: [
@@ -1068,7 +1154,7 @@ class _EmptyState extends StatelessWidget {
                       .copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: RenewdSpacing.sm),
               Text(
-                'Track insurance, subscriptions, government docs and never miss a renewal again. Your data is encrypted with AES-256.',
+                'Track insurance, subscriptions, government docs and never miss a renewal again.',
                 textAlign: TextAlign.center,
                 style: RenewdTextStyles.bodySmall
                     .copyWith(color: RenewdColors.slate, height: 1.6),
@@ -1077,52 +1163,43 @@ class _EmptyState extends StatelessWidget {
           ),
         ),
         const SizedBox(height: RenewdSpacing.xxl),
-        // Quick-start suggestions
         Align(
           alignment: Alignment.centerLeft,
           child: Text('GET STARTED',
-              style: RenewdTextStyles.sectionHeader.copyWith(
-                color: RenewdColors.slate,
-              )),
+              style: RenewdTextStyles.sectionHeader
+                  .copyWith(color: RenewdColors.slate)),
         ),
         const SizedBox(height: RenewdSpacing.lg),
-        AnimatedListItem(
-          index: 0,
-          child: _QuickStartTile(
-            icon: LucideIcons.scanLine,
-            title: 'Scan a document',
-            subtitle: 'Point your camera at any policy or bill',
-            color: RenewdColors.lavender,
-            isDark: isDark,
-            onTap: () async {
-              final result = await Get.toNamed(AppRoutes.scanAdd);
-              if (result == true) Get.find<DashboardController>().fetchRenewals();
-            },
-          ),
+        _QuickStartTile(
+          icon: LucideIcons.scanLine,
+          title: 'Scan a document',
+          subtitle: 'Point your camera at any policy or bill',
+          color: RenewdColors.lavender,
+          isDark: isDark,
+          onTap: () async {
+            final result = await Get.toNamed(AppRoutes.scanAdd);
+            if (result == true) {
+              Get.find<DashboardController>().fetchRenewals();
+            }
+          },
         ),
         const SizedBox(height: RenewdSpacing.md),
-        AnimatedListItem(
-          index: 1,
-          child: _QuickStartTile(
-            icon: LucideIcons.plus,
-            title: 'Add a renewal manually',
-            subtitle: 'Insurance, SIM, passport, subscription...',
-            color: RenewdColors.oceanBlue,
-            isDark: isDark,
-            onTap: () => Get.toNamed(AppRoutes.addRenewal),
-          ),
+        _QuickStartTile(
+          icon: LucideIcons.plus,
+          title: 'Add a renewal manually',
+          subtitle: 'Insurance, SIM, passport, subscription...',
+          color: RenewdColors.oceanBlue,
+          isDark: isDark,
+          onTap: () => Get.toNamed(AppRoutes.addRenewal),
         ),
         const SizedBox(height: RenewdSpacing.md),
-        AnimatedListItem(
-          index: 2,
-          child: _QuickStartTile(
-            icon: LucideIcons.messageSquare,
-            title: 'Ask AI Chat',
-            subtitle: 'Get help organizing your renewals',
-            color: RenewdColors.emerald,
-            isDark: isDark,
-            onTap: () => Get.toNamed(AppRoutes.chat),
-          ),
+        _QuickStartTile(
+          icon: LucideIcons.messageSquare,
+          title: 'Ask AI Chat',
+          subtitle: 'Get help organizing your renewals',
+          color: RenewdColors.emerald,
+          isDark: isDark,
+          onTap: () => Get.toNamed(AppRoutes.chat),
         ),
       ],
     );
@@ -1155,6 +1232,20 @@ class _QuickStartTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark ? RenewdColors.darkSlate : Colors.white,
           borderRadius: RenewdRadius.lgAll,
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Row(
           children: [

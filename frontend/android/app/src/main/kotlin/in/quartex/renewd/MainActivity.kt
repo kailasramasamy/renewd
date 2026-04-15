@@ -1,4 +1,4 @@
-package com.quartex.renewd
+package `in`.quartex.renewd
 
 import io.flutter.embedding.android.FlutterActivity
 

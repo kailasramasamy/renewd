@@ -33,28 +33,39 @@ class HomeScreen extends StatelessWidget {
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? RenewdColors.darkBorder
-                    : RenewdColors.mist,
-                width: 0.5,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? RenewdColors.charcoal
+                : Colors.white,
+            boxShadow: Theme.of(context).brightness == Brightness.dark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 16,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: BottomNavigationBar(
+                currentIndex: controller.currentTab.value,
+                onTap: controller.changeTab,
+                selectedLabelStyle:
+                    RenewdTextStyles.caption.copyWith(fontSize: 11),
+                unselectedLabelStyle:
+                    RenewdTextStyles.caption.copyWith(fontSize: 11),
+                selectedItemColor: RenewdColors.oceanBlue,
+                items: [
+                  _navItem(LucideIcons.home, 'Home'),
+                  _navItem(LucideIcons.layers, 'Categories'),
+                  _navItem(LucideIcons.fileText, 'Vault'),
+                  _navItem(LucideIcons.sparkles, 'AI Chat'),
+                ],
               ),
             ),
-          ),
-          child: BottomNavigationBar(
-            currentIndex: controller.currentTab.value,
-            onTap: controller.changeTab,
-            selectedLabelStyle: RenewdTextStyles.caption.copyWith(fontSize: 11),
-            unselectedLabelStyle:
-                RenewdTextStyles.caption.copyWith(fontSize: 11),
-            selectedItemColor: RenewdColors.oceanBlue,
-            items: [
-              _navItem(LucideIcons.home, 'Home'),
-              _navItem(LucideIcons.layers, 'Categories'),
-              _navItem(LucideIcons.fileText, 'Vault'),
-              _navItem(LucideIcons.sparkles, 'AI Chat'),
-            ],
           ),
         ),
       ),

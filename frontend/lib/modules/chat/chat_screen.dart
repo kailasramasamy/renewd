@@ -32,7 +32,9 @@ class ChatScreen extends StatelessWidget {
       });
     }
 
-    return Scaffold(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
@@ -70,6 +72,7 @@ class ChatScreen extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -77,8 +80,12 @@ class ChatScreen extends StatelessWidget {
 class _EmptyChat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
+    return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
         padding: const EdgeInsets.all(RenewdSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -107,6 +114,7 @@ class _EmptyChat extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

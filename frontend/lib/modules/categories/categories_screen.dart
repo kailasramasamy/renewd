@@ -20,7 +20,9 @@ class CategoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(CategoriesController());
-    return Scaffold(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
       appBar: AppBar(title: const Text('Categories')),
       body: Obx(() {
         if (c.isLoading.value) {
@@ -68,6 +70,7 @@ class CategoriesScreen extends StatelessWidget {
           ],
         );
       }),
+    ),
     );
   }
 }

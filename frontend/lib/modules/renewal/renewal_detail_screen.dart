@@ -12,13 +12,12 @@ import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_opacity.dart';
 import '../../core/utils/currency.dart';
 import '../../core/utils/date_utils.dart';
-import '../../data/models/document_model.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/models/renewal_model.dart';
 import '../../core/utils/haptics.dart';
+import '../../widgets/brand_logo.dart';
 import '../../widgets/minder_button.dart';
 import '../../widgets/minder_card.dart';
-import '../../widgets/status_badge.dart';
 import '../vault/vault_screen.dart';
 import 'renewal_detail_controller.dart';
 
@@ -62,35 +61,12 @@ class RenewalDetailScreen extends StatelessWidget {
             tooltip: 'Go back',
             onPressed: () => Get.back(result: c.dataChanged),
           ),
-          title: Text(renewal?.name ?? 'Detail'),
           actions: [
-            if (renewal != null) ...[
+            if (renewal != null)
               IconButton(
-                icon: Icon(LucideIcons.bell),
-                tooltip: 'Reminders',
-                onPressed: () => _showRemindersSheet(context, c),
+                icon: Icon(LucideIcons.moreVertical),
+                onPressed: () => _showActionsSheet(context, c, renewal),
               ),
-              IconButton(
-                icon: Icon(LucideIcons.edit),
-                tooltip: 'Edit renewal',
-                onPressed: () async {
-                  final result = await Get.toNamed(
-                    AppRoutes.editRenewal,
-                    arguments: renewal,
-                  );
-                  if (result == true) {
-                    c.dataChanged = true;
-                    c.fetchRenewal(renewal.id);
-                  }
-                },
-              ),
-              IconButton(
-                icon: Icon(LucideIcons.trash2,
-                    color: RenewdColors.coralRed),
-                tooltip: 'Delete renewal',
-                onPressed: () => _confirmDelete(context, c),
-              ),
-            ],
           ],
         ),
         body: c.isLoading.value && renewal == null
@@ -104,30 +80,152 @@ class RenewalDetailScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, RenewalDetailController c,
       RenewalModel renewal) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final days = renewal.daysRemaining;
+    final statusColor = RenewdDateUtils.statusColorFromDays(days);
     return SingleChildScrollView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.all(RenewdSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+          RenewdSpacing.lg, 0, RenewdSpacing.lg, RenewdSpacing.xl),
       child: Column(
         children: [
+          // ─── Hero Section ─────────────────────────
+          BrandLogo(renewal: renewal, size: 64),
+          const SizedBox(height: RenewdSpacing.lg),
+          Text(renewal.name,
+              style: RenewdTextStyles.h2
+                  .copyWith(fontWeight: FontWeight.w700),
+              textAlign: TextAlign.center),
+          const SizedBox(height: RenewdSpacing.xs),
+          Text(
+            renewal.provider ?? CategoryConfig.label(renewal.category),
+            style: RenewdTextStyles.bodySmall
+                .copyWith(color: RenewdColors.slate),
+          ),
+          const SizedBox(height: RenewdSpacing.lg),
+          if (renewal.amount != null)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: RenewdSpacing.xl, vertical: RenewdSpacing.md),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF3B3BDB), Color(0xFF7C3AED)],
+                ),
+                borderRadius: RenewdRadius.pillAll,
+              ),
+              child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(
+                    text: RenewdCurrency.format(renewal.amount!),
+                    style: RenewdTextStyles.h2.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' /${_freqShort(renewal.frequency)}',
+                    style: RenewdTextStyles.bodySmall.copyWith(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          const SizedBox(height: RenewdSpacing.xl),
+
+          // ─── Countdown Ring ───────────────────────
           _CountdownRing(renewal: renewal),
           const SizedBox(height: RenewdSpacing.xl),
-          _InfoSection(renewal: renewal, documents: c.documents),
+
+          // ─── Details Card ─────────────────────────
+          RenewdCard(
+            child: Column(
+              children: [
+                _DetailRow(
+                  label: 'NEXT RENEWAL',
+                  child: Text(RenewdDateUtils.formatDate(renewal.renewalDate),
+                      style: RenewdTextStyles.body
+                          .copyWith(fontWeight: FontWeight.w600)),
+                ),
+                _CardDivider(isDark: isDark),
+                _DetailRow(
+                  label: 'BILLING CYCLE',
+                  child: Text(_formatFrequency(renewal),
+                      style: RenewdTextStyles.body
+                          .copyWith(fontWeight: FontWeight.w600)),
+                ),
+                _CardDivider(isDark: isDark),
+                _DetailRow(
+                  label: 'CATEGORY',
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(CategoryConfig.icon(renewal.category),
+                          size: 16, color: RenewdColors.slate),
+                      const SizedBox(width: RenewdSpacing.xs),
+                      Text(CategoryConfig.label(renewal.category),
+                          style: RenewdTextStyles.body
+                              .copyWith(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+                _CardDivider(isDark: isDark),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('AUTO-RENEW',
+                              style: RenewdTextStyles.sectionHeader
+                                  .copyWith(color: RenewdColors.slate)),
+                          const SizedBox(height: 2),
+                          Text(
+                            renewal.autoRenew
+                                ? 'Renewal is active'
+                                : 'Renewal is off',
+                            style: RenewdTextStyles.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      renewal.autoRenew
+                          ? LucideIcons.toggleRight
+                          : LucideIcons.toggleLeft,
+                      size: 28,
+                      color: renewal.autoRenew
+                          ? RenewdColors.oceanBlue
+                          : RenewdColors.slate,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: RenewdSpacing.xl),
+
+          // ─── Policy Summary ───────────────────────
           _PolicySummary(c: c),
+
+          // ─── Payment History ──────────────────────
           _PaymentHistory(c: c),
+
+          // ─── Documents ────────────────────────────
           _DocumentsSection(c: c),
           const SizedBox(height: RenewdSpacing.xl),
+
+          // ─── Action Button ────────────────────────
           Obx(() {
             if (c.showPaymentPrompt.value) {
               return _PaymentPrompt(c: c, renewal: renewal);
             }
-            final days = renewal.daysRemaining;
             if (days > 7) {
               return Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.md),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
+                  color: isDark
                       ? RenewdColors.darkSlate
                       : RenewdColors.cloudGray,
                   borderRadius: RenewdRadius.mdAll,
@@ -151,6 +249,102 @@ class RenewalDetailScreen extends StatelessWidget {
           }),
           const SizedBox(height: RenewdSpacing.xl),
         ],
+      ),
+    );
+  }
+
+  static String _freqShort(String? freq) {
+    switch (freq) {
+      case 'monthly': return 'month';
+      case 'yearly': return 'year';
+      case 'quarterly': return 'quarter';
+      case 'weekly': return 'week';
+      default: return 'year';
+    }
+  }
+
+  static String _formatFrequency(RenewalModel r) {
+    if (r.frequency == 'custom' && r.frequencyDays != null) {
+      return 'Every ${r.frequencyDays} days';
+    }
+    const labels = {
+      'monthly': 'Monthly',
+      'quarterly': 'Quarterly',
+      'yearly': 'Yearly',
+      'weekly': 'Weekly',
+    };
+    return labels[r.frequency] ?? (r.frequency ?? 'Unknown');
+  }
+
+  void _showActionsSheet(BuildContext context, RenewalDetailController c,
+      RenewalModel renewal) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(RenewdRadius.xl)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(RenewdSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: RenewdColors.slate
+                      .withValues(alpha: RenewdOpacity.moderate),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: RenewdSpacing.xl),
+              _ActionSheetItem(
+                icon: LucideIcons.edit,
+                label: 'Edit Renewal',
+                subtitle: 'Modify details',
+                color: RenewdColors.oceanBlue,
+                isDark: isDark,
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  final result = await Get.toNamed(
+                    AppRoutes.editRenewal,
+                    arguments: renewal,
+                  );
+                  if (result == true) {
+                    c.dataChanged = true;
+                    c.fetchRenewal(renewal.id);
+                  }
+                },
+              ),
+              const SizedBox(height: RenewdSpacing.sm),
+              _ActionSheetItem(
+                icon: LucideIcons.bell,
+                label: 'Reminders',
+                subtitle: 'Set notification schedule',
+                color: RenewdColors.lavender,
+                isDark: isDark,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showRemindersSheet(context, c);
+                },
+              ),
+              const SizedBox(height: RenewdSpacing.sm),
+              _ActionSheetItem(
+                icon: LucideIcons.trash2,
+                label: 'Delete',
+                subtitle: 'Permanently remove this renewal',
+                color: RenewdColors.coralRed,
+                isDark: isDark,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _confirmDelete(context, c);
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -285,157 +479,104 @@ class _CountdownRing extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: RenewdSpacing.sm),
-        Text(
-          days < 0 ? 'days overdue' : 'days remaining',
-          style: RenewdTextStyles.bodySmall.copyWith(color: RenewdColors.slate),
-        ),
       ],
     );
   }
 }
 
-class _InfoSection extends StatelessWidget {
-  final RenewalModel renewal;
-  final List<DocumentModel> documents;
-  const _InfoSection({required this.renewal, required this.documents});
-
-  @override
-  Widget build(BuildContext context) {
-    final days = renewal.daysRemaining;
-    final statusType = _statusTypeFromDays(days);
-    return Column(
-      children: [
-        RenewdCard(
-          child: Column(
-            children: [
-              if (renewal.provider != null) ...[
-                _InfoRow(
-                    icon: LucideIcons.building2,
-                    label: 'Provider',
-                    value: renewal.provider!),
-                _Divider(),
-              ],
-              if (renewal.amount != null) ...[
-                _InfoRow(
-                    icon: LucideIcons.wallet,
-                    label: 'Amount',
-                    value: RenewdCurrency.format(renewal.amount!, decimals: 2)),
-                _Divider(),
-              ],
-              _InfoRow(
-                  icon: LucideIcons.refreshCcw,
-                  label: 'Frequency',
-                  value: _formatFrequency(renewal)),
-              _Divider(),
-              if (renewal.category == RenewalCategory.insurance &&
-                  _policyStartDate() != null) ...[
-                _InfoRow(
-                    icon: LucideIcons.calendarCheck,
-                    label: 'Policy Start',
-                    value: RenewdDateUtils.formatDate(_policyStartDate()!)),
-                _Divider(),
-              ],
-              _InfoRow(
-                  icon: LucideIcons.calendar,
-                  label: renewal.category == RenewalCategory.insurance
-                      ? 'Policy Expiry'
-                      : 'Next Renewal',
-                  value: RenewdDateUtils.formatDate(renewal.renewalDate)),
-              _Divider(),
-              _InfoRow(
-                  icon: LucideIcons.rotateCcw,
-                  label: 'Auto-renew',
-                  value: renewal.autoRenew ? 'Enabled' : 'Disabled'),
-              _Divider(),
-              Row(
-                children: [
-                  Icon(CategoryConfig.icon(renewal.category),
-                      size: 16, color: RenewdColors.slate),
-                  const SizedBox(width: RenewdSpacing.sm),
-                  Text('Category',
-                      style: RenewdTextStyles.bodySmall
-                          .copyWith(color: RenewdColors.slate)),
-                  const Spacer(),
-                  StatusBadge(
-                    label: CategoryConfig.label(renewal.category),
-                    status: statusType,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Get policy start date from the linked document's AI-extracted issue_date
-  DateTime? _policyStartDate() {
-    for (final doc in documents) {
-      if (doc.issueDate != null) return doc.issueDate;
-    }
-    return null;
-  }
-
-  String _formatFrequency(RenewalModel r) {
-    if (r.frequency == 'custom' && r.frequencyDays != null) {
-      return 'Every ${r.frequencyDays} days';
-    }
-    const labels = {
-      'monthly': 'Monthly',
-      'quarterly': 'Quarterly',
-      'yearly': 'Yearly',
-      'weekly': 'Weekly',
-    };
-    return labels[r.frequency] ?? (r.frequency ?? 'Unknown');
-  }
-
-  StatusType _statusTypeFromDays(int days) {
-    if (days < 0) return StatusType.critical;
-    if (days <= 7) return StatusType.critical;
-    if (days <= 30) return StatusType.urgent;
-    if (days <= 60) return StatusType.warning;
-    return StatusType.safe;
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
+class _DetailRow extends StatelessWidget {
   final String label;
-  final String value;
-  const _InfoRow({required this.icon, required this.label, required this.value});
+  final Widget child;
+  const _DetailRow({required this.label, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: RenewdColors.slate),
-        const SizedBox(width: RenewdSpacing.sm),
-        SizedBox(
-          width: 100,
+        Expanded(
           child: Text(label,
-              style: RenewdTextStyles.bodySmall
+              style: RenewdTextStyles.sectionHeader
                   .copyWith(color: RenewdColors.slate)),
         ),
-        Expanded(
-          child: Text(value, style: RenewdTextStyles.bodySmall,
-              textAlign: TextAlign.right),
-        ),
+        child,
       ],
     );
   }
 }
 
-class _Divider extends StatelessWidget {
+class _CardDivider extends StatelessWidget {
+  final bool isDark;
+  const _CardDivider({required this.isDark});
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.sm),
+      padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.md),
       child: Divider(
-        color: isDark ? RenewdColors.steel : RenewdColors.silver,
+        color: isDark ? RenewdColors.steel : RenewdColors.mist,
         height: 1,
+      ),
+    );
+  }
+}
+
+
+class _ActionSheetItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final Color color;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _ActionSheetItem({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(RenewdSpacing.lg),
+        decoration: BoxDecoration(
+          color: isDark ? RenewdColors.steel : RenewdColors.cloudGray,
+          borderRadius: RenewdRadius.lgAll,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: RenewdOpacity.light),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: RenewdSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: RenewdTextStyles.body
+                          .copyWith(fontWeight: FontWeight.w500)),
+                  Text(subtitle,
+                      style: RenewdTextStyles.caption
+                          .copyWith(color: RenewdColors.slate)),
+                ],
+              ),
+            ),
+            Icon(LucideIcons.chevronRight,
+                color: RenewdColors.slate, size: 16),
+          ],
+        ),
       ),
     );
   }

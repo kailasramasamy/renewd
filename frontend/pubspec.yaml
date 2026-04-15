@@ -1,7 +1,7 @@
 name: renewd
 description: AI-powered personal renewal tracking app.
 publish_to: 'none'
-version: 1.0.0+4
+version: 1.0.0+5
 
 environment:
   sdk: ^3.10.4
@@ -39,6 +39,7 @@ dependencies:
   url_launcher: ^6.3.2
   in_app_purchase: ^3.2.3
   receive_sharing_intent: ^1.8.1
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
@@ -54,7 +55,15 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/icon.png"
   remove_alpha_ios: true
 
+flutter_native_splash:
+  color: "#F2F4F7"
+  color_dark: "#111111"
+  android_12:
+    color: "#F2F4F7"
+    color_dark: "#111111"
+
 flutter:
   uses-material-design: true
   assets:
     - assets/
+    - assets/fonts/

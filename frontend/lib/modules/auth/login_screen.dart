@@ -151,7 +151,7 @@ class _SocialButton extends StatelessWidget {
               Icon(icon, size: 22, color: textColor),
             if (googleLogo)
               Text('G',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF4285F4),

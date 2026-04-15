@@ -83,9 +83,9 @@ class VersionCheckService {
 
   static Future<void> _openStore() async {
     // iOS App Store URL (replace with actual ID after publishing)
-    const iosUrl = 'https://apps.apple.com/app/renewd/id000000000';
+    const iosUrl = 'https://apps.apple.com/us/app/renewd/id6761368622';
     const androidUrl =
-        'https://play.google.com/store/apps/details?id=com.quartex.renewd';
+        'https://play.google.com/store/apps/details?id=in.quartex.renewd';
 
     final url = GetPlatform.isIOS ? iosUrl : androidUrl;
     final uri = Uri.parse(url);

@@ -7,34 +7,26 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:360842637861:android:4722ac11e3f62f7adf45cc",
+        "mobilesdk_app_id": "1:360842637861:android:9d6a3f98ee1b6745df45cc",
         "android_client_info": {
-          "package_name": "com.quartex.renewd"
+          "package_name": "in.quartex.renewd"
         }
       },
       "oauth_client": [
         {
-          "client_id": "360842637861-00rk3vt4t0948u4ddba4s1ilpnp6l5e5.apps.googleusercontent.com",
+          "client_id": "360842637861-ajhlhp5uoe0g5hrim3shcv38jee8l54o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.quartex.renewd",
-            "certificate_hash": "da6ca6b1b1297066b4ccf5760cc7d167db2e864a"
-          }
-        },
-        {
-          "client_id": "360842637861-398m2nj2h7lpb57ac396d11j37puahjr.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.quartex.renewd",
-            "certificate_hash": "2d7ecef8d880ab1be18126fe317d4f6603bb380a"
-          }
-        },
-        {
-          "client_id": "360842637861-sq0kg26gjitchb2kq6fso2g9h6gvdlqb.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.quartex.renewd",
+            "package_name": "in.quartex.renewd",
             "certificate_hash": "d5fb0f9b9f1135dbd6aad783af19a2db1183ef3e"
+          }
+        },
+        {
+          "client_id": "360842637861-oc0disrtsmudqaj7j3i3npm9953p2i1t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.quartex.renewd",
+            "certificate_hash": "2d7ecef8d880ab1be18126fe317d4f6603bb380a"
           }
         },
         {
