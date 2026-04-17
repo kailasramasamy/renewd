@@ -1,6 +1,18 @@
 import type { FastifyInstance } from "fastify";
+import { renewdQueue } from "../../jobs/queue.js";
 
 export default async function healthRoutes(app: FastifyInstance) {
+  app.post("/admin/trigger-reminders", async (request, reply) => {
+    const { key } = request.body as { key?: string };
+    if (key !== "renewd-admin-2026") {
+      return reply.status(403).send({ error: "Forbidden" });
+    }
+    await renewdQueue.add("daily-reminder-check", {}, {
+      removeOnComplete: { age: 3600 },
+    });
+    return reply.send({ status: "queued", job: "daily-reminder-check" });
+  });
+
   app.get("/health", async (_request, reply) => {
     return reply.status(200).send({
       status: "ok",
