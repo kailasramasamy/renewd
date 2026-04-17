@@ -1,7 +1,7 @@
 name: renewd
 description: AI-powered personal renewal tracking app.
 publish_to: 'none'
-version: 1.0.0+5
+version: 1.0.2+7
 
 environment:
   sdk: ^3.10.4
