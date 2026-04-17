@@ -159,9 +159,8 @@ class AuthController extends GetxController {
 
       final needsName = (user.displayName ?? '').isEmpty;
       final needsEmail = (user.email ?? '').isEmpty;
-      final needsPhone = (user.phoneNumber ?? '').isEmpty;
 
-      if (needsName || needsEmail || needsPhone) {
+      if (needsName || needsEmail) {
         Get.offAllNamed(AppRoutes.completeProfile);
       } else {
         showSuccessSnack('Welcome to Renewd!');
@@ -222,9 +221,8 @@ class AuthController extends GetxController {
       // Check if profile needs completion
       final needsName = (user.displayName ?? '').isEmpty;
       final needsEmail = (user.email ?? '').isEmpty;
-      final needsPhone = (user.phoneNumber ?? '').isEmpty;
 
-      if (needsName || needsEmail || needsPhone) {
+      if (needsName || needsEmail) {
         Get.offAllNamed(AppRoutes.completeProfile);
       } else {
         showSuccessSnack('Welcome to Renewd!');

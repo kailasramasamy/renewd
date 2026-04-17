@@ -29,10 +29,6 @@ class LoginScreen extends StatelessWidget {
                 _Logo(isDark: isDark),
                 const SizedBox(height: RenewdSpacing.xxxl),
                 _SocialButtons(c: c, isDark: isDark),
-                const SizedBox(height: RenewdSpacing.xl),
-                _OrDivider(isDark: isDark),
-                const SizedBox(height: RenewdSpacing.xl),
-                _PhoneSection(c: c, isDark: isDark),
                 const SizedBox(height: RenewdSpacing.xxl),
                 _Terms(),
                 const SizedBox(height: RenewdSpacing.xl),
@@ -165,96 +161,6 @@ class _SocialButton extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _OrDivider extends StatelessWidget {
-  final bool isDark;
-  const _OrDivider({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isDark ? RenewdColors.darkBorder : RenewdColors.mist;
-    return Row(
-      children: [
-        Expanded(child: Container(height: 0.5, color: color)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: RenewdSpacing.lg),
-          child: Text('or',
-              style: RenewdTextStyles.caption
-                  .copyWith(color: RenewdColors.slate)),
-        ),
-        Expanded(child: Container(height: 0.5, color: color)),
-      ],
-    );
-  }
-}
-
-class _PhoneSection extends StatelessWidget {
-  final AuthController c;
-  final bool isDark;
-  const _PhoneSection({required this.c, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          controller: c.phoneController,
-          keyboardType: TextInputType.phone,
-          style: RenewdTextStyles.body.copyWith(
-            color: isDark ? Colors.white : RenewdColors.deepNavy,
-          ),
-          decoration: InputDecoration(
-            hintText: 'Enter your phone number',
-            hintStyle: RenewdTextStyles.body
-                .copyWith(color: RenewdColors.slate),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(left: 12, right: 4),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(LucideIcons.phone, size: 18,
-                      color: RenewdColors.slate),
-                  const SizedBox(width: 8),
-                  Text(c.dialCode,
-                      style: RenewdTextStyles.body.copyWith(
-                        color: isDark ? Colors.white : RenewdColors.deepNavy,
-                      )),
-                ],
-              ),
-            ),
-          ),
-          onChanged: (v) => c.phone.value = v,
-          onSubmitted: (_) => c.sendOtp(),
-        ),
-        Obx(() {
-          if (c.errorMessage.value.isEmpty) {
-            return const SizedBox(height: RenewdSpacing.md);
-          }
-          return Padding(
-            padding: const EdgeInsets.only(top: RenewdSpacing.sm),
-            child: Text(c.errorMessage.value,
-                style: RenewdTextStyles.caption
-                    .copyWith(color: RenewdColors.coralRed)),
-          );
-        }),
-        const SizedBox(height: RenewdSpacing.md),
-        Obx(() => SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: c.isLoading.value ? null : c.sendOtp,
-                child: c.isLoading.value
-                    ? const SizedBox(
-                        width: 20, height: 20,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : const Text('Continue with Phone'),
-              ),
-            )),
-      ],
     );
   }
 }

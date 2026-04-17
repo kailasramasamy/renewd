@@ -63,6 +63,12 @@ class AnalyticsController extends GetxController {
     return sorted.take(5).toList();
   }
 
+  List<RenewalModel> renewalsByCategory(RenewalCategory category) {
+    final filtered = _renewals.where((r) => r.category == category).toList();
+    filtered.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+    return filtered;
+  }
+
   double annualCostOf(RenewalModel r) => _annualCost(r);
 
   String frequencyLabel(String? freq) {

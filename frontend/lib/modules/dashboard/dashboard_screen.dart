@@ -18,6 +18,7 @@ import '../../core/widgets/animated_list_item.dart';
 import '../../widgets/brand_logo.dart';
 import '../../widgets/skeleton_loader.dart';
 import '../../data/models/renewal_model.dart';
+import '../home/home_controller.dart';
 import 'dashboard_controller.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -26,7 +27,6 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(DashboardController());
-    final allRenewalsKey = GlobalKey();
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -52,13 +52,13 @@ class DashboardScreen extends StatelessWidget {
                   if (c.renewals.isNotEmpty) ...[
                     _SummaryCard(c: c),
                     const SizedBox(height: RenewdSpacing.xl),
-                    _UpcomingGrid(c: c, allRenewalsKey: allRenewalsKey),
+                    _UpcomingGrid(c: c),
                     if (c.banners.isNotEmpty) ...[
                       const SizedBox(height: RenewdSpacing.xl),
                       _BannerCarousel(c: c),
                     ],
                     const SizedBox(height: RenewdSpacing.xl),
-                    _RenewalsListSection(key: allRenewalsKey, c: c),
+                    _RenewalsListSection(c: c),
                   ] else if (c.filteredRenewals.isEmpty &&
                       c.searchQuery.value.isEmpty)
                     _EmptyState()
@@ -211,7 +211,7 @@ class _SummaryCard extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF3B3BDB), Color(0xFF7C3AED)],
+            colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
           ),
           borderRadius: RenewdRadius.xlAll,
         ),
@@ -319,8 +319,7 @@ class _SummaryChip extends StatelessWidget {
 
 class _UpcomingGrid extends StatelessWidget {
   final DashboardController c;
-  final GlobalKey allRenewalsKey;
-  const _UpcomingGrid({required this.c, required this.allRenewalsKey});
+  const _UpcomingGrid({required this.c});
 
   @override
   Widget build(BuildContext context) {
@@ -332,12 +331,8 @@ class _UpcomingGrid extends StatelessWidget {
         _SectionHeader(
           title: 'Upcoming Renewals',
           onSeeAll: () {
-            final ctx = allRenewalsKey.currentContext;
-            if (ctx != null) {
-              Scrollable.ensureVisible(ctx,
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOut);
-            }
+            final homeCtrl = Get.find<HomeController>();
+            homeCtrl.changeTab(1);
           },
         ),
         const SizedBox(height: RenewdSpacing.md),
@@ -433,15 +428,23 @@ class _UpcomingCard extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 6),
-            Text(
-              days == 0
-                  ? 'Due today'
-                  : days == 1
-                      ? 'Tomorrow'
-                      : '$days days left',
-              style: RenewdTextStyles.caption.copyWith(
-                color: statusColor,
-                fontWeight: FontWeight.w600,
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: RenewdSpacing.sm, vertical: 3),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.2),
+                borderRadius: RenewdRadius.pillAll,
+              ),
+              child: Text(
+                days == 0
+                    ? 'Due today'
+                    : days == 1
+                        ? 'Tomorrow'
+                        : '$days days left',
+                style: RenewdTextStyles.caption.copyWith(
+                  color: statusColor,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -471,7 +474,7 @@ class _UpcomingCard extends StatelessWidget {
 
 class _RenewalsListSection extends StatelessWidget {
   final DashboardController c;
-  const _RenewalsListSection({super.key, required this.c});
+  const _RenewalsListSection({required this.c});
 
   @override
   Widget build(BuildContext context) {

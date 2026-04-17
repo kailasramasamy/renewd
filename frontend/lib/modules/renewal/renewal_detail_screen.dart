@@ -46,8 +46,21 @@ void _showSnack(BuildContext context,
   ));
 }
 
-class RenewalDetailScreen extends StatelessWidget {
+class RenewalDetailScreen extends StatefulWidget {
   const RenewalDetailScreen({super.key});
+
+  @override
+  State<RenewalDetailScreen> createState() => _RenewalDetailScreenState();
+}
+
+class _RenewalDetailScreenState extends State<RenewalDetailScreen> {
+  final _showTitle = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    _showTitle.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +74,14 @@ class RenewalDetailScreen extends StatelessWidget {
             tooltip: 'Go back',
             onPressed: () => Get.back(result: c.dataChanged),
           ),
+          title: ValueListenableBuilder<bool>(
+            valueListenable: _showTitle,
+            builder: (_, show, _) => AnimatedOpacity(
+              opacity: show ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: Text(renewal?.name ?? ''),
+            ),
+          ),
           actions: [
             if (renewal != null)
               IconButton(
@@ -73,7 +94,13 @@ class RenewalDetailScreen extends StatelessWidget {
             ? const Center(child: CircularProgressIndicator())
             : renewal == null
                 ? const Center(child: Text('Renewal not found'))
-                : _buildBody(context, c, renewal),
+                : NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      _showTitle.value = notification.metrics.pixels > 120;
+                      return false;
+                    },
+                    child: _buildBody(context, c, renewal),
+                  ),
       );
     });
   }
@@ -82,7 +109,6 @@ class RenewalDetailScreen extends StatelessWidget {
       RenewalModel renewal) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final days = renewal.daysRemaining;
-    final statusColor = RenewdDateUtils.statusColorFromDays(days);
     return SingleChildScrollView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(

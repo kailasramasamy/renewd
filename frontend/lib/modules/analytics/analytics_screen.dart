@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../app/routes/app_routes.dart';
 import '../../core/constants/category_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -250,17 +251,19 @@ class _CategoryList extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: RenewdSpacing.sm),
           child: RenewdCard(
+            onTap: () => _showCategoryRenewals(
+                context, c, item.category, color, isDark),
             padding: const EdgeInsets.all(RenewdSpacing.lg),
             child: Row(
               children: [
                 Container(
-                  width: 36, height: 36,
+                  width: 40, height: 40,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(CategoryConfig.icon(item.category),
-                      size: 18, color: color),
+                      size: 20, color: color),
                 ),
                 const SizedBox(width: RenewdSpacing.md),
                 Expanded(
@@ -268,13 +271,13 @@ class _CategoryList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(CategoryConfig.label(item.category),
-                          style: RenewdTextStyles.bodySmall.copyWith(
+                          style: RenewdTextStyles.body.copyWith(
                             fontWeight: FontWeight.w700,
                             color: isDark ? Colors.white : RenewdColors.deepNavy,
                           )),
                       const SizedBox(height: 2),
                       Text('${item.count} renewal${item.count > 1 ? 's' : ''} · ${pct.toStringAsFixed(0)}%',
-                          style: RenewdTextStyles.caption.copyWith(
+                          style: RenewdTextStyles.bodySmall.copyWith(
                             color: RenewdColors.slate,
                           )),
                     ],
@@ -284,7 +287,7 @@ class _CategoryList extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(RenewdCurrency.format(item.annualCost),
-                        style: RenewdTextStyles.bodySmall.copyWith(
+                        style: RenewdTextStyles.body.copyWith(
                           fontWeight: FontWeight.w700,
                           color: isDark ? Colors.white : RenewdColors.deepNavy,
                         )),
@@ -294,6 +297,9 @@ class _CategoryList extends StatelessWidget {
                         )),
                   ],
                 ),
+                const SizedBox(width: RenewdSpacing.xs),
+                Icon(LucideIcons.chevronRight,
+                    size: 16, color: RenewdColors.slate),
               ],
             ),
           ),
@@ -301,6 +307,108 @@ class _CategoryList extends StatelessWidget {
       }).toList(),
     );
   }
+}
+
+void _showCategoryRenewals(BuildContext context, AnalyticsController c,
+    RenewalCategory category, Color color, bool isDark) {
+  final renewals = c.renewalsByCategory(category);
+  Navigator.of(context).push(MaterialPageRoute(
+    builder: (_) => Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(LucideIcons.arrowLeft),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(CategoryConfig.label(category)),
+      ),
+      body: renewals.isEmpty
+          ? Center(
+              child: Text('No renewals in this category',
+                  style: RenewdTextStyles.bodySmall
+                      .copyWith(color: RenewdColors.slate)))
+          : ListView.separated(
+              padding: const EdgeInsets.all(RenewdSpacing.lg),
+              itemCount: renewals.length,
+              separatorBuilder: (_, _) =>
+                  const SizedBox(height: RenewdSpacing.sm),
+              itemBuilder: (_, i) {
+                final r = renewals[i];
+                final days = r.daysRemaining;
+                final statusColor = days < 0
+                    ? RenewdColors.coralRed
+                    : days <= 7
+                        ? RenewdColors.tangerine
+                        : days <= 30
+                            ? RenewdColors.amber
+                            : RenewdColors.emerald;
+                return RenewdCard(
+                  onTap: () => Get.toNamed(AppRoutes.renewalDetail,
+                      arguments: r),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(CategoryConfig.icon(category),
+                            size: 20, color: color),
+                      ),
+                      const SizedBox(width: RenewdSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(r.name,
+                                style: RenewdTextStyles.body.copyWith(
+                                    fontWeight: FontWeight.w600),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis),
+                            if (r.provider != null)
+                              Text(r.provider!,
+                                  style: RenewdTextStyles.caption
+                                      .copyWith(color: RenewdColors.slate)),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (r.amount != null)
+                            Text(RenewdCurrency.format(r.amount!),
+                                style: RenewdTextStyles.body.copyWith(
+                                    fontWeight: FontWeight.w700)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: RenewdSpacing.sm, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              days < 0
+                                  ? '${days.abs()}d overdue'
+                                  : days == 0
+                                      ? 'Today'
+                                      : '${days}d',
+                              style: RenewdTextStyles.caption.copyWith(
+                                color: statusColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+    ),
+  ));
 }
 
 // ─── Top Renewals ────────────────────────────────────
@@ -322,7 +430,10 @@ class _TopRenewals extends StatelessWidget {
               height: RenewdSpacing.xl,
               color: isDark ? RenewdColors.steel : RenewdColors.silver,
             ),
-            Row(
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.renewalDetail,
+                  arguments: items[i]),
+              child: Row(
               children: [
                 Container(
                   width: 24, height: 24,
@@ -372,6 +483,7 @@ class _TopRenewals extends StatelessWidget {
                   ],
                 ),
               ],
+            ),
             ),
           ],
         ],
