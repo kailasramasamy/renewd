@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/network/api_client.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/network/api_endpoints.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -115,6 +116,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       storage.saveUserData(existing);
 
       Get.offAllNamed(AppRoutes.home);
+      Get.find<NotificationService>().registerToken();
     } catch (_) {
       showErrorSnack('Failed to save profile');
     } finally {

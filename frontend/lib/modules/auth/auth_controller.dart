@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../core/network/api_client.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/utils/currency.dart';
 import '../../core/utils/snackbar_helper.dart';
@@ -166,6 +167,7 @@ class AuthController extends GetxController {
         showSuccessSnack('Welcome to Renewd!');
         Get.offAllNamed(AppRoutes.home);
       }
+      Get.find<NotificationService>().registerToken();
     } catch (e) {
       isLoading.value = false;
       if (e.toString().contains('canceled') || e.toString().contains('cancelled')) return;
@@ -228,6 +230,8 @@ class AuthController extends GetxController {
         showSuccessSnack('Welcome to Renewd!');
         Get.offAllNamed(AppRoutes.home);
       }
+      // Register FCM token after successful login
+      Get.find<NotificationService>().registerToken();
     } catch (e) {
       isLoading.value = false;
       errorMessage.value = 'Sign in failed';
