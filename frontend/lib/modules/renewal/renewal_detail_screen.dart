@@ -723,14 +723,17 @@ class _KeyDetailsTable extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     vertical: RenewdSpacing.sm),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 120,
+                    Expanded(
+                      flex: 2,
                       child: Text(label,
                           style: RenewdTextStyles.caption
                               .copyWith(color: RenewdColors.slate)),
                     ),
+                    const SizedBox(width: RenewdSpacing.md),
                     Expanded(
+                      flex: 3,
                       child: Text(
                           value.isNotEmpty ? value : detail,
                           style: RenewdTextStyles.bodySmall),
