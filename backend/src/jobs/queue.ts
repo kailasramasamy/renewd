@@ -78,6 +78,13 @@ export const renewdWorker = new Worker(
   { connection, concurrency: 5 }
 );
 
+// Log worker lifecycle events
+renewdWorker.on("ready", () => console.log("[Worker] Ready and listening for jobs"));
+renewdWorker.on("failed", (job, err) =>
+  console.error(`[Worker] Job ${job?.name} failed:`, err.message));
+renewdWorker.on("error", (err) =>
+  console.error("[Worker] Error:", err.message));
+
 /** Graceful shutdown — call from server close hook */
 export async function closeJobs(): Promise<void> {
   await renewdWorker.close();
