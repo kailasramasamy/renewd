@@ -12,24 +12,29 @@ class RenewdColors {
   static const mist = Color(0xFFE5E5EA);
 
   // Status
-  static const emerald = Color(0xFF34C759);      // iOS green
-  static const amber = Color(0xFFFFCC00);
+  static const emerald = Color(0xFF6CD4A0);
+  static const amber = Color(0xFFE6C070);
   static const tangerine = Color(0xFFFF9F0A);
-  static const coralRed = Color(0xFFFF453A);     // iOS red (dark-friendly)
+  static const coralRed = Color(0xFFE58271);
 
-  // Accent
-  static const lavender = Color(0xFFBF5AF2);     // iOS purple
+  // Accent / AI
+  static const lavender = Color(0xFF8B6DF0);
+  static const accent2 = Color(0xFF7CC4EA);
   static const teal = Color(0xFF30D158);
   static const rose = Color(0xFFFF375F);
 
-  // Dark mode — neutral gray (Apple/Linear style)
-  static const charcoal = Color(0xFF111111);     // true dark bg
-  static const darkSlate = Color(0xFF1C1C1E);   // iOS secondary bg
-  static const steel = Color(0xFF2C2C2E);       // iOS tertiary bg
-  static const silver = Color(0xFFC7C7CC);
-  static const darkBorder = Color(0xFF38383A);   // iOS separator
+  // Signature gradient
+  static const gradientStart = Color(0xFF8B6DF0);
+  static const gradientEnd = Color(0xFF7CC4EA);
+
+  // Dark mode
+  static const charcoal = Color(0xFF1A1A22);
+  static const darkSlate = Color(0xFF22222C);
+  static const steel = Color(0xFF2F2F3C);
+  static const silver = Color(0xFFC2C2CA);
+  static const darkBorder = Color(0xFF3D3D4D);
 
   // Text
-  static const warmWhite = Color(0xFFF2F2F7);   // iOS primary label dark
-  static const warmGray = Color(0xFF8E8E93);     // iOS secondary label
+  static const warmWhite = Color(0xFFF9F9FB);
+  static const warmGray = Color(0xFF898A95);
 }

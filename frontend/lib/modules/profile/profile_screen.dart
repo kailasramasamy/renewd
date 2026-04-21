@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../app/routes/app_routes.dart';
 import '../../core/network/api_client.dart';
@@ -20,6 +21,11 @@ import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'profile_controller.dart';
+
+Future<String> _getVersion() async {
+  final info = await PackageInfo.fromPlatform();
+  return '${info.version} (${info.buildNumber})';
+}
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -248,8 +254,14 @@ class ProfileScreen extends StatelessWidget {
               Text('Renewd', style: RenewdTextStyles.h1.copyWith(
                   fontWeight: FontWeight.w700)),
               const SizedBox(height: RenewdSpacing.sm),
-              Text('Version 1.0.0', style: RenewdTextStyles.body
-                  .copyWith(color: RenewdColors.slate)),
+              FutureBuilder<String>(
+                future: _getVersion(),
+                builder: (_, snap) => Text(
+                  'Version ${snap.data ?? '...'}',
+                  style: RenewdTextStyles.body
+                      .copyWith(color: RenewdColors.slate),
+                ),
+              ),
               const SizedBox(height: RenewdSpacing.lg),
               Text(
                 'AI-powered personal renewal tracking.\nNever miss a renewal again.',

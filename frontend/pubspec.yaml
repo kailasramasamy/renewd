@@ -1,7 +1,7 @@
 name: renewd
 description: AI-powered personal renewal tracking app.
 publish_to: 'none'
-version: 1.0.2+8
+version: 1.0.3+10
 
 environment:
   sdk: ^3.10.4
@@ -40,6 +40,7 @@ dependencies:
   in_app_purchase: ^3.2.3
   receive_sharing_intent: ^1.8.1
   flutter_native_splash: ^2.4.7
+  package_info_plus: ^8.3.0
 
 dev_dependencies:
   flutter_test:

@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
                 const SizedBox(height: RenewdSpacing.xl),
                 Text(
                   'Renewd',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.publicSans(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     color: Theme.of(context).brightness == Brightness.dark

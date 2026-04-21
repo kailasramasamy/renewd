@@ -95,7 +95,7 @@ class RenewdTheme {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        textTheme: GoogleFonts.plusJakartaSansTextTheme(),
+        textTheme: GoogleFonts.publicSansTextTheme(),
       );
 
   static ThemeData get dark => ThemeData(
@@ -202,6 +202,6 @@ class RenewdTheme {
         bottomSheetTheme: const BottomSheetThemeData(
           backgroundColor: RenewdColors.darkSlate,
         ),
-        textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme),
+        textTheme: GoogleFonts.publicSansTextTheme(ThemeData.dark().textTheme),
       );
 }
