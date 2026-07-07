@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { env } from "../config/env.js";
 import { processDailyReminderCheck } from "./processors/daily-reminder-check.js";
 import { processDailyDigest } from "./processors/daily-digest.js";
+import { processAutoRollover } from "./processors/auto-rollover.js";
 
 const redisUrl = new URL(env.REDIS_URL);
 const connection = {
@@ -43,6 +44,9 @@ export const renewdWorker = new Worker(
     try {
       let result: { processed: number; failed: number } | undefined;
       switch (job.name) {
+        case "daily-auto-rollover":
+          result = await processAutoRollover(job);
+          break;
         case "daily-reminder-check":
           result = await processDailyReminderCheck(job);
           break;

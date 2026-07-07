@@ -46,3 +46,41 @@ export async function deleteUnsentReminders(
     [renewalId]
   );
 }
+
+/** Advance a renewal date by exactly one period of its frequency. */
+export function calculateNextDate(
+  current: string,
+  frequency: string,
+  customDays: number | null
+): Date {
+  const date = new Date(current);
+  switch (frequency) {
+    case "monthly": date.setMonth(date.getMonth() + 1); break;
+    case "quarterly": date.setMonth(date.getMonth() + 3); break;
+    case "yearly": date.setFullYear(date.getFullYear() + 1); break;
+    case "weekly": date.setDate(date.getDate() + 7); break;
+    case "custom": date.setDate(date.getDate() + (customDays ?? 30)); break;
+    default: date.setFullYear(date.getFullYear() + 1);
+  }
+  return date;
+}
+
+/** Roll a past renewal date forward to its next occurrence on/after `today`. */
+export function nextRenewalDate(
+  current: string,
+  frequency: string,
+  customDays: number | null,
+  today: string
+): string {
+  const todayDate = new Date(today);
+  let next = new Date(current);
+  let guard = 0;
+  while (next < todayDate && guard++ < 1000) {
+    next = calculateNextDate(
+      next.toISOString().split("T")[0],
+      frequency,
+      customDays
+    );
+  }
+  return next.toISOString().split("T")[0];
+}

@@ -22,7 +22,7 @@ export async function processDailyReminderCheck(_job: Job): Promise<{ processed:
      JOIN users u ON u.id = r.user_id
      WHERE r.is_sent = FALSE
        AND COALESCE(r.snoozed_until, r.reminder_date) <= CURRENT_DATE
-       AND u.fcm_token IS NOT NULL
+       AND ren.renewal_date >= CURRENT_DATE
        AND ren.status = 'active'`
   );
 
@@ -40,9 +40,24 @@ export async function processDailyReminderCheck(_job: Job): Promise<{ processed:
 async function sendSingleReminder(pool: ReturnType<typeof getJobPool>, reminder: DueReminder): Promise<boolean> {
   const { title, body } = formatMessage(reminder.renewal_name, reminder.days_before);
 
+  // In-app inbox is the reliable channel — record it and mark the reminder
+  // handled regardless of whether the push delivers.
+  await pool.query(
+    `INSERT INTO notification_log (user_id, renewal_id, title, body, type)
+     VALUES ($1, $2, $3, $4, 'reminder')`,
+    [reminder.user_id, reminder.renewal_id, title, body]
+  );
+  await pool.query(
+    "UPDATE reminders SET is_sent = TRUE, sent_at = NOW() WHERE id = $1",
+    [reminder.id]
+  );
+
+  // Push is best-effort; users without a token still get the in-app record.
+  if (!reminder.fcm_token) return true;
+
   try {
     await sendPushNotification({
-      token: reminder.fcm_token!,
+      token: reminder.fcm_token,
       title,
       body,
       data: {
@@ -50,18 +65,6 @@ async function sendSingleReminder(pool: ReturnType<typeof getJobPool>, reminder:
         reminder_id: reminder.id,
       },
     });
-
-    await pool.query(
-      "UPDATE reminders SET is_sent = TRUE, sent_at = NOW() WHERE id = $1",
-      [reminder.id]
-    );
-
-    // Log to in-app notification inbox
-    await pool.query(
-      `INSERT INTO notification_log (user_id, renewal_id, title, body, type)
-       VALUES ($1, $2, $3, $4, 'reminder')`,
-      [reminder.user_id, reminder.renewal_id, title, body]
-    );
     return true;
   } catch (err) {
     if (err instanceof Error && err.message.includes("INVALID_FCM_TOKEN")) {

@@ -27,6 +27,12 @@ export async function initScheduler(): Promise<void> {
       await renewdQueue.removeRepeatableByKey(job.key);
     }
 
+    await renewdQueue.add("daily-auto-rollover", {}, {
+      repeat: { pattern: "0 7 * * *" },   // Before the reminder check at 08:00
+      removeOnComplete: { age: 3600 },
+      removeOnFail: { age: 86400 },
+    });
+
     await renewdQueue.add("daily-reminder-check", {}, {
       repeat: { pattern: "0 8 * * *" },
       removeOnComplete: { age: 3600 },    // Keep completed jobs 1 hour

@@ -3,7 +3,7 @@ import { authMiddleware } from "../../middleware/auth.js";
 import { AppError, NotFoundError } from "../../lib/errors.js";
 import { validateString, validateNumber } from "../../lib/validation.js";
 import { getUserId } from "../../lib/user-context.js";
-import { createDefaultReminders, deleteUnsentReminders } from "./helpers.js";
+import { createDefaultReminders, deleteUnsentReminders, calculateNextDate } from "./helpers.js";
 import { registerReminderRoutes } from "./reminders.js";
 import { updateRenewalLogo } from "../../services/logo.js";
 import { createPremiumMiddleware } from "../../middleware/premium.js";
@@ -170,19 +170,6 @@ async function registerMarkRenewed(app: FastifyInstance) {
 
     return reply.send({ renewal: result.rows[0] });
   });
-}
-
-function calculateNextDate(current: string, frequency: string, customDays: number | null): Date {
-  const date = new Date(current);
-  switch (frequency) {
-    case "monthly": date.setMonth(date.getMonth() + 1); break;
-    case "quarterly": date.setMonth(date.getMonth() + 3); break;
-    case "yearly": date.setFullYear(date.getFullYear() + 1); break;
-    case "weekly": date.setDate(date.getDate() + 7); break;
-    case "custom": date.setDate(date.getDate() + (customDays ?? 30)); break;
-    default: date.setFullYear(date.getFullYear() + 1);
-  }
-  return date;
 }
 
 async function registerPriceCheck(app: FastifyInstance) {
