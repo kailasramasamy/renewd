@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
-        android:label="frontend"
+        android:label="Renewd"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -47,6 +48,11 @@
                 <data android:mimeType="image/*"/>
             </intent-filter>
         </activity>
+        <!-- Route background FCM notifications to the reminders channel
+             created at runtime in NotificationService -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="renewd_reminders" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

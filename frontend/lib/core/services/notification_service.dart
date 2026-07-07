@@ -89,16 +89,18 @@ class NotificationService extends GetxService {
   }
 
   Future<void> _registerToken() async {
-    // Wait for APNS token to be ready (iOS requires this before FCM token)
+    // iOS must have the APNS token ready before the FCM token; Android has no
+    // APNS token, so gating on it there permanently blocks registration.
     for (var attempt = 0; attempt < 5; attempt++) {
       try {
-        final apnsToken = await _messaging.getAPNSToken();
-        if (apnsToken != null) {
-          final token = await _messaging.getToken();
-          if (token != null) {
-            await _provider?.registerFcmToken(token);
-            return;
-          }
+        if (Platform.isIOS && await _messaging.getAPNSToken() == null) {
+          await Future.delayed(const Duration(seconds: 2));
+          continue;
+        }
+        final token = await _messaging.getToken();
+        if (token != null) {
+          await _provider?.registerFcmToken(token);
+          return;
         }
       } catch (e) {
         debugPrint('_registerToken attempt $attempt failed: $e');
