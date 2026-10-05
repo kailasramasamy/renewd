@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Renewd — Redesign</title>
+<link rel="stylesheet" href="styles.css"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+  // Tweak defaults — edit-mode persistence
+  window.__TWEAKS__ = /*EDITMODE-BEGIN*/{
+    "theme": "dark",
+    "ai": "lavender",
+    "auth": "phone",
+    "screen": "home"
+  }/*EDITMODE-END*/;
+</script>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="shared.jsx"></script>
+<script type="text/babel" src="screen_entry.jsx"></script>
+<script type="text/babel" src="screen_home.jsx"></script>
+<script type="text/babel" src="screen_chat.jsx"></script>
+<script type="text/babel" src="screen_vault.jsx"></script>
+<script type="text/babel" src="screen_categories.jsx"></script>
+<script type="text/babel" src="screen_detail.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// Grouped screen list for the Tweaks panel
+const SCREEN_GROUPS = [
+  { group: 'Entry flow', items: [
+    { id: 'splash', label: 'Splash' },
+    { id: 'onboarding', label: 'Onboarding' },
+    { id: 'login', label: 'Login' },
+    { id: 'otp', label: 'OTP Verify' },
+    { id: 'profile', label: 'Complete Profile' },
+  ]},
+  { group: 'Main app', items: [
+    { id: 'home', label: 'Home' },
+    { id: 'categories', label: 'Renewals' },
+    { id: 'vault', label: 'Vault' },
+    { id: 'chat', label: 'AI Chat' },
+    { id: 'detail', label: 'Renewal Detail' },
+  ]},
+];
+
+function applyTweaks(t) {
+  document.documentElement.setAttribute('data-theme', t.theme);
+  document.documentElement.setAttribute('data-ai', t.ai);
+}
+
+function DeviceBezel({ children, theme }) {
+  const bezel = {
+    width: 402, height: 874, borderRadius: 54, overflow: 'hidden',
+    position: 'relative', background: '#000',
+    boxShadow: theme === 'light'
+      ? '0 40px 80px rgba(17,17,17,0.18), 0 0 0 10px #E5E5EA, 0 0 0 11px #C7C7CC'
+      : '0 50px 100px rgba(0,0,0,0.5), 0 0 0 10px #1b1b1f, 0 0 0 11px #2a2a30',
+    flexShrink: 0,
+  };
+  return (
+    <div style={bezel}>
+      <div style={{
+        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+        width: 124, height: 36, borderRadius: 20, background: '#000', zIndex: 100,
+      }}/>
+      {children}
+    </div>
+  );
+}
+
+function App() {
+  const [tweaks, setTweaks] = useState(window.__TWEAKS__);
+  const [editMode, setEditMode] = useState(false);
+  const [screen, setScreen] = useState(() => localStorage.getItem('renewd-screen') || tweaks.screen || 'home');
+  const [detail, setDetail] = useState(null);
+
+  useEffect(() => { applyTweaks(tweaks); }, [tweaks]);
+  useEffect(() => { localStorage.setItem('renewd-screen', screen); }, [screen]);
+
+  // Tweaks host bridge
+  useEffect(() => {
+    const onMsg = (e) => {
+      if (!e.data || typeof e.data !== 'object') return;
+      if (e.data.type === '__activate_edit_mode') setEditMode(true);
+      if (e.data.type === '__deactivate_edit_mode') setEditMode(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const updateTweak = (k, v) => {
+    const next = { ...tweaks, [k]: v };
+    setTweaks(next);
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*');
+  };
+
+  const handleTab = (t) => { setDetail(null); setScreen(t); };
+  const openRenewal = (r) => setDetail(r);
+
+  // ---- Entry flow chaining ----
+  const afterOnboarding = () => setScreen('login');
+  const afterLogin = () => setScreen('otp');
+  const afterOtp = () => setScreen('profile');
+  const afterProfile = () => setScreen('home');
+
+  let content;
+  if (screen === 'splash') content = <SplashScreen/>;
+  else if (screen === 'onboarding') content = <OnboardingScreen onFinish={afterOnboarding}/>;
+  else if (screen === 'login') content = <LoginScreen variant={tweaks.auth === 'email' ? 'email' : 'phone'} onContinue={afterLogin}/>;
+  else if (screen === 'otp') content = <OtpScreen onVerify={afterOtp} onBack={() => setScreen('login')}/>;
+  else if (screen === 'profile') content = <CompleteProfileScreen onFinish={afterProfile}/>;
+  else if (detail || screen === 'detail') {
+    const r = detail || RENEWALS.find(x => x.id === 'dost');
+    content = <DetailScreen renewal={r} onBack={() => { setDetail(null); setScreen('categories'); }}/>;
+  }
+  else if (screen === 'chat') content = <ChatScreen onTab={handleTab}/>;
+  else if (screen === 'vault') content = <VaultScreen onTab={handleTab}/>;
+  else if (screen === 'categories') content = <CategoriesScreen onTab={handleTab} onOpenRenewal={openRenewal}/>;
+  else content = <HomeScreen onTab={handleTab} onOpenRenewal={openRenewal}/>;
+
+  return (
+    <>
+      <DeviceBezel theme={tweaks.theme}>{content}</DeviceBezel>
+      {editMode && (
+        <TweaksPanel
+          tweaks={tweaks}
+          update={updateTweak}
+          setScreen={(s) => { setDetail(null); updateTweak('screen', s); setScreen(s); }}
+        />
+      )}
+    </>
+  );
+}
+
+function TweaksPanel({ tweaks, update, setScreen }) {
+  return (
+    <div className="tweaks-panel">
+      <h4><Sparkle size={14}/> Tweaks</h4>
+
+      <div className="row">
+        <label>Theme</label>
+        <div className="seg">
+          {['dark', 'light'].map(s => (
+            <button key={s} className={tweaks.theme === s ? 'on' : ''} onClick={() => update('theme', s)}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="row">
+        <label>AI accent</label>
+        <div className="swatches">
+          {[
+            ['lavender', '#BF5AF2'],
+            ['ocean', '#3B82F6'],
+            ['teal', '#30D158'],
+          ].map(([k, c]) => (
+            <div
+              key={k}
+              className={`sw ${tweaks.ai === k ? 'on' : ''}`}
+              style={{ background: c }}
+              onClick={() => update('ai', k)}
+              title={k}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="row">
+        <label>Auth method</label>
+        <div className="seg">
+          {['phone', 'email'].map(s => (
+            <button key={s} className={tweaks.auth === s ? 'on' : ''} onClick={() => update('auth', s)}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {SCREEN_GROUPS.map(g => (
+        <div className="row" key={g.group}>
+          <label>{g.group}</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, padding: 3, background: 'var(--surface-2)', borderRadius: 'var(--r-sm)', border: '1px solid var(--border)' }}>
+            {g.items.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setScreen(s.id)}
+                style={{
+                  padding: '6px 8px', fontSize: 11, fontWeight: 600, border: 0, cursor: 'pointer',
+                  background: tweaks.screen === s.id ? 'var(--surface)' : 'transparent',
+                  color: tweaks.screen === s.id ? 'var(--text)' : 'var(--text-3)',
+                  borderRadius: 6, fontFamily: 'var(--sans)',
+                  boxShadow: tweaks.screen === s.id ? '0 1px 3px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'left', letterSpacing: -0.05,
+                }}
+              >{s.label}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+
+</body>
+</html>

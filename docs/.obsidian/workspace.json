@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "production-readiness-checklist.md",
+                "file": "tester-invite-message.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "production-readiness-checklist"
+              "title": "tester-invite-message"
             }
           }
         ]
@@ -186,10 +186,11 @@
   "active": "46c813632a9ba3d7",
   "lastOpenFiles": [
     "marketing/whatsapp-launch-message.md",
+    "tester-invite-message.md",
+    "production-readiness-checklist.md",
     "marketing",
     "v2-roadmap.md",
     "security-audit-tracker.md",
-    "production-readiness-checklist.md",
     "test-plan.md",
     "competitive-analysis.md",
     "build-plan.md",

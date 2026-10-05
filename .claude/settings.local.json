@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:www.fontshare.com)",
+      "WebFetch(domain:www.perplexity.ai)",
+      "WebFetch(domain:stitch.withgoogle.com)",
+      "WebFetch(domain:fonts.google.com)"
     ]
   }
 }

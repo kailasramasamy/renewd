@@ -1,0 +1,842 @@
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ============================================================
+   Renewd tokens — ported from Flutter app_colors/app_text_styles
+   RenewdColors.* / RenewdRadius.* / RenewdSpacing.* / RenewdOpacity.*
+   ============================================================ */
+
+:root {
+  /* === Core === */
+  --deep-navy: #111111;
+  --ocean-blue: #3B82F6;       /* primary */
+  --soft-white: #F2F4F7;       /* light bg */
+  --cloud-gray: #E8ECF0;       /* light surface */
+  --slate: #8E8E93;
+  --mist: #E5E5EA;
+
+  /* === Status === */
+  --emerald: #34C759;
+  --amber: #FFCC00;
+  --tangerine: #FF9F0A;
+  --coral-red: #FF453A;
+
+  /* === Accent (AI) === */
+  --lavender: #BF5AF2;
+  --teal: #30D158;
+  --rose: #FF375F;
+
+  /* === Dark surfaces === */
+  --charcoal: #111111;         /* dark bg */
+  --dark-slate: #1C1C1E;       /* dark surface */
+  --steel: #2C2C2E;            /* dark surface-2 */
+  --silver: #C7C7CC;
+  --dark-border: #38383A;
+  --warm-white: #F2F2F7;
+  --warm-gray: #8E8E93;
+
+  /* === Radius === */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 14px;
+  --r-xl: 16px;
+  --r-pill: 20px;
+
+  /* === Spacing === */
+  --s-xs: 4px;
+  --s-sm: 8px;
+  --s-md: 12px;
+  --s-lg: 16px;
+  --s-xl: 24px;
+  --s-xxl: 32px;
+  --s-xxxl: 48px;
+
+  /* === Type === */
+  --sans: 'Public Sans', -apple-system, system-ui, sans-serif;
+  --mono: 'Public Sans', -apple-system, system-ui, sans-serif; /* shim — existing screens use var(--mono) */
+
+  /* === AI accent variable (swappable via tweak) === */
+  --ai-accent: var(--lavender);
+  --ai-soft: rgba(191, 90, 242, 0.14);
+  --ai-glow: rgba(191, 90, 242, 0.35);
+
+  /* ============================================================
+     THEME (default = dark — charcoal)
+     ============================================================ */
+  color-scheme: dark;
+  --bg:          var(--charcoal);
+  --surface:     var(--dark-slate);
+  --surface-2:   var(--steel);
+  --border:      var(--dark-border);
+  --border-soft: rgba(56, 56, 58, 0.7);
+
+  --text:   var(--warm-white);
+  --text-2: #AEAEB2;   /* iOS tertiary label dark */
+  --text-3: var(--warm-gray);
+  --text-4: #636366;
+
+  --primary:      var(--ocean-blue);
+  --primary-soft: rgba(59, 130, 246, 0.15);
+  --primary-glow: rgba(59, 130, 246, 0.4);
+
+  /* Legacy aliases — point old screens at new system without rewriting them */
+  --accent:        var(--ocean-blue);
+  --accent-2:      var(--ocean-blue);
+  --accent-soft:   rgba(59, 130, 246, 0.15);
+  --gradient:      var(--ocean-blue);                       /* was a linear-gradient; now flat */
+  --gradient-soft: rgba(59, 130, 246, 0.10);
+  --border-strong: var(--dark-border);
+  --bg-2:          var(--dark-slate);
+
+  --success:    var(--emerald);
+  --warn:       var(--tangerine);
+  --danger:     var(--coral-red);
+
+  /* Status tints (for pills / borders) */
+  --success-soft: rgba(52, 199, 89, 0.18);
+  --warn-soft:    rgba(255, 159, 10, 0.18);
+  --danger-soft:  rgba(255, 69, 58, 0.18);
+  --amber-soft:   rgba(255, 204, 0, 0.18);
+}
+
+/* Light theme */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:          var(--soft-white);
+  --surface:     #FFFFFF;
+  --surface-2:   var(--cloud-gray);
+  --border:      var(--mist);
+  --border-soft: rgba(229, 229, 234, 0.8);
+
+  --text:   var(--deep-navy);
+  --text-2: #3A3A3C;
+  --text-3: var(--slate);
+  --text-4: #AEAEB2;
+
+  --primary-soft: rgba(59, 130, 246, 0.10);
+
+  --accent-soft:   rgba(59, 130, 246, 0.10);
+  --gradient-soft: rgba(59, 130, 246, 0.08);
+  --border-strong: var(--mist);
+
+  --success-soft: rgba(52, 199, 89, 0.14);
+  --warn-soft:    rgba(255, 159, 10, 0.14);
+  --danger-soft:  rgba(255, 69, 58, 0.12);
+  --amber-soft:   rgba(255, 204, 0, 0.18);
+}
+
+/* AI accent variants (tweakable) */
+:root[data-ai="lavender"] { --ai-accent: #BF5AF2; --ai-soft: rgba(191,90,242,0.14); --ai-glow: rgba(191,90,242,0.35); }
+:root[data-ai="ocean"]    { --ai-accent: #3B82F6; --ai-soft: rgba(59,130,246,0.14);  --ai-glow: rgba(59,130,246,0.35); }
+:root[data-ai="teal"]     { --ai-accent: #30D158; --ai-soft: rgba(48,209,88,0.14);   --ai-glow: rgba(48,209,88,0.30); }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: #0a0a0c;
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
+}
+
+:root[data-theme="light"] body {
+  background: #D1D5DB;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   App canvas (inside device frame)
+   ============================================================ */
+.app {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+  font-family: var(--sans);
+  display: flex;
+  flex-direction: column;
+}
+
+.app-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 16px 120px;
+  scrollbar-width: none;
+}
+.app-scroll::-webkit-scrollbar { display: none; }
+
+/* ============================================================
+   Typography — Plus Jakarta scale mirrors RenewdTextStyles
+   ============================================================ */
+.t-h1      { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; }
+.t-h2      { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.15; }
+.t-h3      { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2; }
+.t-body    { font-size: 16px; font-weight: 500; }
+.t-body-sm { font-size: 14px; font-weight: 500; letter-spacing: 0.1px; }
+.t-subtitle{ font-size: 14px; font-weight: 600; letter-spacing: 0.1px; }
+.t-caption { font-size: 12px; font-weight: 500; letter-spacing: 0.3px; }
+.t-section { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-3); }
+.t-num-lg  { font-size: 48px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+.t-num-md  { font-size: 32px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+
+/* Legacy alias used across existing screens */
+.mono { font-family: var(--sans); font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+/* ============================================================
+   Screen header
+   ============================================================ */
+.screen-header {
+  padding: 64px 4px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.screen-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+.screen-subtitle {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 6px;
+  font-weight: 500;
+  letter-spacing: 0.05px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.icon-btn:active { transform: scale(0.96); }
+
+/* ============================================================
+   Card — matches Flutter CardTheme (radius 14, no elevation)
+   ============================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+
+/* ============================================================
+   Tab bar (floating)
+   ============================================================ */
+.tabbar {
+  position: absolute;
+  left: 12px; right: 12px; bottom: 14px;
+  height: 64px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 30;
+  padding: 8px;
+  gap: 4px;
+}
+:root[data-theme="light"] .tabbar {
+  box-shadow: 0 8px 30px rgba(17,17,17,0.08), 0 1px 2px rgba(17,17,17,0.04);
+  background: color-mix(in srgb, #fff 92%, transparent);
+}
+
+.tab {
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--text-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.1px;
+  transition: color 0.15s;
+}
+.tab.active { color: var(--primary); }
+.tab.active .tab-icon-wrap {
+  color: var(--primary);
+}
+.tab-icon-wrap {
+  width: 36px;
+  height: 28px;
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+
+/* ============================================================
+   Brand logo tile (per-renewal color)
+   ============================================================ */
+.logo-tile {
+  width: 40px; height: 40px;
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 17px;
+  position: relative;
+  overflow: hidden;
+}
+.logo-tile.sm { width: 32px; height: 32px; border-radius: var(--r-sm); font-size: 14px; }
+.logo-tile.lg { width: 72px; height: 72px; border-radius: var(--r-xl); font-size: 28px; }
+
+/* ============================================================
+   Renewal row (list cell)
+   ============================================================ */
+.renewal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.renewal-row:active { transform: scale(0.99); }
+.renewal-row .name { font-size: 15px; font-weight: 600; letter-spacing: -0.1px; }
+.renewal-row .sub { font-size: 12px; color: var(--text-3); margin-top: 2px; font-weight: 500; }
+.renewal-row .amt { text-align: right; }
+.renewal-row .amt .money { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   Due pill (status colors from iOS palette)
+   ============================================================ */
+.due-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.due-pill.soon  { background: var(--warn-soft);    color: var(--warn);    border-color: transparent; }
+.due-pill.today { background: var(--coral-red);    color: #fff;           border-color: transparent; }
+.due-pill.warn  { background: var(--amber-soft);   color: #CC9A00;        border-color: transparent; }
+.due-pill.ok    { background: var(--success-soft); color: var(--success); border-color: transparent; }
+
+/* ============================================================
+   Chip row
+   ============================================================ */
+.chip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  scrollbar-width: none;
+}
+.chip-row::-webkit-scrollbar { display: none; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  letter-spacing: -0.05px;
+}
+.chip.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  font-weight: 600;
+}
+.chip .count {
+  opacity: 0.55;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.chip.active .count { opacity: 0.75; }
+
+/* ============================================================
+   Search field (matches Flutter InputDecoration)
+   ============================================================ */
+.search {
+  height: 44px;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  color: var(--text-3);
+  font-size: 14px;
+  transition: border-color 0.15s;
+}
+.search:focus-within {
+  border-color: var(--primary);
+  background: var(--surface);
+}
+.search input {
+  background: none;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--sans);
+}
+.search input::placeholder { color: var(--text-3); }
+
+/* ============================================================
+   Gradient accent text — only used for AI moments now
+   ============================================================ */
+.grad-text {
+  color: var(--ai-accent);
+}
+
+.spark { filter: drop-shadow(0 0 6px var(--ai-glow)); }
+
+/* ============================================================
+   Chat bubbles
+   ============================================================ */
+.chat-scroll { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.bubble {
+  max-width: 82%;
+  padding: 11px 14px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 500;
+  letter-spacing: -0.05px;
+}
+.bubble.user {
+  align-self: flex-end;
+  background: var(--primary);
+  color: #fff;
+  border-bottom-right-radius: 6px;
+}
+.bubble.ai {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 6px;
+  color: var(--text);
+}
+
+/* ============================================================
+   Composer (chat input)
+   ============================================================ */
+.composer {
+  position: absolute;
+  left: 12px; right: 12px; bottom: 90px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 6px 6px 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 25;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+}
+.composer input {
+  flex: 1;
+  background: none;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--sans);
+  height: 40px;
+}
+.composer input::placeholder { color: var(--text-3); }
+.send-btn {
+  width: 40px; height: 40px;
+  border-radius: var(--r-md);
+  background: var(--ai-accent);
+  border: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #fff;
+  box-shadow: 0 4px 12px var(--ai-glow);
+}
+.send-btn:disabled {
+  background: var(--surface-2);
+  box-shadow: none;
+  opacity: 0.5;
+  color: var(--text-3);
+}
+
+/* ============================================================
+   Section label (UPPERCASE eyebrow)
+   ============================================================ */
+.sec-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin: 22px 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sec-label .count { color: var(--text-4); font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
+
+/* ============================================================
+   Detail screen
+   ============================================================ */
+.progress-bar {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.progress-bar .fill {
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  border-radius: 999px;
+}
+
+.kv-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 500;
+}
+.kv-row:last-child { border-bottom: 0; }
+.kv-row .k { color: var(--text-3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; }
+.kv-row .v { font-weight: 600; letter-spacing: -0.1px; }
+
+/* Toggle (iOS style) */
+.toggle {
+  width: 51px; height: 31px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 25px; height: 25px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.toggle.on { background: var(--success); border-color: transparent; }
+.toggle.on::after { transform: translateX(20px); }
+
+/* ============================================================
+   Sparkle bg — now very subtle, optional
+   ============================================================ */
+.sparkle-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(500px 300px at 80% -5%, var(--ai-soft), transparent 70%);
+  opacity: 0.6;
+}
+
+/* ============================================================
+   Doc rows
+   ============================================================ */
+.doc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.doc-row:last-child { border-bottom: 0; }
+.doc-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  color: var(--text-2);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.doc-name { font-size: 14px; font-weight: 600; letter-spacing: -0.1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-meta { font-size: 12px; color: var(--text-3); margin-top: 3px; display: flex; gap: 8px; align-items: center; font-weight: 500; }
+
+/* ============================================================
+   Shimmer / skeleton
+   ============================================================ */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+/* ============================================================
+   AI tag pill
+   ============================================================ */
+.ai-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ai-accent);
+  background: var(--ai-soft);
+  padding: 3px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  font-family: var(--sans);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   Buttons — flat Ocean Blue primary
+   ============================================================ */
+.btn {
+  height: 50px;
+  padding: 0 20px;
+  border-radius: var(--r-md);
+  background: var(--primary);
+  color: #fff;
+  border: 0;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: transform 0.1s, filter 0.15s;
+}
+.btn:active { transform: scale(0.98); }
+.btn:hover { filter: brightness(1.08); }
+.btn.ghost {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn.ghost:hover { background: var(--surface-2); filter: none; }
+
+/* AI-flavored button (purple) for ask/sparkle actions */
+.btn.ai {
+  background: var(--ai-accent);
+  color: #fff;
+  box-shadow: 0 4px 14px var(--ai-glow);
+}
+
+.btn.sm { height: 36px; padding: 0 14px; font-size: 13px; border-radius: var(--r-sm); }
+.btn.lg { height: 54px; font-size: 16px; border-radius: var(--r-md); }
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* ============================================================
+   Suggested-prompt card
+   ============================================================ */
+.sugg {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.sugg:active { transform: scale(0.99); }
+.sugg:hover { border-color: var(--text-4); }
+.sugg .q { font-size: 14.5px; font-weight: 600; letter-spacing: -0.1px; }
+.sugg .h { font-size: 12px; color: var(--text-3); margin-top: 3px; font-weight: 500; }
+
+/* ============================================================
+   Text input (matches Flutter InputDecoration theme)
+   ============================================================ */
+.field {
+  height: 50px;
+  background: var(--surface-2);
+  border: 1.5px solid transparent;
+  border-radius: var(--r-md);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--sans);
+  font-weight: 500;
+  transition: border-color 0.15s;
+}
+.field:focus-within { border-color: var(--primary); }
+.field input {
+  flex: 1;
+  background: none;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--sans);
+  min-width: 0;
+  letter-spacing: -0.05px;
+}
+.field input::placeholder { color: var(--text-3); }
+.field .prefix { color: var(--text-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Form label */
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ============================================================
+   Status indicators (dots)
+   ============================================================ */
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-dot.success { background: var(--success); }
+.status-dot.warn    { background: var(--warn); }
+.status-dot.danger  { background: var(--danger); }
+.status-dot.amber   { background: var(--amber); }
+
+/* ============================================================
+   Tweaks panel
+   ============================================================ */
+.tweaks-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 272px;
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 16px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  z-index: 100;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+}
+.tweaks-panel h4 {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  display: flex; align-items: center; gap: 6px;
+}
+.tweaks-panel label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 7px;
+}
+.tweaks-panel .row { margin-bottom: 14px; }
+.tweaks-panel .row:last-child { margin-bottom: 0; }
+.tweaks-panel .seg {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.tweaks-panel .seg button {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--sans);
+  text-transform: capitalize;
+}
+.tweaks-panel .seg button.on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.tweaks-panel .swatches { display: flex; gap: 8px; }
+.tweaks-panel .sw {
+  width: 32px; height: 32px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  border: 2px solid var(--border);
+  transition: transform 0.1s;
+}
+.tweaks-panel .sw.on {
+  border-color: var(--text);
+  transform: scale(1.08);
+}
