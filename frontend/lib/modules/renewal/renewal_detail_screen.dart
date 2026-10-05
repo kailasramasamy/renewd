@@ -255,7 +255,7 @@ class _RenewalDetailScreenState extends State<RenewalDetailScreen> {
   }
 
   void _showRemindersSheet(BuildContext context, RenewalDetailController c) {
-    const availableDays = [30, 14, 7, 3, 1];
+    const availableDays = [30, 14, 7];
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -275,7 +275,7 @@ class _RenewalDetailScreenState extends State<RenewalDetailScreen> {
               ],
             ),
             const SizedBox(height: RenewdSpacing.xs),
-            Text('Get notified before this renewal is due',
+            Text('Early reminders. You\'ll also be reminded daily from 3 days before until you act.',
                 style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),
             const SizedBox(height: RenewdSpacing.md),
             Obx(() => Wrap(

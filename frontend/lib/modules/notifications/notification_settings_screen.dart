@@ -55,7 +55,7 @@ class NotificationSettingsScreen extends StatelessWidget {
         Text('Default Reminder Days',
             style: RenewdTextStyles.h3.copyWith(color: RenewdColors.deepNavy)),
         const SizedBox(height: RenewdSpacing.xs),
-        Text('Reminders are created for new renewals at these intervals',
+        Text('Early reminders for new renewals. Daily reminders from 3 days before are automatic.',
             style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate)),
         const SizedBox(height: RenewdSpacing.sm),
         Wrap(

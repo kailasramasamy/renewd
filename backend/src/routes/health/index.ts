@@ -39,7 +39,7 @@ export default async function healthRoutes(app: FastifyInstance) {
 
     return reply.send({
       free_renewal_limit: parseInt(raw.free_renewal_limit ?? "5", 10),
-      free_reminder_days: JSON.parse(raw.free_reminder_days ?? "[1]"),
+      free_reminder_days: JSON.parse(raw.free_reminder_days ?? "[7]"),
       premium_reminder_days: JSON.parse(raw.premium_reminder_days ?? "[7,1]"),
       pricing: {
         monthly: parseInt(raw.premium_monthly_price ?? "99", 10),

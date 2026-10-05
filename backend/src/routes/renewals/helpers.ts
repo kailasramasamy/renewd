@@ -2,6 +2,13 @@ import type { Pool } from "pg";
 
 const DEFAULT_DAYS_BEFORE = [7, 1];
 
+/** Final-stretch reminders every renewal gets on top of the user's early days. */
+export const ESCALATION_DAYS = [3, 2, 1, 0];
+
+/** Daily nags after the due date (negative = days overdue), non-auto-renew only. */
+export const OVERDUE_GRACE_DAYS = 7;
+const OVERDUE_DAYS = Array.from({ length: OVERDUE_GRACE_DAYS }, (_, i) => -(i + 1));
+
 export async function createDefaultReminders(
   db: Pool,
   userId: string,
@@ -26,14 +33,17 @@ export async function createRemindersForDays(
   renewalDate: string,
   daysBefore: number[]
 ): Promise<void> {
-  if (daysBefore.length === 0) return;
+  const days = [...new Set([...daysBefore, ...ESCALATION_DAYS, ...OVERDUE_DAYS])];
 
   await db.query(
     `INSERT INTO reminders (user_id, renewal_id, days_before, reminder_date)
-     SELECT $1, $2, d, ($3::date - d * INTERVAL '1 day')::date
+     SELECT $1, $2, d, $3::date - d
      FROM unnest($4::int[]) AS d
-     WHERE ($3::date - d * INTERVAL '1 day')::date >= CURRENT_DATE`,
-    [userId, renewalId, renewalDate, daysBefore]
+     CROSS JOIN renewals ren
+     WHERE ren.id = $2
+       AND $3::date - d >= CURRENT_DATE
+       AND (d >= 0 OR NOT COALESCE(ren.auto_renew, FALSE))`,
+    [userId, renewalId, renewalDate, days]
   );
 }
 

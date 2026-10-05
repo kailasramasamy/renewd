@@ -12,7 +12,7 @@ class NotificationSettingsController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isSaving = false.obs;
 
-  static const availableDays = [30, 14, 7, 3, 1];
+  static const availableDays = [30, 14, 7];
 
   @override
   void onInit() {

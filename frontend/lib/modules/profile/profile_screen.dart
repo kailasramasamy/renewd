@@ -63,10 +63,25 @@ class ProfileScreen extends StatelessWidget {
                 ..._items.map(_buildItem),
                 _buildSignOut(),
                 _buildDeleteAccount(),
+                _buildVersionFooter(),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildVersionFooter() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: RenewdSpacing.lg),
+      child: FutureBuilder<String>(
+        future: _getVersion(),
+        builder: (_, snap) => Text(
+          snap.hasData ? 'Version ${snap.data}' : '',
+          textAlign: TextAlign.center,
+          style: RenewdTextStyles.caption.copyWith(color: RenewdColors.slate),
+        ),
       ),
     );
   }

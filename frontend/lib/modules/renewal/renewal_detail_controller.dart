@@ -81,18 +81,11 @@ class RenewalDetailController extends GetxController {
     if (id == null) return;
     try {
       final reminders = await _provider.getReminders(id);
-      final unsent = reminders
+      // Days <= 3 (and overdue) are automatic escalation reminders, not user-chosen
+      reminderDays.assignAll(reminders
           .where((r) => r['is_sent'] != true)
           .map((r) => r['days_before'] as int)
-          .toList();
-
-      if (unsent.isEmpty) {
-        const defaults = [7, 1];
-        await _provider.updateReminders(id, defaults);
-        reminderDays.assignAll(defaults);
-      } else {
-        reminderDays.assignAll(unsent);
-      }
+          .where((d) => d > 3));
     } catch (e) {
       debugPrint('fetchReminders failed: $e');
     }

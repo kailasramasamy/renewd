@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../network/api_client.dart';
 import '../theme/app_colors.dart';
@@ -8,13 +9,12 @@ import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 
 class VersionCheckService {
-  static const _appVersion = '1.0.0';
-
   static Future<void> check() async {
     try {
+      final info = await PackageInfo.fromPlatform();
       final client = Get.find<ApiClient>();
       final response = await client.safeGet(
-        '/version-check?version=$_appVersion',
+        '/version-check?version=${info.version}',
       );
       final body = response.body as Map<String, dynamic>;
 

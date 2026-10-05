@@ -3,7 +3,7 @@ import { authMiddleware } from "../../middleware/auth.js";
 import { createPremiumMiddleware } from "../../middleware/premium.js";
 import { NotFoundError } from "../../lib/errors.js";
 import { getUserId } from "../../lib/user-context.js";
-import { createRemindersForDays, deleteUnsentReminders } from "./helpers.js";
+import { createRemindersForDays, deleteUnsentReminders, ESCALATION_DAYS } from "./helpers.js";
 
 const auth = { preHandler: authMiddleware };
 
@@ -26,14 +26,16 @@ export async function registerReminderRoutes(app: FastifyInstance) {
 
   app.put("/:id/reminders", { preHandler: [authMiddleware, premiumMiddleware] }, async (request, reply) => {
     const { id } = request.params as { id: string };
-    const { days_before } = request.body as { days_before: number[] };
+    const { days_before: requested } = request.body as { days_before: number[] };
+    // Escalation days are added automatically for everyone; only early days are user-chosen
+    const days_before = requested.filter((d) => !ESCALATION_DAYS.includes(d) && d > 0);
 
     // Free users can only use free_reminder_days config
     if (!request.premium.isPremium) {
       const configResult = await app.db.query(
         "SELECT value FROM app_config WHERE key = 'free_reminder_days'"
       );
-      const allowedDays: number[] = JSON.parse(configResult.rows[0]?.value ?? "[1]");
+      const allowedDays: number[] = JSON.parse(configResult.rows[0]?.value ?? "[7]");
       const hasDisallowed = days_before.some((d) => !allowedDays.includes(d));
       if (hasDisallowed) {
         return reply.status(403).send({

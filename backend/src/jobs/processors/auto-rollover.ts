@@ -16,9 +16,11 @@ interface OverdueRenewal {
 }
 
 /**
- * Advance active renewals whose date has passed to their next occurrence and
+ * Advance active auto-renewing renewals whose date has passed to their next occurrence and
  * generate the next cycle's reminders. Runs before the daily reminder check so
  * a freshly-created reminder due today can still fire the same morning.
+ * Non-auto-renew renewals stay overdue so the user keeps getting nagged until
+ * they mark it renewed, edit the date, or cancel it.
  */
 export async function processAutoRollover(
   _job: Job
@@ -29,7 +31,7 @@ export async function processAutoRollover(
     `SELECT id, user_id, frequency, frequency_days,
             renewal_date::text AS renewal_date, CURRENT_DATE::text AS today
      FROM renewals
-     WHERE status = 'active' AND renewal_date < CURRENT_DATE`
+     WHERE status = 'active' AND auto_renew = TRUE AND renewal_date < CURRENT_DATE`
   );
 
   console.log(`[AutoRollover] Found ${rows.length} overdue renewals`);
